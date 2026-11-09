@@ -11,6 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "${{ matrix.python }}" }
+      - run: pip install ruff && ruff check .
       - run: python -m unittest -v
       - run: python audit.py examples/vulnerable-demo --out /tmp/out --color never --lang en --export /tmp/docs
       - run: python scripts/gen_docs.py && git diff --exit-code docs/RULES.md docs/CLI.md || echo "docs regenerated (commit them)"

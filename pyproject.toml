@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pn-ultra-audit"
-version = "1.0.14"
+version = "1.0.15"
 description = "One read-only command to audit code, tests, docs, databases, servers, SEO, crypto, SaaS/fintech and audit-readiness - live in the terminal, delivered as a dashboard."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -18,3 +18,19 @@ pn-ultra-audit = "audit:main"
 [tool.setuptools]
 py-modules = ["audit"]
 packages = ["engine"]
+
+[tool.setuptools.package-data]
+engine = ["locales/*.json"]
+
+[tool.ruff]
+line-length = 200
+target-version = "py39"
+extend-exclude = ["examples"]
+
+[tool.ruff.lint]
+select = ["E9", "F"]   # syntax errors + pyflakes (unused names, undefined names)
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+check_untyped_defs = false   # start lenient; tighten per package

@@ -1,9 +1,8 @@
 """Free SEO/SEM data without paid APIs: keyword ideas (public autocomplete), Google Search Console CSV
 analysis (official, free export), competitor on-page comparison (same polite crawler). Stdlib only."""
 import csv, json, re, string, time, urllib.parse
-from collections import defaultdict
 
-from .seo import _get, _f, analyze_html, UA
+from .seo import _get, _f, analyze_html
 
 
 def keyword_ideas(seeds, lang="en", country="us", expand=True, max_calls=40, delay=0.4, ui_note=None):

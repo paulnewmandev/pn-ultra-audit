@@ -428,6 +428,12 @@ def _dashboard():
     m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m); return m
 
 
+def _pack_md(lang):
+    """Markdown-report strings from engine/locales/<lang>.json (standalone: this file may be loaded without the package)."""
+    try: return json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "locales", lang + ".json"), encoding="utf-8")).get("md", {})
+    except (OSError, ValueError): return {}
+
+
 def render(d, lang="es", strict=False, ncloc=None):
     findings = load(os.path.join(d, "findings.json"))
     if findings is None: print("ERROR: findings.json not found", file=sys.stderr); sys.exit(2)
@@ -443,7 +449,7 @@ def render(d, lang="es", strict=False, ncloc=None):
     ledger = load(os.path.join(d, "coverage-ledger.json"), []); owasp = load(os.path.join(d, "owasp-matrix.json"), [])
     comp = compute(confirmed, ncloc or metrics.get("ncloc") or 0, meta.get("profile", "standard"), ledger)
     ctx = dict(confirmed=confirmed, nv=nv, rejected=rejected, metrics=metrics, meta=meta, ledger=ledger, owasp=owasp, comp=comp)
-    t = T[lang]
+    t = dict(T["en"]); t.update(T.get(lang, {})); t.update(_pack_md(lang))
     open(os.path.join(d, "REPORT.md"), "w", encoding="utf-8").write(build_md(ctx, t))
     ctx["all"] = confirmed + nv
     try:
@@ -461,7 +467,7 @@ def render(d, lang="es", strict=False, ncloc=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--dir", required=True); ap.add_argument("--lang", default="es", choices=["es", "en"]); ap.add_argument("--strict", action="store_true"); ap.add_argument("--ncloc", type=int)
+    ap.add_argument("--dir", required=True); ap.add_argument("--lang", default="es"); ap.add_argument("--strict", action="store_true"); ap.add_argument("--ncloc", type=int)
     a = ap.parse_args()
     comp = render(a.dir, a.lang, a.strict, a.ncloc)
     print(f"OK: {comp['n_confirmed']} confirmed, {comp['n_nv']} needs_validation, {comp['n_rejected']} rejected | R={comp['reliability']} S={comp['security']} M={comp['maintainability']} | gate={'PASS' if comp['gate_pass'] else 'FAIL'}"

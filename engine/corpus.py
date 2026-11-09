@@ -1,5 +1,5 @@
 """Verified fix corpus: vulnerable/fixed pairs proving that a rule fires on the flaw and stays silent on the fix."""
-import json, os, shutil, tempfile
+import json, os
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT = os.path.join(HERE, "examples", "fixes")

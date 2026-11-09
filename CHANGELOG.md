@@ -3,6 +3,31 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.15] - 2026-11-08
+
+### Added
+- **PWA auditor** (`pwa`, auto-detected from a manifest, service worker or PWA tooling): manifest and installability (fields, 192/512 + maskable icons, start_url/scope, display), service worker (registration scope, fetch strategy, versioned caches + cleanup, offline fallback, `skipWaiting`, update flow), push (permission without gesture, hard-coded VAPID key) and SW security (remote `importScripts`, caching authenticated/API responses, unvalidated `message` events, `sw.js` cache headers); optional live check with `--url`. PWA view with an installability checklist/score in the dashboard.
+- **Strictness levels** `basic | standard (default) | strict` (`lenient`/`balanced` stay as aliases) with `--ask` for an interactive 1-3 menu; installed assistant skills now ask the user which level to use.
+- **Languages**: `--lang auto` (system language; Spanish by default), **Chinese (`zh`)** and an open pack system: drop `engine/locales/<code>.json` to add a language (terminal, dashboard and Markdown report), missing keys fall back to English.
+- **Server / VPS audit, part 2** (`--ssh`): automatic **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle, Contabo, IONOS...) with provider-specific risks (IMDSv1, instance role, GCP scopes/OS Login, agents, secrets in user-data) and the CLI command to verify the provider firewall; **Apache, Redis, Kafka/ZooKeeper (+JMX), Kubernetes (k3s/kubeadm/microk8s), containers, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, Postfix, kernel/sysctl, AppArmor/SELinux, auditd, SSH crypto and key permissions, cron, SUID, backups** (60+ new rules, 5 new remediation guides).
+- **`server-fixes.sh`**: a reviewable remediation script generated from the server findings (safe `[S]` vs risky `[R]` fixes, timestamped backups, config validation before reload). It is never executed by the tool.
+- **Security-firm style report**: executive report view/PDF with cover, overall risk, key risks, scope & methodology, remediation roadmap and **repository tree with findings per folder**; the project's **logo and brand colors** are detected (manifest, CSS variables, Tailwind, SCSS, Android, Flutter, iOS) and used.
+- **One DataTable component** for every table (search, sortable columns, page size, centered pagination) and **file links** that open `file:line` in VS Code / Cursor / Windsurf / Zed / VSCodium (folder set once; Alt+click copies the path).
+- **Own SVG icons** for every sidebar item.
+- **Suggested AI prompt per finding** in the detail side panel: a ready-to-paste prompt built for that exact finding (file:line, current code, cause, impact, fix steps, safe pattern, rules, deliverable) with three modes - Fix, Fix + test, Explain only - plus Copy and Open-in-editor buttons.
+- `.pnauditignore` and inline `pn-audit: ignore[=RULE]` suppressions (the count is always reported); `engine/suppress.py`.
+- New skills `audit-pwa` and `audit-servers` (16 skills).
+
+### Fixed
+- Dashboard no longer shows only the header when scripts fail or are blocked: server-rendered summary fallback and a visible error banner. **Root cause found:** `<!--` in a finding was escaped as the invalid JSON escape `\!`, which broke the whole dashboard.
+- `AUTHZ-IDOR` no longer flags lookups already scoped through the current user (`->user()->orders()->findOrFail()`).
+- MongoDB live audit crashed (`json` was not imported); unused variables and duplicate keys removed (`ruff` now runs in CI).
+- Project-type detection ignores `examples/`, `docs/` and fixtures (a CLI is no longer classified as mobile + SaaS + web3), and package keywords are no longer treated as dependencies.
+- The tool audits itself: A/A/A and quality gate PASS.
+
+### Removed
+- Unused generated files (raw terminal dumps, unreferenced screenshots and icons) and local caches.
+
 ## [1.0.14] - 2026-11-08
 
 ### Added

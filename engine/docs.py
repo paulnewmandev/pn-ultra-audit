@@ -3,7 +3,7 @@
 Strict: public API must be documented, functions bounded in size/complexity, tooling configured.
 Functional: findings are AGGREGATED per file/project (no 500-row noise), trivial code is exempt,
 fixes are quick-win ordered, and `--baseline` turns legacy debt into a ratchet (gate only on new)."""
-import ast, json, os, re, subprocess
+import ast, os, re, subprocess
 from collections import Counter, defaultdict
 
 from .kb import KB
@@ -13,6 +13,8 @@ PROFILES = {
     "balanced": dict(doc_target=60, doc_file_min=4, fn_len=60,  cc=15, params=6, nest=4, type_target=40, sev_doc="low",  sev_fn="low", need_arch_doc=True,  need_ci=True,  ts_any=20, prints=15),
     "strict":   dict(doc_target=80, doc_file_min=3, fn_len=40,  cc=10, params=5, nest=3, type_target=70, sev_doc="low",  sev_fn="medium", need_arch_doc=True, need_ci=True, ts_any=8, prints=6),
 }
+PROFILES["basic"] = PROFILES["lenient"]      # 3 public levels: basic | standard | strict (old names kept as aliases)
+PROFILES["standard"] = PROFILES["balanced"]
 SRC_EXT = {"py", "js", "jsx", "ts", "tsx", "mjs", "cjs", "vue", "svelte", "php", "java", "kt", "kts", "go", "rs", "swift", "dart", "cs", "rb", "scala"}
 TESTISH = re.compile(r"(^|/)(tests?|__tests__|spec|specs|e2e|cypress|androidTest|testing|integration_test|mocks?|fixtures?|migrations?|seeds?|vendor|generated|__generated__|dist|build)(/|$)|\.(test|spec|stories|d)\.\w+$|_test\.\w+$|Tests?\.\w+$|\.min\.|\.pb\.|_pb2|\.g\.dart$|\.freezed\.dart$|/R\.java$|BuildConfig")
 SCRIPTISH = re.compile(r"(^|/)(scripts?|bin|tools?|cli|manage|examples?|demo|docs?)(/|$)|(^|/)(setup|conftest|manage|fabfile|gulpfile|webpack\.config|vite\.config|next\.config|jest\.config)\.")
@@ -183,7 +185,7 @@ def project_docs(root, files, S, prof, tracked):
         t = read(readme); lines = [l for l in t.split("\n") if l.strip()]
         miss = [n for n, rx in (("install/setup", r"install|setup|getting started|instal"), ("usage/run", r"usage|run|start|uso|ejecut"), ("tests", r"\btest|pruebas"), ("configuration (env vars)", r"config|\.env|environment|variables")) if not re.search(rx, t, re.I)]
         if len(lines) < 12 or len(miss) >= 2:
-            out.append(_f("DOC-README-THIN", f"README is thin" + (f" (missing: {', '.join(miss)})" if miss else ""), "docs", "code_smell", prof["sev_doc"] if prof["sev_doc"] != "info" else "info", "documentation", readme, 1,
+            out.append(_f("DOC-README-THIN", "README is thin" + (f" (missing: {', '.join(miss)})" if miss else ""), "docs", "code_smell", prof["sev_doc"] if prof["sev_doc"] != "info" else "info", "documentation", readme, 1,
                           f"{len(lines)} non-empty lines", "Add the missing sections so a new developer can run and test the project in 10 minutes", 25))
     if ncloc > 800:
         if not any(re.search(r"license|licence|copying", b, re.I) for b in base) and tracked is not None:
@@ -338,7 +340,7 @@ def code_quality(root, files, prof, progress=None):
     # ── emit docs findings (per file, aggregated)
     undocumented_files.sort(key=lambda x: -(x[1] - x[2]))
     for rel, n, d, miss, weak in undocumented_files[:60]:
-        ev = f"{d}/{n} documented ({100 * d // n}%). Missing: " + ", ".join(f"{s['name']}:{s['line']}" for s in miss) + (f". Incomplete: " + ", ".join(f"{s['name']}:{s['line']}" for s in weak) if weak else "")
+        ev = f"{d}/{n} documented ({100 * d // n}%). Missing: " + ", ".join(f"{s['name']}:{s['line']}" for s in miss) + (". Incomplete: " + ", ".join(f"{s['name']}:{s['line']}" for s in weak) if weak else "")
         out.append(_f("DOC-API-UNDOCUMENTED", f"Public API under-documented in `{rel}` ({d}/{n})", "docstrings", "code_smell", prof["sev_doc"], "documentation", rel, miss[0]["line"] if miss else 1, ev,
                       "Add doc comments to every public symbol: one-line summary, params/returns/raises (where non-obvious), and a usage example for entry points", max(5, 3 * (n - d))))
     if len(undocumented_files) > 60:
@@ -425,7 +427,6 @@ def architecture_profile(root, files, S, deps_text=""):
     dirs = Counter(); [dirs.update(p.lower() for p in r.split("/")[:-1][:4]) for r in rels]
     has = lambda *n: any(x in dirs for x in n)
     read = lambda p: open(os.path.join(root, p), errors="ignore").read(200_000) if os.path.exists(os.path.join(root, p)) else ""
-    sig = []
     mono = [m for m in ("nx.json", "turbo.json", "lerna.json", "pnpm-workspace.yaml", "rush.json") if m in {os.path.basename(r) for r in rels}] or (["workspaces"] if '"workspaces"' in read("package.json") else [])
     pkgs = sorted({r.split("/")[1] for r in rels if r.split("/")[0] in ("packages", "apps", "services", "libs", "modules") and r.count("/") >= 2})
     compose = [r for r in rels if re.search(r"(^|/)(docker-)?compose[^/]*\.ya?ml$", r)]

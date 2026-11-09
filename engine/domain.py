@@ -1,7 +1,7 @@
 """Domain deep-dive for SaaS / enterprise, fintech, banking, health-tech and e-commerce codebases.
 Static heuristics: multi-tenant isolation, money handling, idempotency, atomicity/races, webhook authenticity, PCI data, audit trails,
 RBAC/SSO, key management, resilience of payment-provider calls. Produces findings + a domain scorecard (used by compliance mapping)."""
-import os, re
+import re
 from collections import Counter
 
 from .kb import KB

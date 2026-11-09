@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generates all brand assets (own artwork, no third-party logos): logo, wordmark, hero banner,
 language/database/platform badges and feature icons. Run:  python3 scripts/make_assets.py"""
-import math, os, sys
+import math, os
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A = os.path.join(ROOT, "assets")
@@ -108,19 +108,11 @@ import json; json.dump(index, open(os.path.join(A, "badges", "index.json"), "w")
 def icon(name, body):
     W(f"features/{name}.svg", f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="{name}"><defs>{GRAD.format(id="i")}</defs><rect x="1" y="1" width="62" height="62" rx="16" fill="#0f1536"/><rect x="1" y="1" width="62" height="62" rx="16" fill="none" stroke="url(#i)" stroke-opacity=".6" stroke-width="1.5"/><g fill="none" stroke="url(#i)" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">{body}</g></svg>''')
 icon("security", '<path d="M32 12 46 18v11c0 10-6 17-14 21-8-4-14-11-14-21V18z"/><path d="M26 31l5 5 8-10"/>')
-icon("bugs", '<ellipse cx="32" cy="36" rx="9" ry="12"/><path d="M26 25a6 6 0 0 1 12 0M23 31H15M41 31h8M23 40h-8M41 40h8M25 47l-6 6M39 47l6 6M32 24v24"/>')
 icon("quality", '<path d="M14 46V30M26 46V20M38 46V34M50 46V14"/><path d="M12 50h40"/>')
 icon("docs", '<path d="M20 12h18l8 8v32H20z"/><path d="M38 12v8h8M26 30h14M26 37h14M26 44h9"/>')
-icon("qa", '<path d="M24 12h16M28 12v14L16 48a4 4 0 0 0 4 6h24a4 4 0 0 0 4-6L36 26V12"/><path d="M22 40h20"/>')
-icon("seo", '<circle cx="28" cy="28" r="12"/><path d="M37 37l12 12"/><path d="M23 30l4 4 7-8"/>')
-icon("database", '<ellipse cx="32" cy="18" rx="15" ry="6"/><path d="M17 18v28c0 3 7 6 15 6s15-3 15-6V18"/><path d="M17 32c0 3 7 6 15 6s15-3 15-6"/>')
-icon("server", '<rect x="14" y="14" width="36" height="14" rx="3"/><rect x="14" y="36" width="36" height="14" rx="3"/><path d="M22 21h.1M22 43h.1M30 21h12M30 43h12"/>')
 icon("git", '<circle cx="20" cy="18" r="5"/><circle cx="20" cy="46" r="5"/><circle cx="44" cy="30" r="5"/><path d="M20 23v18M25 18c10 0 14 4 14 12"/>')
-icon("crypto", '<path d="M32 10 50 20v24L32 54 14 44V20z"/><path d="M26 25h8a4 4 0 0 1 0 8h-8M26 33h9a4 4 0 0 1 0 8h-9M26 21v24"/>')
-icon("mobile", '<rect x="21" y="9" width="22" height="46" rx="5"/><path d="M29 15h6M31 49h2"/>')
 icon("terminal", '<rect x="10" y="14" width="44" height="36" rx="5"/><path d="M19 26l8 6-8 6M31 40h12"/>')
 icon("dashboard", '<rect x="11" y="12" width="42" height="40" rx="5"/><path d="M11 22h42M20 42V32M30 42V28M40 42V35"/>')
-icon("architecture", '<rect x="24" y="10" width="16" height="10" rx="2"/><rect x="10" y="42" width="16" height="10" rx="2"/><rect x="38" y="42" width="16" height="10" rx="2"/><path d="M32 20v10M18 42v-6h28v6"/>')
 print("assets written:", len(os.listdir(A)), "root files;", len(os.listdir(os.path.join(A, "badges"))), "badges;", len(os.listdir(os.path.join(A, "features"))), "icons")
 
 

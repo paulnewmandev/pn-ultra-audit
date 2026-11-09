@@ -273,6 +273,8 @@ KB.update(KB_SERVER)
 
 from .kb_qa import KB_QA
 KB.update(KB_QA)
+from .kb_pwa import KB_PWA
+KB.update(KB_PWA)
 
 from .kb_seo import KB_SEO
 KB.update(KB_SEO)

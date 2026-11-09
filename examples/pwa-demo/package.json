@@ -1,0 +1,1 @@
+{ "name": "pwa-demo", "dependencies": { "workbox-window": "7.0.0" } }

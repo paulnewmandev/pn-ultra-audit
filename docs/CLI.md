@@ -3,9 +3,9 @@
 Generated from `python3 audit.py --help`.
 
 ```text
-usage: pn-ultra-audit [-h] [--out OUT] [--lang {es,en}] [--profile {quick,standard,deep}]
-                      [--strictness {lenient,balanced,strict}] [--baseline auto|FILE] [--exclude EXCLUDE]
-                      [--tools] [--semgrep-config SEMGREP_CONFIG] [--run-tests]
+usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,en,es,zh}] [--profile {quick,standard,deep}]
+                      [--strictness {basic,standard,strict,lenient,balanced}] [--ask] [--baseline auto|FILE]
+                      [--exclude EXCLUDE] [--tools] [--semgrep-config SEMGREP_CONFIG] [--run-tests]
                       [--test-timeout TEST_TIMEOUT] [--only ONLY] [--skip SKIP] [--plan] [--list-auditors]
                       [--no-docs] [--no-qa] [--domain DOMAIN] [--compliance LIST|all] [--evidence-pack DIR]
                       [--level {beginner,pro}] [--scaffold] [--write] [--show ID] [--kb QUERY] [--run DIR]
@@ -24,7 +24,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {es,en}] [--profile {quick,standa
                       [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.14 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.15 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -32,11 +32,16 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --out OUT             output base dir (default ./audit-output/<name>)
-  --lang {es,en}        report language (default es)
+  --lang {auto,en,es,zh}
+                        report/UI language: auto (system language, Spanish by default) | es | en | zh ...
+                        (any pack in engine/locales/). report language (default es)
   --profile {quick,standard,deep}
                         quick: first 2500 files
-  --strictness {lenient,balanced,strict}
-                        docs/complexity/standards thresholds (default strict)
+  --strictness {basic,standard,strict,lenient,balanced}
+                        how demanding the audit is: basic (core risks only, lenient thresholds) | standard
+                        (default, balanced) | strict (enterprise-grade: tight complexity/docs/typing limits
+                        and extra QA/CI/hardening checks). lenient/balanced are aliases
+  --ask                 interactive: ask which strictness level to use (menu 1-3) when running in a terminal
   --baseline auto|FILE  ratchet: findings already present in the previous run (auto) or FILE are 'legacy';
                         the gate judges only NEW ones
   --exclude EXCLUDE     glob to skip (repeatable)
@@ -46,7 +51,7 @@ options:
   --run-tests           EXECUTES the project's own test suite (runs target code)
   --test-timeout TEST_TIMEOUT
   --only ONLY           run only these auditors (comma list):
-                        security,quality,docs,tests,qa,seo,web3,db,domain
+                        security,quality,docs,tests,qa,seo,pwa,web3,db,domain
   --skip SKIP           skip these auditors (comma list)
   --plan                detect the project type, print which auditors would run, and exit
   --list-auditors       list the auditors and exit
@@ -168,6 +173,7 @@ SEO / SEM (web):
 | `tests` | Test inventory, untested modules, assertion-free/focused/skipped tests |
 | `qa` | Front-end QA (Playwright/Cypress/axe/visual) and mobile QA (Android/iOS/Flutter/RN) |
 | `seo` | SEO + SEM readiness: metadata, robots, sitemap, tracking, consent |
+| `pwa` | Progressive Web Apps: manifest, installability, service worker, offline, push, update flow |
 | `web3` | Smart contracts (Solidity/Anchor) and dApp patterns |
 | `db` | SQL/migrations static checks and live DB connections (--db) |
 | `domain` | Deep dive for SaaS/multi-tenant, fintech, banking, health-tech and e-commerce (tenant isolation, money, idempotency, webhooks, PCI data, audit trail) |

@@ -6,19 +6,19 @@ servers (SSH), cloud DBs (RDS) and SEO/SEM in one read-only CLI with a live term
   python3 audit.py ~/app --db ./app.sqlite3 --tools --run-tests --url https://example.com --authorized
   python3 audit.py --ssh deploy@host --authorized --remote-path /var/www/app --sudo --via-ssh --db postgres://u@rds:5432/app --aws-rds
 Stdlib only. Nothing is written to the audited target."""
-import argparse, datetime, hashlib, importlib.util, json, os, re, shutil, subprocess, sys, tempfile
+import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys, tempfile
 from collections import Counter
 from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.14"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.15"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -161,7 +161,7 @@ def export_bundle(run_dir, dest, pdf=False):
     if pdf:
         ch = find_chrome()
         if ch:
-            r = subprocess.run([ch, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=4000", f"--print-to-pdf={os.path.join(dest, 'report.pdf')}", "file://" + os.path.join(dest, "index.html") + "#v=print"], capture_output=True, timeout=120)
+            subprocess.run([ch, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", "--virtual-time-budget=4000", f"--print-to-pdf={os.path.join(dest, 'report.pdf')}", "file://" + os.path.join(dest, "index.html") + "#v=print"], capture_output=True, timeout=120)
             if os.path.exists(os.path.join(dest, "report.pdf")): out.append("report.pdf"); res["pdf"] = True
     return res
 
@@ -174,9 +174,10 @@ def tunnel_url(url, port):
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="pn-ultra-audit", description=f"{NAME} {VERSION} - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.")
     ap.add_argument("path", nargs="?", help="project directory (default .; omit when auditing only a remote server / URL)")
-    ap.add_argument("--out", help="output base dir (default ./audit-output/<name>)"); ap.add_argument("--lang", default="es", choices=["es", "en"], help="report language (default es)")
+    ap.add_argument("--out", help="output base dir (default ./audit-output/<name>)"); ap.add_argument("--lang", default="auto", choices=["auto"] + sorted(i18n.available()), help="report/UI language: auto (system language, Spanish by default) | es | en | zh ... (any pack in engine/locales/). report language (default es)")
     ap.add_argument("--profile", default="standard", choices=["quick", "standard", "deep"], help="quick: first 2500 files")
-    ap.add_argument("--strictness", default="strict", choices=["lenient", "balanced", "strict"], help="docs/complexity/standards thresholds (default strict)")
+    ap.add_argument("--strictness", default="standard", choices=["basic", "standard", "strict", "lenient", "balanced"], help="how demanding the audit is: basic (core risks only, lenient thresholds) | standard (default, balanced) | strict (enterprise-grade: tight complexity/docs/typing limits and extra QA/CI/hardening checks). lenient/balanced are aliases")
+    ap.add_argument("--ask", action="store_true", help="interactive: ask which strictness level to use (menu 1-3) when running in a terminal")
     ap.add_argument("--baseline", metavar="auto|FILE", help="ratchet: findings already present in the previous run (auto) or FILE are 'legacy'; the gate judges only NEW ones")
     ap.add_argument("--exclude", action="append", default=[], help="glob to skip (repeatable)")
     ap.add_argument("--tools", action="store_true", help="also run installed scanners (semgrep, gitleaks, npm audit, pip-audit, composer audit)"); ap.add_argument("--semgrep-config", default="auto")
@@ -222,7 +223,8 @@ def main(argv=None):
     ap.add_argument("--fail-on", choices=SEV, help="exit 1 if a NEW confirmed finding is at/above this severity (CI)")
     ap.add_argument("--color", default="auto", choices=["auto", "always", "never"]); ap.add_argument("--verbose", action="store_true", help="stream every finding (incl. low and to-review)"); ap.add_argument("--quiet", action="store_true"); ap.add_argument("--version", action="version", version=f"{NAME} {VERSION}")
     a = ap.parse_args(argv)
-    es = a.lang == "es"; N = lambda x, y: x if es else y
+    a.lang = i18n.resolve(a.lang); PACK = i18n.load(a.lang); PX = PACK.get("x", {})
+    es = a.lang == "es"; N = lambda x, y: x if es else PX.get(y, y)
     if a.list_auditors:
         for k, v in detect.AUDITORS.items(): print(f"  {k:<9} {v}")
         print("\n  extra (flags): --db/--aws-rds (databases), --ssh (server), --url (live SEO), --git URL (repo), --history (git secrets), --tools, --run-tests"); return 0
@@ -260,15 +262,22 @@ def main(argv=None):
     if a.sftp and not a.remote_path: print("ERROR: --sftp needs --remote-path", file=sys.stderr); return 2
     local_root = os.path.abspath(a.path) if a.path else (os.getcwd() if not (a.ssh or a.url or a.keywords or a.gsc_csv or a.git or a.ftp or a.sftp) else None)
     if local_root and not os.path.isdir(local_root): print(f"ERROR: not a directory: {local_root}", file=sys.stderr); return 2
-    if a.level == "beginner" and not any(x.startswith("--strictness") for x in (argv if argv is not None else sys.argv)): a.strictness = "balanced"
+    given = any(x.startswith("--strictness") for x in (argv if argv is not None else sys.argv))
+    if a.ask and not given and sys.stdin.isatty() and sys.stdout.isatty():
+        print(N("\n¿Qué tan estricta debe ser la auditoría?\n  1) basic    - solo riesgos principales, umbrales flexibles\n  2) standard - equilibrio recomendado (por defecto)\n  3) strict   - nivel empresa: límites estrictos y chequeos extra", "\nHow strict should the audit be?\n  1) basic    - core risks only, lenient thresholds\n  2) standard - recommended balance (default)\n  3) strict   - enterprise-grade: tight limits and extra checks"))
+        try: a.strictness = {"1": "basic", "2": "standard", "3": "strict"}.get(input("> [2] ").strip() or "2", "standard")
+        except EOFError: pass
+        given = True
+    a.strictness = {"lenient": "basic", "balanced": "standard"}.get(a.strictness, a.strictness)  # normalize aliases
+    if a.level == "beginner" and not given: a.strictness = "standard"
     prof = docs.PROFILES[a.strictness]; strict = a.strictness == "strict"
     ALL_AUD = set(detect.AUDITORS)
     pre = None; detected = None
     def deps_of(fl):
         t = ""
-        for rel, ab, e, sz in fl:
+        for rel, ab, e, sz in detect.product_files(fl):
             if os.path.basename(rel) in ("package.json", "composer.json", "requirements.txt", "pyproject.toml", "pom.xml", "build.gradle", "build.gradle.kts", "go.mod", "Cargo.toml", "Gemfile", "pubspec.yaml", "Pipfile") and rel.count("/") <= 3:
-                try: t += open(ab, errors="ignore").read(60_000)
+                try: t += re.sub(r"(?m)^keywords\s*=.*$", "", open(ab, errors="ignore").read(60_000))  # package keywords are not dependencies
                 except OSError: pass
         return t
     try:
@@ -307,16 +316,18 @@ def main(argv=None):
             stages += [("discover", N("Descubriendo archivos, lenguajes y arquitectura", "Discovering files, languages & architecture")),
                        ("scan", N("Escaneo de código: SQLi · XSS · DoS · secretos · móvil · a11y", "Code scan: SQLi · XSS · DoS · secrets · mobile · a11y") if "security" in plan else N("Indexando código (métricas)", "Indexing code (metrics)"))]
             if "quality" in plan: stages.append(("project", N("Chequeos de proyecto, duplicación y calidad", "Project checks, duplication & quality")))
-            if "docs" in plan: stages.append(("docs", N(f"Documentación, estándares y arquitectura ({a.strictness})", f"Documentation, standards & architecture ({a.strictness})")))
+            if "docs" in plan: stages.append(("docs", N(f"Documentación, estándares y arquitectura ({a.strictness})", PX.get("Documentation, standards & architecture", "Documentation, standards & architecture") + f" ({a.strictness})")))
             if "tests" in plan: stages.append(("tests", N("Análisis de tests", "Test analysis")))
             if "qa" in plan: stages.append(("qa", N("QA front-end y móvil (Android · iOS · Flutter · RN)", "QA: front-end & mobile (Android · iOS · Flutter · RN)")))
             if "seo" in plan: stages.append(("seo_static", N("SEO / SEM estático (plantillas y tracking)", "Static SEO / SEM (templates & tracking)")))
             if "domain" in plan: stages.append(("domain", N("Dominio: SaaS / Fintech / Banca (aislamiento, dinero, idempotencia, webhooks)", "Domain deep-dive: SaaS / Fintech / Banking (isolation, money, idempotency, webhooks)")))
+            if "pwa" in plan: stages.append(("pwa", N("PWA: manifest, service worker, offline e instalación", "PWA: manifest, service worker, offline & installability")))
             if "web3" in plan: stages.append(("web3", N("Cripto / Web3: contratos Solidity, Solana, dApps", "Crypto / Web3: Solidity, Solana, dApps")))
             if a.history: stages.append(("history", N("Historial Git: secretos ya eliminados", "Git history: secrets committed then removed")))
         if "db" in plan or a.db: stages.append(("db", N("Bases de datos (SQL estático + conexiones)", "Databases (static SQL + live)")))
         if a.aws_rds: stages.append(("aws", N("AWS RDS (configuración)", "AWS RDS (configuration)")))
         if a.url: stages.append(("crawl", N("SEO en vivo: rastreo del sitio", "Live SEO: site crawl")))
+        if a.url: stages.append(("pwa_live", N("PWA en vivo: manifest, iconos y service worker", "Live PWA: manifest, icons & service worker")))
         if a.url and a.psi: stages.append(("psi", "PageSpeed Insights"))
         if a.keywords or a.gsc_csv or a.competitor: stages.append(("seo_data", N("Datos SEO gratuitos: keywords · Search Console · competidores", "Free SEO data: keywords · Search Console · competitors")))
         if a.tools: stages.append(("tools", N("Escáneres externos", "External scanners")))
@@ -381,7 +392,7 @@ def main(argv=None):
     if a.git:
         begin("git"); path, err = gitsrc.clone(a.git, a.branch, a.depth if not a.history else max(a.depth, a.history_commits), a.git_token_env, host=a.git_host)
         if err: ui.done(err, warn=True); print("ERROR: " + err, file=sys.stderr); return 2
-        tmp_git = path; scan_root = path; scan_local = True; tracked_git = True
+        tmp_git = path; scan_root = path; scan_local = True
         label = re.sub(r"\.git$", "", os.path.basename(gitsrc.resolve(a.git, a.git_host).rstrip("/").split(":")[-1])) or "repo"
         gs = gitsrc.repo_stats(path); metrics["git"] = gs; ui.done(f"{gs.get('remote', gitsrc.resolve(a.git, a.git_host))} @ {gs.get('ref', '?')} ({gs.get('branch', '')}) · {gs.get('commits', '?')} commits · {gs.get('authors', '?')} authors")
         L("git clone", "pn-ultra-audit", "covered", f"depth={a.depth}")
@@ -427,7 +438,7 @@ def main(argv=None):
         arch["frameworks"] = sorted(S.frameworks)
         if not a.no_docs:
             begin("docs")
-            pd, dinfo = docs.project_docs(scan_root, files, S, prof, tracked)
+            pd, dinfo = docs.project_docs(scan_root, detect.product_files(files), S, prof, tracked)
             def dprog(d, t, n): ui.update(d, t, f"{d}/{t} " + N("archivos", "files"))
             cq, cinfo = docs.code_quality(scan_root, files, prof, progress=dprog); raw += pd + cq; stream(pd + cq); metrics.update(cinfo); metrics["project_docs"] = dinfo
             dp = cinfo["docstrings"]["percent"]
@@ -437,15 +448,19 @@ def main(argv=None):
         ui.done(f"{tinfo['test_files']} " + N("archivos de test", "test files") + f" · {tinfo['test_cases']} " + N("casos", "cases") + f" · ratio {tinfo['test_ratio']}"); L("test-suite analysis (static)", "audit-quality", "covered", "file-name matching; coverage % not measured unless --run-tests")
         if not a.no_qa:
             begin("qa")
-            qf, qinfo = qa.run(files, strict); raw += qf; stream(qf); metrics.update(qinfo)
+            qf, qinfo = qa.run(detect.product_files(files), strict); raw += qf; stream(qf); metrics.update(qinfo)
             plats = ", ".join(qinfo.get("mobile", {}).get("platforms", [])) or "-"; fe = "front-end" if qinfo.get("frontend") else "-"
             ui.done(f"{len(qf)} " + N("hallazgos", "findings") + f" · {N('móvil', 'mobile')}: {plats} · {fe}"); L("QA front-end + mobile (static)", "audit-qa,audit-mobile-qa", "covered", f"mobile={plats}")
         begin("seo_static")
         sf, sinfo = seo.static_seo(scan_root, files, S); raw += sf; stream(sf); metrics["seo"] = dict(sinfo)
         ui.done((f"{len(sf)} " + N("hallazgos", "findings") + f" · trackers: {', '.join(t['name'] for t in sinfo.get('trackers', [])) or '-'}") if sinfo.get("is_web") else N("no es un proyecto web (sin plantillas/HTML)", "not a web project (no templates/HTML)"))
         L("static SEO / SEM", "audit-seo", "covered" if sinfo.get("is_web") else "out_of_scope", "templates, robots, sitemap, metadata, tracking/consent")
+        begin("pwa")
+        pf, pinfo = pwa.analyze(scan_root, detect.product_files(files), a.strictness); raw += pf; stream(pf); metrics["pwa"] = pinfo
+        ui.done((f"{len(pf)} " + N("hallazgos", "findings") + f" · PWA score {pinfo.get('score')}" if pinfo.get("score") is not None else f"{len(pf)} " + N("hallazgos", "findings")) if pinfo else N("no es una PWA (sin manifest ni service worker)", "not a PWA (no manifest or service worker)"))
+        L("PWA: manifest / service worker / offline", "audit-pwa", "covered" if pinfo else "out_of_scope", "manifest, installability, service worker, caching, push, update flow")
         begin("web3")
-        wf, winfo = web3.analyze(scan_root, files); raw += wf; stream(wf); metrics["web3"] = winfo
+        wf, winfo = web3.analyze(scan_root, detect.product_files(files)); raw += wf; stream(wf); metrics["web3"] = winfo
         ui.done((f"{len(wf)} " + N("hallazgos", "findings") + f" · {winfo.get('solidity_files', 0)} .sol · {winfo.get('contracts', 0)} contracts · {', '.join(winfo.get('frameworks', [])) or '-'}") if winfo else N("sin proyecto cripto/Web3", "no crypto/Web3 project detected"))
         L("crypto / web3 heuristics", "audit-security", "covered" if winfo else "out_of_scope", "Solidity, Anchor/Solana, dApp patterns")
         if "domain" in plan or ddet["domains"]:
@@ -498,6 +513,11 @@ def main(argv=None):
         cf, cinfo = seo.crawl(a.url, a.crawl_max, ui_note=ui.note)
         raw += cf; stream(cf); crawl_pages = cinfo.get("pages", []); metrics.setdefault("seo", {})["crawl"] = cinfo
         ui.done(f"{cinfo.get('crawled', 0)} " + N("páginas", "pages") + f" · {len(cf)} " + N("hallazgos", "findings") + f" · sitemap {cinfo.get('sitemap_urls', 0)} URLs"); L("live SEO crawl", "audit-seo", "covered", a.url)
+        begin("pwa_live")
+        try: lf, linfo = pwa.live(a.url, seo._get)
+        except Exception as ex: lf, linfo = [], {"error": str(ex)[:80]}
+        raw += lf; stream(lf); metrics.setdefault("pwa", {})["live"] = linfo
+        ui.done(f"{len(lf)} " + N("hallazgos", "findings") + (f" · manifest {linfo.get('manifest_url', '-')}" if linfo.get("manifest_url") else ""), warn=bool(linfo.get("error"))); L("live PWA check", "audit-pwa", "covered" if not linfo.get("error") else "blocked", linfo.get("error", "manifest, icons, service worker, headers"))
         if a.psi:
             begin("psi"); pf, sc = seo.psi(a.url, a.psi_key, ui.note); raw += pf; stream(pf); metrics["seo"]["psi"] = sc
             ui.done(" · ".join(f"{k}: " + (f"perf {v['scores'].get('performance')} seo {v['scores'].get('seo')}" if 'scores' in v else v.get('error', '?')) for k, v in sc.items()), warn=any('error' in v for v in sc.values()))
@@ -536,6 +556,7 @@ def main(argv=None):
         if r.startswith(("SRV-", "RDS-", "HIST-", "SEO-LIVE", "SEO-PSI", "SEO-GSC", "GITLEAKS", "SEMGREP", "NPM-", "PIP-", "COMPOSER", "TST-FAILING", "DB-", "SEO-TITLE", "SEO-H1", "SEO-NO-OG", "SEO-NO-CANONICAL", "SEO-IMG", "SEO-NO-JSONLD", "SEO-NO-VIEWPORT")) and not r.startswith(("SEO-NO-OG-X",)): return "explicit" if not r.startswith("SEO-") else "seo"
         if f.get("seo_cat") or f["category"] in ("seo", "sem", "privacy") or r.startswith(("SEO-", "SEM-")): return "seo"
         if r.startswith(("FIN-", "SAAS-")) or fam in ("domain-fin", "domain-saas"): return "domain"
+        if r.startswith("PWA-") or fam.startswith("pwa-"): return "pwa"
         if r.startswith("WEB3-") or fam == "web3": return "web3"
         if r.startswith(("QA-", "MOB-AND-", "MOB-IOS-", "MOB-FL-", "MOB-RN-", "A11Y-")): return "qa"
         if fam in ("docs", "docstrings", "standards", "complexity", "architecture") or r.startswith(("DOC-", "STD-", "ARCH-")): return "docs"
@@ -546,7 +567,14 @@ def main(argv=None):
     raw = [f for f in raw if auditor_of(f) in plan or auditor_of(f) == "explicit"]
     metrics["plan"] = dict(kinds=(detected or {}).get("kinds", []), evidence=(detected or {}).get("evidence", {}), auditors=sorted(plan), skipped=sorted(ALL_AUD - plan), auto=not bool(only))
     for k in sorted(ALL_AUD - plan): L(f"auditor: {k}", "pn-ultra-audit", "out_of_scope", N("no aplica a este tipo de proyecto o fue omitido (--skip/--only)", "not applicable to this project type or skipped (--skip/--only)"))
-    findings = to_schema(raw, a.lang); attach_snippets(findings, scan_root)
+    findings = to_schema(raw, a.lang); findings, n_supp = suppress.apply(findings, scan_root)
+    if n_supp: metrics["suppressed"] = n_supp; L("suppressions", "pn-ultra-audit", "covered", N(f"{n_supp} hallazgos suprimidos por .pnauditignore / `pn-audit: ignore`", f"{n_supp} finding(s) suppressed by .pnauditignore / `pn-audit: ignore`"))
+    attach_snippets(findings, scan_root)
+    try:
+        if files:
+            pf_ = detect.product_files(files); br = brandmod.detect(pf_, scan_root, label if 'label' in dir() else "")
+            metrics["brand"] = br; metrics["tree"] = brandmod.tree(files, findings)
+    except Exception as ex_: L("branding / repository tree", "pn-ultra-audit", "blocked", f"skipped: {str(ex_)[:60]}")
     nb = NEWBIE.get(a.lang, NEWBIE["en"])
     for f in findings:
         t = nb.get(f["family"])
@@ -581,6 +609,14 @@ def main(argv=None):
     ref, dirty, branch = git_info(scan_root if tmp_git else local_root) if (tmp_git or (local_root and not tmp_remote)) else ("remote", False, "")
     meta = dict(repo=label, profile=a.profile, strictness=a.strictness, scope_paths=[disp(a.path) if a.path else (a.remote_path or a.url or ".")], source_ref=ref, branch=branch, dirty=dirty, date=str(datetime.date.today()), generated_at=t_start.isoformat(timespec="seconds"),
                 mode="ssh" if a.ssh else "local", tool=f"{NAME} {VERSION}", level=a.level, notes=notes, run_status="complete", run=int(os.path.basename(run_dir).split("-")[1]), lang=a.lang)
+    if metrics.get("server"):
+        try:
+            cl_ = metrics["server"].get("cloud") or {}
+            sfx = serverfix.build(findings, "ssh://" + label, cl_.get("provider_name"), meta["date"])
+            if sfx:
+                with open(os.path.join(run_dir, "server-fixes.sh"), "w", encoding="utf-8") as fh_: fh_.write(sfx)
+                meta["notes"].append(N("Se generó server-fixes.sh (revísalo antes; la herramienta nunca lo ejecuta): `sudo bash server-fixes.sh list`.", "server-fixes.sh was generated (review it first; the tool never runs it): `sudo bash server-fixes.sh list`."))
+        except Exception as ex_: meta["notes"].append(f"server-fixes.sh not generated: {str(ex_)[:60]}")
     for k, v in (("findings.json", findings), ("metrics.json", metrics), ("run-metadata.json", meta), ("owasp-matrix.json", owasp_matrix(findings))):
         json.dump(v, open(os.path.join(run_dir, k), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
     json.dump([{"unit": u["unit"], "pass": u["pass_"], "state": u["state"], "note": u.get("note", "")} for u in ledger], open(os.path.join(run_dir, "coverage-ledger.json"), "w", encoding="utf-8"), indent=2)
@@ -624,7 +660,7 @@ def main(argv=None):
         for f in sorted(new_conf, key=lambda f: (RANK[f["severity"]], f["effort_min"]))[:6]: print(f"  {f['id']:<8} [{f['severity']:<8}] {f['title'][:70]}  {ui.c('dim', f['location']['file'] + ':' + str(f['location']['line']))}")
         print()
         print(ui.c("bold", N("Informes", "Reports")))
-        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
+        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + ((("server-fixes.sh", "server fix script"),) if os.path.exists(os.path.join(run_dir, "server-fixes.sh")) else ()): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
         print()
     ui.verdict(comp["gate_pass"], f"Quality Gate {'PASSED' if comp['gate_pass'] else 'FAILED'}")
     ui.finish(N("Auditoría completa", "Audit complete"))

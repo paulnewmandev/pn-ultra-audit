@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.14"
+VER = "1.0.15"
 R = f'''<div align="center">
 
 <img src="assets/banner.svg" alt="PN-Ultra-Audit - audit everything, ship with confidence" width="100%">
@@ -22,9 +22,9 @@ R = f'''<div align="center">
 [![Read-only](https://img.shields.io/badge/target-read--only-f59e0b?style=for-the-badge)](#safety--privacy)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-ec4899?style=for-the-badge)](CONTRIBUTING.md)
 
-### One command. Eleven lenses. Live in your terminal, delivered as a dashboard.
+### One command. Twelve lenses. Live in your terminal, delivered as a dashboard.
 
-**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · Databases · Servers · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
+**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
 
 [**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
 
@@ -75,11 +75,13 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <p align="center"><img src="docs/img/dash-overview-dark.png" alt="Dashboard overview (dark)" width="100%"></p>
 <p align="center"><sub>Overview - Quality Gate, A-E ratings, severity, categories, risky files, OWASP heat-map, languages, trend and priorities. Light and dark themes (the light one is below).</sub></p>
 <p align="center"><img src="docs/img/dash-overview-light.png" alt="Dashboard overview (light)" width="100%"></p>
+<p align="center"><img src="docs/img/dash-report.png" alt="Executive report" width="100%"></p>
+<p align="center"><sub>Executive report - cover with your project's logo and colors, overall risk level, key risks, methodology and the repository tree.</sub></p>
 
 ### Every view, one grid
 <table>
 <tr>
-<td width="50%" valign="top"><img src="docs/img/gal-issue.png" alt="Finding drawer" width="100%"><br><sub><b>Finding drawer</b> - code, plain-words explanation, steps, safe example, AI prompt</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-issue.png" alt="Finding drawer" width="100%"><br><sub><b>Finding drawer</b> - code, plain-words explanation, steps, safe example and a <b>ready-to-paste AI prompt</b> for that exact finding</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-security.png" alt="Security issues" width="100%"><br><sub><b>Issues explorer</b> - filters, sorting, CSV export, fix tracking</sub></td>
 </tr>
 <tr>
@@ -97,6 +99,14 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - Now / This sprint / Backlog with effort</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-coverage.png" alt="Coverage" width="100%"><br><sub><b>Coverage</b> - what was and was not examined</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/gal-report.png" alt="Executive report" width="100%"><br><sub><b>Executive report</b> - security-firm style cover, risk level, key risks; your project's logo and colors are picked up automatically</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-repo.png" alt="Repository tree" width="100%"><br><sub><b>Repository</b> - file tree with findings per folder/file; click a file to open it in your editor</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/gal-pwa.png" alt="PWA" width="100%"><br><sub><b>PWA</b> - installability checklist + findings</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-zh.png" alt="Chinese dashboard" width="100%"><br><sub><b>中文</b> - same report in Chinese (<code>--lang zh</code>); add your language with one JSON file</sub></td>
 </tr>
 </table>
 
@@ -134,6 +144,10 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <tr>
 <td width="50%" valign="top"><img src="docs/img/terminal-agents.png" alt="Install into AI assistants" width="100%"><br><sub><b>--install-agent</b></sub></td>
 <td width="50%" valign="top"><img src="docs/img/terminal-help.png" alt="Help" width="100%"><br><sub><b>--help</b></sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/terminal-pwa.png" alt="PWA audit" width="100%"><br><sub><b>PWA</b> audit (strict level)</sub></td>
+<td width="50%" valign="top"><img src="docs/img/terminal-server-fixes.png" alt="Server fix script" width="100%"><br><sub><b>VPS</b> - <code>server-fixes.sh</code> generated from an <code>--ssh</code> audit (sample)</sub></td>
 </tr>
 </table>
 </details>
@@ -185,7 +199,8 @@ flowchart TB
 | **web3** | Solidity (reentrancy, access control, initializers, unchecked calls, randomness, signature replay, delegatecall, oracles, tx.origin, pragmas), Anchor/Solana, dApp patterns, wallet keys/mnemonics |
 | **db** | `.sql`/T-SQL/PL-SQL; live SQLite, PostgreSQL, MySQL/MariaDB, SQL Server, Redis, MongoDB (read-only); AWS RDS; `--db-sample` plaintext-password check (aggregates only) |
 | **domain** | **SaaS:** tenant isolation (unscoped queries, RLS/global scope), RBAC/SSO/SCIM, audit log, API-key hashing, export/delete, backups/PITR, per-tenant limits. **Fintech/banking:** float-for-money, idempotency, balance races, unsigned webhooks, PAN/CVV, ledger/reconciliation, MFA/SCA, KMS |
-| **servers** | `--ssh`: OS/runtime EOL, updates, `sshd`, ports vs firewall, web-root exposure, Docker, certificates, brute-force noise, disk |
+| **pwa** | manifest + installability, icons/maskable, service worker (registration, strategy, versioned caches, offline fallback, update flow), push, HTTPS, SW security (remote `importScripts`, cached private data, unvalidated messages, leaked VAPID keys); live check with `--url` |
+| **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
 ### Languages, databases and platforms
 
@@ -203,7 +218,7 @@ flowchart TB
 |---|---|---|
 | Local folder | `audit.py ./app` | read-only |
 | **GitHub / GitLab / Bitbucket / Azure DevOps / Codeberg / Gitea / self-hosted** | `--git github:org/repo` · `gitlab:group/sub/repo` · `bitbucket:ws/repo` · `azure:org/proj/repo` · `gitea:host/org/repo` · `--git gitlab:team/app --git-host git.company.com` · any `https://` / `git@host:org/repo.git` | shallow clone, hooks off, never executes code; private repos via your SSH key or `GITHUB_TOKEN` / `GITLAB_TOKEN` / `BITBUCKET_TOKEN` / `AZURE_DEVOPS_TOKEN` / `--git-token-env VAR` (sent as an HTTP header, never stored or printed); `--branch`, `--depth`, `--history` (secrets committed then removed) |
-| **SSH server** | `--ssh user@host --authorized [--sudo] [--remote-path /var/www/app]` | one read-only hardening script; optional code copy and scan |
+| **SSH server / VPS** (AWS, Azure, GCP, DigitalOcean, Hostinger…) | `--ssh user@host --authorized [--sudo] [--remote-path /var/www/app]` | one read-only script; provider auto-detected; optional code copy and scan; writes `server-fixes.sh` (never executed by the tool) |
 | **FTP / FTPS** | `--ftp ftps://user@host/path --authorized` (password in `FTP_PASSWORD`) | download-only; clear-text FTP refused unless `--ftp-allow-plain` |
 | **SFTP-only hosts** | `--sftp user@host --remote-path /path --authorized` | system `sftp`, symlinks dropped, size-capped |
 | Databases | `--db ./app.sqlite3` · `postgres://` · `mysql://` · `redis://` · `mongodb://` · `mssql://` · `--via-ssh` tunnel | read-only catalog queries; password via env (`PGPASSWORD`, `MYSQL_PWD`…) |
@@ -228,7 +243,7 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 | Assistant | What gets installed | Invoke |
 |---|---|---|
-| **Claude Code** | 14 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
+| **Claude Code** | 16 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
 | **Codex** | skills in `.agents/skills/` + `AGENTS.md` block | ask in chat |
 | **Cursor** | `.cursor/rules/pn-ultra-audit.mdc` + `.cursor/commands/pn-audit.md` | `/pn-audit` |
 | **Windsurf** | `.windsurf/rules/` + `.windsurf/workflows/pn-audit.md` | `/pn-audit` |
@@ -291,7 +306,7 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | Flag | Meaning |
 |---|---|
 | `--plan` · `--only a,b` · `--skip a,b` · `--list-auditors` | choose auditors (default: auto-detect) |
-| `--level beginner\\|pro` · `--strictness lenient\\|balanced\\|strict` · `--baseline auto` | learning mode · docs/complexity thresholds · ratchet |
+| `--level beginner\\|pro` · `--strictness basic\\|standard\\|strict` `--ask` · `--baseline auto` | learning mode · docs/complexity thresholds · ratchet |
 | `--git SPEC` `--branch` `--depth` `--history` `--git-host` `--git-token-env` | repositories |
 | `--ssh` `--sftp` `--ftp` `--remote-path` `--sudo` `--ssh-key` `--authorized` | servers (read-only) |
 | `--db URL\\|file` `--db-sample` `--via-ssh` `--aws-rds` | databases |
@@ -301,11 +316,49 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | `--scaffold [--write]` | create missing professional files |
 | `--export DIR` `--pdf` `--lang es\\|en` `--out DIR` | outputs |
 | `--tools` `--run-tests` | semgrep/gitleaks/npm audit/pip-audit · run the project's own tests |
-| `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |
+| `--lang auto\\|es\\|en\\|zh` | report/UI language (auto = system language) |\n| `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |
 | `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
 | `--fail-on SEV` `--verbose` `--quiet` `--color` | CI & output |
 
 Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs/RULES.md).
+
+## Strictness levels
+
+| Level | Flag | When |
+|---|---|---|
+| **basic** | `--strictness basic` | quick health check / prototypes: core risks, lenient thresholds |
+| **standard** *(default)* | `--strictness standard` | recommended balance for most projects |
+| **strict** | `--strictness strict` | enterprise / fintech / pre-certification: tight complexity, docs and typing limits + extra QA, CI, PWA and hardening checks |
+
+In a terminal, `--ask` shows a 1-2-3 menu. From an AI assistant the installed skills **ask you which level you want** before running (`lenient`/`balanced` still work as aliases).
+
+## Languages
+
+`--lang auto` (default) follows your system language - English if your locale is English, Chinese for `zh`, **Spanish otherwise**. Force one with `--lang es|en|zh` or `PN_AUDIT_LANG=en`. The terminal output, dashboard and Markdown report are fully translated.
+
+**Add a language in 10 minutes:** copy [`engine/locales/zh.json`](engine/locales/zh.json) to `engine/locales/<code>.json`, translate the values (`ui` = dashboard, `md` = Markdown report, `x` = English sentence → translation for CLI/dashboard text) and run `python3 audit.py --lang <code>`. It is auto-discovered; anything you skip falls back to English. PRs welcome.
+
+## Servers and VPS (AWS · Azure · Google Cloud · DigitalOcean · Hostinger · …)
+
+```bash
+python3 audit.py --ssh deploy@my-vps --authorized --sudo --remote-path /var/www/app
+```
+One read-only script runs over SSH (key/agent auth) and reports in four layers:
+
+1. **Provider** - auto-detected (AWS EC2, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode/Akamai, OVH, Oracle, Contabo, IONOS…) without reading any credential: AWS IMDSv1 and instance role, GCP service-account scopes and OS Login, Azure/DO agents, secrets in cloud-init user-data - plus the exact CLI command (or hPanel steps) to verify the **provider firewall**, which cannot be read from inside the VM.
+2. **OS & access** - EOL, patches, `sshd` (settings and crypto), root/password login, users, SSH key permissions, firewall, fail2ban, sysctl baseline, AppArmor/SELinux, auditd, persistent logs, cron, SUID, backups, disk/inodes.
+3. **Web & containers** - nginx, **Apache**, PHP, certificates, web-root leaks; **Docker/Podman** (privileged, host network/PID, `docker.sock` mounts, root users, limits, TCP API, ports that bypass ufw) and **Kubernetes** (k3s/kubeadm/microk8s: kubeconfig, kubelet, API server, etcd, privileged pods, hostPath, cluster-admin, NetworkPolicy).
+4. **Data & messaging** - **Redis**, **Kafka/ZooKeeper (+JMX)**, MySQL/MariaDB, PostgreSQL (`pg_hba.conf`), MongoDB, Elasticsearch, memcached, RabbitMQ, Postfix.
+
+**Fixing the server:** every run with `--ssh` also writes `server-fixes.sh` next to the report. It is **never executed by PN-Ultra-Audit** - you read it, copy it to the server and run `sudo bash server-fixes.sh list` (safe `[S]` vs risky `[R]` fixes), then `... safe` or `... SRV-SSH-ROOT SRV-NO-FIREWALL`. Each fix makes a timestamped backup, validates the config (`sshd -t`, `nginx -t`, `apachectl configtest`) and reloads. Keep a second SSH session open for SSH/firewall changes.
+
+## PWA audit
+
+Detected automatically from a manifest, a service worker or PWA tooling (Workbox, vite-plugin-pwa, next-pwa, Angular). It checks installability (manifest fields, 192/512 + maskable icons, `start_url`/scope, display), the service worker (registration scope, strategy, versioned caches + cleanup, offline fallback, `skipWaiting`, update flow), push (permission on load, leaked VAPID keys) and its security (remote `importScripts`, caching private API responses, unvalidated `message` events). Add `--url https://site --authorized` for a live check of the deployed manifest, icons and `sw.js` headers. Strict mode adds rich-install fields, install prompt, navigation preload and cache bounds.
+
+## Reports like a security firm
+
+The **Executive report** view (and the PDF) opens with a cover, overall risk level, key risks, scope & methodology, findings, remediation roadmap and the **repository tree** with findings per folder. If your project has a **logo and brand colors** (manifest `theme_color`, CSS variables, Tailwind, SCSS, Android `colors.xml`, Flutter, iOS asset catalog) they are detected and used for the cover and the dashboard accents. Every table is the same component (search, sortable columns, page size, centered pagination) and every `file:line` is a link that opens your editor (VS Code, Cursor, Windsurf, Zed, VSCodium - set the project folder once with the folder button; Alt+click copies the path). Findings you accept can be silenced with a `.pnauditignore` file or an inline `pn-audit: ignore=RULE` comment, and the count is always reported.
 
 ## Safety & privacy
 
@@ -339,6 +392,6 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 14 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
+<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 16 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
 '''
 open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8").write(R); print("README.md", len(R.splitlines()), "lines")

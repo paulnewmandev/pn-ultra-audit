@@ -4,7 +4,7 @@ PostgreSQL via psql, MySQL/MariaDB via mysql client). No third-party Python pack
 Live connections are READ-ONLY catalog queries. Passwords are passed via environment
 variables (PGPASSWORD / MYSQL_PWD), never on the command line.
 """
-import os, re, shutil, sqlite3, subprocess
+import json, os, re, shutil, sqlite3, subprocess
 from urllib.parse import urlparse, unquote
 
 MONEY = re.compile(r"(price|amount|total|balance|cost|salary|fee|tax|subtotal|payment)", re.I)
@@ -172,7 +172,7 @@ def audit_url(url, sample=False):
          "money": "SELECT table_name, column_name, data_type FROM information_schema.columns WHERE table_schema NOT IN ('pg_catalog','information_schema') AND data_type IN ('real','double precision','money') AND column_name ~* '(price|amount|total|balance|cost|fee|tax)'",
          "ssl": "SHOW ssl", "ver": "SHOW server_version",
         }
-        out, notes = [], []
+        out = []
         for k, sql in q.items():
             rc, so, se = _run(base + [sql], env)
             if rc != 0:

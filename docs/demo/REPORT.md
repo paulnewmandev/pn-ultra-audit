@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-08
-- **Tool:** PN-Ultra-Audit 1.0.14
+- **Tool:** PN-Ultra-Audit 1.0.15
 
 ## Contents
 
@@ -36,7 +36,7 @@
 
 | critical | high | medium | low | info | Total | Needs review / validation |
 |---|---|---|---|---|---|---|
-| 7 | 31 | 31 | 19 | 1 | 89 | 25 |
+| 7 | 29 | 32 | 20 | 1 | 89 | 23 |
 
 ### Audited environment
 
@@ -67,9 +67,9 @@
 pie showData
     title Confirmed findings by severity
     "critical" : 7
-    "high" : 31
-    "medium" : 31
-    "low" : 19
+    "high" : 29
+    "medium" : 32
+    "low" : 20
     "info" : 1
 ```
 
@@ -103,7 +103,7 @@ pie showData
     title To review, by priority
     "medium" : 14
     "high" : 8
-    "low" : 3
+    "low" : 1
 ```
 
 ### Project map: modules, size and findings
@@ -146,13 +146,13 @@ gantt
     Possible IDOR / BOLA missing owner x2 :crit, t8, after t7, 1d
     section This sprint medium & quick wins
     Database schema issue x12 :t9, after t8, 1d
-    Mobile test strategy & infrastruct x5 :t10, after t9, 1d
+    Mobile test strategy & infrastruct x6 :t10, after t9, 2d
     On-page SEO x5 :t11, after t10, 1d
     Likely bug pattern x3 :t12, after t11, 1d
     Test coverage gap / test hygiene x3 :t13, after t12, 1d
     Web accessibility WCAG 2.2 x3 :t14, after t13, 1d
     Predictable randomness for secrets x2 :t15, after t14, 1d
-    SEM / analytics tracking setup x1 :t16, after t15, 1d
+    Test infrastructure gaps front-end x2 :t16, after t15, 1d
     section Backlog debt
     Smart contract / crypto security x1 :t17, after t16, 1d
     API documentation docstrings / doc x1 :t18, after t17, 1d
@@ -200,8 +200,6 @@ gantt
 | SEC-032 | high | vulnerability | `mobile/android/app/src/main/AndroidManifest.xml:2` | Android: debuggable / cleartext | 5 min |
 | SEO-001 | high | bug | `web/index.html:1` | Pages without <title> (1 of 1 HTML pages) | 5 min |
 | SEO-002 | high | bug | `web/public/robots.txt:1` | robots.txt blocks the whole site (Disallow: /) | 5 min |
-| TST-001 | high | test_gap | `.:1` | Android: no unit tests (src/test) for the app code | 240 min |
-| TST-002 | high | test_gap | `package.json:1` | Front-end has no unit/component test runner (Vitest/Jest/Karma) | 90 min |
 | A11-001 | medium | bug | `web/index.html:10` | Image without alt text | 3 min |
 | A11-002 | medium | bug | `web/index.html:11` | Click handler on a non-interactive element (keyboard/screen-reader inaccessible) | 10 min |
 | BUG-003 | medium | bug | `app.db:1` | Invalid foreign key definition | 30 min |
@@ -213,9 +211,8 @@ gantt
 | BUG-009 | medium | bug | `db/schema.sql:2` | Money column `orders.total` uses FLOAT | 30 min |
 | BUG-010 | medium | bug | `web/tests/checkout.spec.ts:8` | Focused test committed (`.only` / `fit`) - the rest of the suite is silently ski | 2 min |
 | COD-001 | medium | code_smell | `.:1` | Project has no README | 45 min |
-| COD-002 | medium | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 80%) | 15 min |
-| COD-003 | medium | code_smell | `app.db:1` | Table `users` has no PRIMARY KEY | 25 min |
-| COD-004 | medium | code_smell | `db/schema.sql:1` | Table `users` has no PRIMARY KEY | 20 min |
+| COD-002 | medium | code_smell | `app.db:1` | Table `users` has no PRIMARY KEY | 25 min |
+| COD-003 | medium | code_smell | `db/schema.sql:1` | Table `users` has no PRIMARY KEY | 20 min |
 | SEC-033 | medium | vulnerability | `app.db:1` | SQLite file is world-accessible (0o644) | 5 min |
 | SEC-034 | medium | vulnerability | `backend/app.py:35` | Redirect to user-controlled URL | 10 min |
 | SEC-035 | medium | vulnerability | `backend/server.js:9` | Non-cryptographic RNG for secrets | 10 min |
@@ -226,15 +223,18 @@ gantt
 | SEO-003 | medium | code_smell | `.:1` | No sitemap.xml (or generator) found | 30 min |
 | SEO-004 | medium | code_smell | `web/index.html:1` | Pages without meta description (1 of 1 HTML pages) | 5 min |
 | SEO-005 | medium | bug | `web/index.html:1` | Pages without viewport meta (not mobile-friendly) (1 of 1 HTML pages) | 5 min |
-| TST-003 | medium | test_gap | `.:1` | Android: no instrumented/UI tests (src/androidTest) | 240 min |
-| TST-004 | medium | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:1` | Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains  | 20 min |
-| TST-005 | medium | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: UI tests exist but production code sets no accessibilityIdentifier | 90 min |
-| TST-006 | medium | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:3` | iOS: 1 sleep/asyncAfter calls in tests (flaky) | 6 min |
+| TST-001 | medium | test_gap | `.:1` | Android: no unit tests (src/test) for the app code | 240 min |
+| TST-002 | medium | test_gap | `.:1` | Android: no instrumented/UI tests (src/androidTest) | 240 min |
+| TST-003 | medium | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:1` | Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains  | 20 min |
+| TST-004 | medium | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: UI tests exist but production code sets no accessibilityIdentifier | 90 min |
+| TST-005 | medium | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:3` | iOS: 1 sleep/asyncAfter calls in tests (flaky) | 6 min |
+| TST-006 | medium | test_gap | `package.json:1` | Front-end has no unit/component test runner (Vitest/Jest/Karma) | 90 min |
 | TST-007 | medium | test_gap | `package.json:1` | package.json has no working `test` script | 5 min |
 | TST-008 | medium | test_gap | `tests/test_app.py:1` | Test file `tests/test_app.py` defines tests but contains no assertions | 20 min |
 | TST-009 | medium | test_gap | `web/tests/checkout.spec.ts:4` | Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) | 8 min |
 | A11-003 | low | bug | `web/index.html:2` | <html> without lang attribute | 2 min |
 | BUG-011 | low | bug | `backend/app.py:53` | Mutable default argument | 10 min |
+| COD-004 | low | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
 | COD-005 | low | code_smell | `app.db:1` | Foreign keys declared but PRAGMA foreign_keys is OFF by default | 10 min |
 | COD-006 | low | code_smell | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
 | COD-007 | low | code_smell | `backend/app.py:62` | Empty catch/except (swallowed error) | 10 min |
@@ -267,7 +267,7 @@ gantt
 | `.` | 7 |
 | `app/Http/UserController.php` | 5 |
 | `mobile/ios/AppUITests/LoginUITests.swift` | 4 |
-| `package.json` | 3 |
+| `web/tests/checkout.spec.ts` | 3 |
 
 <a id="guia"></a>
 ## Step-by-step remediation guide
@@ -502,48 +502,9 @@ CREATE TABLE t (id BIGSERIAL PRIMARY KEY, name text NOT NULL);  CREATE INDEX ON 
 
 **How to verify:** Re-run `python3 audit.py --db ...`; finding gone.
 
-- [ ] `SEC-029`, `BUG-003`, `COD-003`, `BUG-004`, `BUG-005`, `COD-004`, `BUG-008`, `SEC-037`, `BUG-009`, `COD-005`, `PER-001`, `PER-002` …  — tick when fixed, then re-run the audit
+- [ ] `SEC-029`, `BUG-003`, `COD-002`, `BUG-004`, `BUG-005`, `COD-003`, `BUG-008`, `SEC-037`, `BUG-009`, `COD-005`, `PER-001`, `PER-002` …  — tick when fixed, then re-run the audit
 
-### 7. Mobile test strategy & infrastructure  · **high**  · 6 confirmed · 0 to review
-
-**What it is.** Missing unit/UI test layers, flaky sync (sleeps), text-based locators, no accessibility ids/tags, no CI device matrix or coverage.
-
-**Impact.** Crashes and regressions on real devices; UI changes break tests; store rejections go unnoticed.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| high | `.:1` | Android: no unit tests (src/test) for the app code | 240 min |
-| medium | `.:1` | Android: no instrumented/UI tests (src/androidTest) | 240 min |
-| medium | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: UI tests exist but production code sets no accessibilityIdentifie | 90 min |
-| medium | `mobile/ios/AppUITests/LoginUITests.swift:3` | iOS: 1 sleep/asyncAfter calls in tests (flaky) | 6 min |
-| low | `.:1` | iOS: code coverage not enabled in scheme/test plan | 10 min |
-| low | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: 1 UI test file(s) do not set continueAfterFailure = false | 2 min |
-
-**Steps:**
-
-1. Pyramid: fast JVM/host unit tests (ViewModel/use-cases/reducers) ≫ component/UI tests ≫ a few end-to-end journeys on real devices/emulators.
-2. Android: JUnit + MockK + Turbine + coroutines-test (`runTest`); Compose UI tests with `createComposeRule` and `Modifier.testTag` constants from production; Espresso for Views; UiAutomator for cross-app; Gradle Managed Devices (ATD images) in CI; never `Thread.sleep` - use idling/`waitUntil`/`advanceTimeBy`.
-3. iOS: XCTest/Swift Testing for logic; XCUITest with `accessibilityIdentifier` (not visible text); `waitForExistence(timeout:)` instead of sleep; set `continueAfterFailure = false`; Test Plans for configs (locales, dark mode); `xcodebuild test` on a simulator matrix in CI.
-4. Cross-platform: Flutter `flutter_test` + `integration_test` (+ goldens); React Native Jest + RNTL + Detox/Maestro; Maestro/Appium for black-box flows; noqa (vision-based, proprietary) for games/WebViews/canvases.
-5. Add accessibility checks (Compose/Espresso AccessibilityChecks, XCUITest `performAccessibilityAudit`), coverage (Kover/JaCoCo, Xcode code coverage), and a device/OS matrix incl. one low-end device.
-
-**Vulnerable code/config:**
-```
-Thread.sleep(2000); onView(withText("Login")).perform(click())  // XCUITest: sleep(2); app.buttons["Login"].tap()
-```
-
-**Safe form:**
-```
-composeRule.onNodeWithTag(Tags.LoginButton).performClick()   // XCUITest: app.buttons["login_button"].waitForExistence(timeout: 5)
-```
-
-**How to verify:** Tests pass 10× in a row on CI emulators/simulators; test names map to user journeys.
-
-- [ ] `TST-001`, `TST-003`, `TST-005`, `TST-006`, `TST-010`, `TST-012`  — tick when fixed, then re-run the audit
-
-### 8. Cross-Site Scripting (XSS)  · **high**  · 5 confirmed · 1 to review
+### 7. Cross-Site Scripting (XSS)  · **high**  · 5 confirmed · 1 to review
 
 **What it is.** Untrusted data is written into HTML/JS/URL context without context-correct encoding, so the browser executes attacker script in your origin.
 
@@ -585,7 +546,7 @@ echo htmlspecialchars($_GET['q'], ENT_QUOTES, 'UTF-8');   // PHP
 
 - [ ] `SEC-009`, `SEC-015`, `SEC-019`, `SEC-021`, `SEC-031`  — tick when fixed, then re-run the audit
 
-### 9. Android manifest/WebView/storage weaknesses  · **high**  · 1 confirmed · 5 to review
+### 8. Android manifest/WebView/storage weaknesses  · **high**  · 1 confirmed · 5 to review
 
 **What it is.** Debuggable builds, backups, cleartext traffic, exported components, permissive WebView and plaintext token storage expose app data.
 
@@ -623,7 +584,7 @@ android:allowBackup="false"
 
 - [ ] `SEC-032`  — tick when fixed, then re-run the audit
 
-### 10. On-page SEO  · **high**  · 6 confirmed · 0 to review
+### 9. On-page SEO  · **high**  · 6 confirmed · 0 to review
 
 **What it is.** Page-level signals search engines and social networks rely on are missing or malformed: title, meta description, canonical, single H1, Open Graph/Twitter cards, language, image alt text, structured data.
 
@@ -666,7 +627,7 @@ android:allowBackup="false"
 
 - [ ] `SEO-001`, `SEO-004`, `SEO-005`, `SEO-006`, `SEO-007`, `SEO-008`  — tick when fixed, then re-run the audit
 
-### 11. SQL Injection  · **high**  · 4 confirmed · 1 to review
+### 10. SQL Injection  · **high**  · 4 confirmed · 1 to review
 
 **What it is.** User-controlled text is concatenated/interpolated into an SQL statement, so the database parses attacker input as SQL code instead of data.
 
@@ -709,46 +670,7 @@ query = f"SELECT * FROM users WHERE name = '{name}'"
 
 - [ ] `SEC-008`, `SEC-013`, `SEC-014`, `SEC-020`  — tick when fixed, then re-run the audit
 
-### 12. Test infrastructure gaps (front-end)  · **high**  · 2 confirmed · 3 to review
-
-**What it is.** Layers of the test pyramid are missing (unit/component, E2E, accessibility, visual, performance budget, coverage gates) or are not run in CI.
-
-**Impact.** Regressions in UI, accessibility and critical flows reach users; refactors are unsafe.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| high | `package.json:1` | Front-end has no unit/component test runner (Vitest/Jest/Karma) | 90 min |
-| medium | `package.json:1` | package.json has no working `test` script | 5 min |
-| review/medium | `package.json:1` | No automated accessibility testing (axe / jsx-a11y / Lighthouse) | 60 min |
-| review/low | `package.json:1` | No visual regression testing | 90 min |
-| review/low | `package.json:1` | No performance budget (Lighthouse CI / size-limit) | 60 min |
-
-**Steps:**
-
-1. Unit/component: Vitest or Jest + Testing Library (query by role/label/text like a user).
-2. E2E: Playwright (chromium + firefox + webkit/mobile viewport) for the 5-10 critical journeys; fixtures for auth (storageState); traces on failure; `forbidOnly` and a small `retries` in CI.
-3. Accessibility: @axe-core/playwright (or jest-axe) on every key page + eslint-plugin-jsx-a11y.
-4. Visual: Playwright `toHaveScreenshot` or Storybook + Chromatic/Percy for the design system; mask dynamic regions.
-5. Network: mock third parties with MSW/route.fulfill; never hit real payment/email services.
-6. Gates: coverage thresholds on changed code, Lighthouse CI / size-limit budgets, all required in CI.
-
-**Vulnerable code/config:**
-```
-only a few unit tests, no browser tests
-```
-
-**Safe form:**
-```
-vitest + @testing-library + playwright + axe + CI job with traces/artifacts
-```
-
-**How to verify:** CI shows each layer running; breaking a critical flow turns the pipeline red.
-
-- [ ] `TST-002`, `TST-007`  — tick when fixed, then re-run the audit
-
-### 13. Technical SEO & crawlability  · **high**  · 3 confirmed · 1 to review
+### 11. Technical SEO & crawlability  · **high**  · 3 confirmed · 1 to review
 
 **What it is.** Crawlers cannot reliably discover, fetch or index pages: broken links, redirect chains, missing/incorrect robots.txt or sitemap, noindex mistakes, client-side-only rendering, missing HTTPS redirect or compression.
 
@@ -789,7 +711,7 @@ Sitemap: https://acme.com/sitemap.xml
 
 - [ ] `SEO-002`, `SEO-003`, `SEO-011`  — tick when fixed, then re-run the audit
 
-### 14. Possible IDOR / BOLA (missing ownership check)  · **high**  · 2 confirmed · 0 to review
+### 12. Possible IDOR / BOLA (missing ownership check)  · **high**  · 2 confirmed · 0 to review
 
 **What it is.** An object is loaded by a client-supplied ID; if the code does not also check it belongs to the caller/tenant, anyone can read or edit others' data.
 
@@ -822,7 +744,7 @@ $request->user()->orders()->findOrFail($request->id)
 
 - [ ] `SEC-010`, `SEC-023`  — tick when fixed, then re-run the audit
 
-### 15. JWT misuse  · **high**  · 2 confirmed · 0 to review
+### 13. JWT misuse  · **high**  · 2 confirmed · 0 to review
 
 **What it is.** Hard-coded/weak signing secret, `alg: none`, or disabled signature/expiry verification make tokens forgeable.
 
@@ -855,7 +777,7 @@ jwt.sign(payload, process.env.JWT_SECRET, {algorithm:'HS256', expiresIn:'15m'})
 
 - [ ] `SEC-022`, `SEC-026`  — tick when fixed, then re-run the audit
 
-### 16. Flaky / brittle test patterns  · **high**  · 2 confirmed · 0 to review
+### 14. Flaky / brittle test patterns  · **high**  · 2 confirmed · 0 to review
 
 **What it is.** Fixed sleeps, CSS/XPath locators, forced clicks, un-awaited assertions, order-dependent tests and unmocked time/randomness make tests intermittently fail or pass without verifying anything.
 
@@ -892,7 +814,7 @@ await expect(page.getByText('Saved')).toBeVisible();
 
 - [ ] `BUG-002`, `TST-009`  — tick when fixed, then re-run the audit
 
-### 17. Server-Side Request Forgery (SSRF)  · **high**  · 1 confirmed · 0 to review
+### 15. Server-Side Request Forgery (SSRF)  · **high**  · 1 confirmed · 0 to review
 
 **What it is.** The server fetches a URL chosen by the user, letting attackers reach internal services and cloud metadata (169.254.169.254).
 
@@ -926,7 +848,7 @@ requests.get(url, timeout=5, allow_redirects=False)
 
 - [ ] `SEC-016`  — tick when fixed, then re-run the audit
 
-### 18. Path Traversal / arbitrary file access  · **high**  · 1 confirmed · 0 to review
+### 16. Path Traversal / arbitrary file access  · **high**  · 1 confirmed · 0 to review
 
 **What it is.** A file path is built from user input; `../` or absolute paths escape the intended directory.
 
@@ -960,7 +882,7 @@ if not p.startswith(os.path.realpath(BASE) + os.sep): abort(400)
 
 - [ ] `SEC-017`  — tick when fixed, then re-run the audit
 
-### 19. Declared permissions / privacy strings  · **high**  · 1 confirmed · 0 to review
+### 17. Declared permissions / privacy strings  · **high**  · 1 confirmed · 0 to review
 
 **What it is.** The app uses a protected API without declaring the permission (Android manifest) or the usage-description key (iOS Info.plist).
 
@@ -992,7 +914,46 @@ CLLocationManager() without NSLocationWhenInUseUsageDescription
 
 - [ ] `BUG-001`  — tick when fixed, then re-run the audit
 
-### 20. Web accessibility (WCAG 2.2)  · **medium**  · 3 confirmed · 1 to review
+### 18. Mobile test strategy & infrastructure  · **medium**  · 6 confirmed · 0 to review
+
+**What it is.** Missing unit/UI test layers, flaky sync (sleeps), text-based locators, no accessibility ids/tags, no CI device matrix or coverage.
+
+**Impact.** Crashes and regressions on real devices; UI changes break tests; store rejections go unnoticed.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `.:1` | Android: no unit tests (src/test) for the app code | 240 min |
+| medium | `.:1` | Android: no instrumented/UI tests (src/androidTest) | 240 min |
+| medium | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: UI tests exist but production code sets no accessibilityIdentifie | 90 min |
+| medium | `mobile/ios/AppUITests/LoginUITests.swift:3` | iOS: 1 sleep/asyncAfter calls in tests (flaky) | 6 min |
+| low | `.:1` | iOS: code coverage not enabled in scheme/test plan | 10 min |
+| low | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: 1 UI test file(s) do not set continueAfterFailure = false | 2 min |
+
+**Steps:**
+
+1. Pyramid: fast JVM/host unit tests (ViewModel/use-cases/reducers) ≫ component/UI tests ≫ a few end-to-end journeys on real devices/emulators.
+2. Android: JUnit + MockK + Turbine + coroutines-test (`runTest`); Compose UI tests with `createComposeRule` and `Modifier.testTag` constants from production; Espresso for Views; UiAutomator for cross-app; Gradle Managed Devices (ATD images) in CI; never `Thread.sleep` - use idling/`waitUntil`/`advanceTimeBy`.
+3. iOS: XCTest/Swift Testing for logic; XCUITest with `accessibilityIdentifier` (not visible text); `waitForExistence(timeout:)` instead of sleep; set `continueAfterFailure = false`; Test Plans for configs (locales, dark mode); `xcodebuild test` on a simulator matrix in CI.
+4. Cross-platform: Flutter `flutter_test` + `integration_test` (+ goldens); React Native Jest + RNTL + Detox/Maestro; Maestro/Appium for black-box flows; noqa (vision-based, proprietary) for games/WebViews/canvases.
+5. Add accessibility checks (Compose/Espresso AccessibilityChecks, XCUITest `performAccessibilityAudit`), coverage (Kover/JaCoCo, Xcode code coverage), and a device/OS matrix incl. one low-end device.
+
+**Vulnerable code/config:**
+```
+Thread.sleep(2000); onView(withText("Login")).perform(click())  // XCUITest: sleep(2); app.buttons["Login"].tap()
+```
+
+**Safe form:**
+```
+composeRule.onNodeWithTag(Tags.LoginButton).performClick()   // XCUITest: app.buttons["login_button"].waitForExistence(timeout: 5)
+```
+
+**How to verify:** Tests pass 10× in a row on CI emulators/simulators; test names map to user journeys.
+
+- [ ] `TST-001`, `TST-002`, `TST-004`, `TST-005`, `TST-010`, `TST-012`  — tick when fixed, then re-run the audit
+
+### 19. Web accessibility (WCAG 2.2)  · **medium**  · 3 confirmed · 1 to review
 
 **What it is.** Markup patterns that block keyboard and screen-reader users: images without alt, clickable non-interactive elements, positive tabindex, removed focus outline, missing page language, zoom disabled.
 
@@ -1030,7 +991,7 @@ CLLocationManager() without NSLocationWhenInUseUsageDescription
 
 - [ ] `A11-001`, `A11-002`, `A11-003`  — tick when fixed, then re-run the audit
 
-### 21. Likely bug pattern  · **medium**  · 3 confirmed · 0 to review
+### 20. Likely bug pattern  · **medium**  · 3 confirmed · 0 to review
 
 **What it is.** Construct that behaves differently from what it appears to do.
 
@@ -1064,7 +1025,7 @@ def f(x, acc=None):
 
 - [ ] `BUG-006`, `BUG-007`, `BUG-011`  — tick when fixed, then re-run the audit
 
-### 22. Test coverage gap / test hygiene  · **medium**  · 3 confirmed · 0 to review
+### 21. Test coverage gap / test hygiene  · **medium**  · 3 confirmed · 0 to review
 
 **What it is.** Modules without tests, skipped or assertion-free tests let regressions through.
 
@@ -1097,9 +1058,241 @@ it('works', () => { expect(result).toBe(42) })
 
 **How to verify:** CI green; coverage report shows module covered.
 
-- [ ] `TST-004`, `TST-008`, `BUG-010`  — tick when fixed, then re-run the audit
+- [ ] `TST-003`, `TST-008`, `BUG-010`  — tick when fixed, then re-run the audit
 
-### 23. API documentation (docstrings / doc comments)  · **medium**  · 2 confirmed · 0 to review
+### 22. Test infrastructure gaps (front-end)  · **medium**  · 2 confirmed · 1 to review
+
+**What it is.** Layers of the test pyramid are missing (unit/component, E2E, accessibility, visual, performance budget, coverage gates) or are not run in CI.
+
+**Impact.** Regressions in UI, accessibility and critical flows reach users; refactors are unsafe.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `package.json:1` | Front-end has no unit/component test runner (Vitest/Jest/Karma) | 90 min |
+| medium | `package.json:1` | package.json has no working `test` script | 5 min |
+| review/medium | `package.json:1` | No automated accessibility testing (axe / jsx-a11y / Lighthouse) | 60 min |
+
+**Steps:**
+
+1. Unit/component: Vitest or Jest + Testing Library (query by role/label/text like a user).
+2. E2E: Playwright (chromium + firefox + webkit/mobile viewport) for the 5-10 critical journeys; fixtures for auth (storageState); traces on failure; `forbidOnly` and a small `retries` in CI.
+3. Accessibility: @axe-core/playwright (or jest-axe) on every key page + eslint-plugin-jsx-a11y.
+4. Visual: Playwright `toHaveScreenshot` or Storybook + Chromatic/Percy for the design system; mask dynamic regions.
+5. Network: mock third parties with MSW/route.fulfill; never hit real payment/email services.
+6. Gates: coverage thresholds on changed code, Lighthouse CI / size-limit budgets, all required in CI.
+
+**Vulnerable code/config:**
+```
+only a few unit tests, no browser tests
+```
+
+**Safe form:**
+```
+vitest + @testing-library + playwright + axe + CI job with traces/artifacts
+```
+
+**How to verify:** CI shows each layer running; breaking a critical flow turns the pipeline red.
+
+- [ ] `TST-006`, `TST-007`  — tick when fixed, then re-run the audit
+
+### 23. Predictable randomness for secrets  · **medium**  · 2 confirmed · 0 to review
+
+**What it is.** Non-cryptographic RNGs (`Math.random`, `rand`, `random`) are predictable and must not generate tokens, OTPs or reset codes.
+
+**Impact.** Attackers predict or brute-force tokens and take over accounts.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `backend/server.js:9` | Non-cryptographic RNG for secrets | 10 min |
+| medium | `contracts/Vault.sol:24` | Solidity randomness from block data | 60 min |
+
+**Steps:**
+
+1. Use the CSPRNG: `crypto.randomBytes`, `secrets.token_urlsafe`, `random_bytes`, `SecureRandom`, `crypto/rand`.
+2. Use ≥ 128 bits for tokens, hash them at rest, set expiry and single use.
+
+**Vulnerable code/config:**
+```
+token = Math.random().toString(36)
+```
+
+**Safe form:**
+```
+token = crypto.randomBytes(32).toString('hex')   // Python: secrets.token_urlsafe(32)
+```
+
+**How to verify:** Grep again for non-CSPRNG calls near token/otp/reset code.
+
+- [ ] `SEC-035`, `SEC-036`  — tick when fixed, then re-run the audit
+
+### 24. SEM / analytics tracking setup  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** Advertising and analytics tags are missing, duplicated, misconfigured, or fire without user consent; conversions are not tracked.
+
+**Impact.** Ad spend cannot be optimized (no conversions), data is unreliable, and tracking before consent breaches GDPR/ePrivacy (fines; Google Ads audiences disabled without Consent Mode v2 in the EEA).
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `web/index.html:1` | Tracking tags found (Google Analytics 4, Meta Pixel) but no consent ma | 120 min |
+
+**Steps:**
+
+1. Install one tag manager (GTM) and load GA4, Google Ads and Meta pixels through it; avoid hard-coding duplicates.
+2. Implement a consent banner (CMP) and Google Consent Mode v2: default `denied`, update on accept; do not fire marketing tags before consent.
+3. Define conversion events (purchase, lead, sign_up) with value/currency, import them to Google Ads, and verify with Tag Assistant / GA4 DebugView.
+4. Preserve gclid/UTM parameters through redirects and forms (hidden fields -> CRM).
+5. Landing pages: indexable only if organic; fast (LCP < 2.5 s), message-matched to the ad, one primary CTA.
+
+**Vulnerable code/config:**
+```
+<script src='https://www.googletagmanager.com/gtag/js?id=G-XXXX'> loaded unconditionally, no consent
+```
+
+**Safe form:**
+```
+gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'});
+```
+
+**How to verify:** With cookies rejected, no _ga/_fbp cookies or ad requests in DevTools > Network; conversions appear in GA4 DebugView after accepting.
+
+- [ ] `SEM-001`  — tick when fixed, then re-run the audit
+
+### 25. Project documentation  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** Missing or thin project documentation (README, architecture notes, API spec, contributing guide) makes onboarding slow and decisions invisible.
+
+**Impact.** New developers cannot run/test the project; knowledge lives in people's heads; reviews lack context.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `.:1` | Project has no README | 45 min |
+
+**Steps:**
+
+1. README: purpose, requirements, install, run, test, configuration (every env var), deploy, troubleshooting - a new dev must be productive in 10 minutes.
+2. Add docs/architecture.md: context diagram, modules and their responsibilities, data flow, external systems, deployment view (a mermaid diagram is enough).
+3. Record key decisions as ADRs (adr/0001-title.md: context, decision, consequences).
+4. Publish an OpenAPI/GraphQL schema for HTTP APIs and keep it generated from code.
+5. Add CONTRIBUTING.md (branching, commit style, how to run lint/tests) and CHANGELOG.md (Keep a Changelog + SemVer).
+
+**Vulnerable code/config:**
+```
+README.md: '# app'
+```
+
+**Safe form:**
+```
+README.md: purpose · requirements · install · run · test · config table · deploy · troubleshooting
+```
+
+**How to verify:** A teammate follows the README on a clean machine without asking you anything.
+
+- [ ] `COD-001`  — tick when fixed, then re-run the audit
+
+### 26. World-writable permissions  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** chmod 777 lets any local user modify files.
+
+**Impact.** Any local user can read/modify the data.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `app.db:1` | SQLite file is world-accessible (0o644) | 5 min |
+
+**Steps:**
+
+1. Use 750/640 and correct owner/group.
+
+**Vulnerable code/config:**
+```
+chmod -R 777 /var/www
+```
+
+**Safe form:**
+```
+chmod -R u=rwX,g=rX,o= /var/www
+```
+
+**How to verify:** `ls -l` shows no world-write.
+
+- [ ] `SEC-033`  — tick when fixed, then re-run the audit
+
+### 27. Open Redirect  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** A redirect target comes from user input without an allowlist.
+
+**Impact.** Phishing from your trusted domain; token leakage in OAuth flows.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `backend/app.py:35` | Redirect to user-controlled URL | 10 min |
+
+**Steps:**
+
+1. Redirect only to relative paths or to an allowlist of hosts.
+2. Reject URLs with a scheme/host you do not own; beware `//evil.com` and `\\evil.com`.
+3. Prefer opaque IDs (`?next=dashboard`) mapped server-side.
+
+**Vulnerable code/config:**
+```
+return redirect(request.args['next'])
+```
+
+**Safe form:**
+```
+nxt = request.args.get('next', '/')
+if not (nxt.startswith('/') and not nxt.startswith('//')): nxt = '/'
+return redirect(nxt)
+```
+
+**How to verify:** Try `?next=https://evil.com` and `?next=//evil.com`: must land on `/`.
+
+- [ ] `SEC-034`  — tick when fixed, then re-run the audit
+
+### 28. Sensitive data in logs  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** Passwords/tokens printed to logs end up in aggregators and crash reports.
+
+**Impact.** Credential exposure to anyone with log access.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `frontend/src/App.jsx:4` | Secret/password written to logs | 5 min |
+
+**Steps:**
+
+1. Remove the log or redact (`token=***`).
+2. Add a logging filter that masks known secret keys.
+
+**Vulnerable code/config:**
+```
+console.log('login', password)
+```
+
+**Safe form:**
+```
+logger.info('login attempt', {user})
+```
+
+**How to verify:** Grep logs of a test run for the secret.
+
+- [ ] `SEC-038`  — tick when fixed, then re-run the audit
+
+### 29. API documentation (docstrings / doc comments)  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** Public functions, classes and modules lack doc comments, or the comments are too short to say what the code promises (parameters, return value, errors, side effects).
 
@@ -1109,7 +1302,7 @@ it('works', () => { expect(result).toBe(42) })
 
 | Sev. | File | Title | Effort |
 |---|---|---|---|
-| medium | `.:1` | Public API documentation coverage is 0.0% (target 80%) | 15 min |
+| low | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
 | low | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
 
 **Steps:**
@@ -1146,202 +1339,7 @@ def charge(user: User, amount: Decimal, retry: int = 3) -> Receipt:
 
 **How to verify:** Run the doc linter / doc generator: no missing-docstring warnings on public API; generated docs read well.
 
-- [ ] `COD-002`, `COD-006`  — tick when fixed, then re-run the audit
-
-### 24. Predictable randomness for secrets  · **medium**  · 2 confirmed · 0 to review
-
-**What it is.** Non-cryptographic RNGs (`Math.random`, `rand`, `random`) are predictable and must not generate tokens, OTPs or reset codes.
-
-**Impact.** Attackers predict or brute-force tokens and take over accounts.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `backend/server.js:9` | Non-cryptographic RNG for secrets | 10 min |
-| medium | `contracts/Vault.sol:24` | Solidity randomness from block data | 60 min |
-
-**Steps:**
-
-1. Use the CSPRNG: `crypto.randomBytes`, `secrets.token_urlsafe`, `random_bytes`, `SecureRandom`, `crypto/rand`.
-2. Use ≥ 128 bits for tokens, hash them at rest, set expiry and single use.
-
-**Vulnerable code/config:**
-```
-token = Math.random().toString(36)
-```
-
-**Safe form:**
-```
-token = crypto.randomBytes(32).toString('hex')   // Python: secrets.token_urlsafe(32)
-```
-
-**How to verify:** Grep again for non-CSPRNG calls near token/otp/reset code.
-
-- [ ] `SEC-035`, `SEC-036`  — tick when fixed, then re-run the audit
-
-### 25. SEM / analytics tracking setup  · **medium**  · 1 confirmed · 0 to review
-
-**What it is.** Advertising and analytics tags are missing, duplicated, misconfigured, or fire without user consent; conversions are not tracked.
-
-**Impact.** Ad spend cannot be optimized (no conversions), data is unreliable, and tracking before consent breaches GDPR/ePrivacy (fines; Google Ads audiences disabled without Consent Mode v2 in the EEA).
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `web/index.html:1` | Tracking tags found (Google Analytics 4, Meta Pixel) but no consent ma | 120 min |
-
-**Steps:**
-
-1. Install one tag manager (GTM) and load GA4, Google Ads and Meta pixels through it; avoid hard-coding duplicates.
-2. Implement a consent banner (CMP) and Google Consent Mode v2: default `denied`, update on accept; do not fire marketing tags before consent.
-3. Define conversion events (purchase, lead, sign_up) with value/currency, import them to Google Ads, and verify with Tag Assistant / GA4 DebugView.
-4. Preserve gclid/UTM parameters through redirects and forms (hidden fields -> CRM).
-5. Landing pages: indexable only if organic; fast (LCP < 2.5 s), message-matched to the ad, one primary CTA.
-
-**Vulnerable code/config:**
-```
-<script src='https://www.googletagmanager.com/gtag/js?id=G-XXXX'> loaded unconditionally, no consent
-```
-
-**Safe form:**
-```
-gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'});
-```
-
-**How to verify:** With cookies rejected, no _ga/_fbp cookies or ad requests in DevTools > Network; conversions appear in GA4 DebugView after accepting.
-
-- [ ] `SEM-001`  — tick when fixed, then re-run the audit
-
-### 26. Project documentation  · **medium**  · 1 confirmed · 0 to review
-
-**What it is.** Missing or thin project documentation (README, architecture notes, API spec, contributing guide) makes onboarding slow and decisions invisible.
-
-**Impact.** New developers cannot run/test the project; knowledge lives in people's heads; reviews lack context.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `.:1` | Project has no README | 45 min |
-
-**Steps:**
-
-1. README: purpose, requirements, install, run, test, configuration (every env var), deploy, troubleshooting - a new dev must be productive in 10 minutes.
-2. Add docs/architecture.md: context diagram, modules and their responsibilities, data flow, external systems, deployment view (a mermaid diagram is enough).
-3. Record key decisions as ADRs (adr/0001-title.md: context, decision, consequences).
-4. Publish an OpenAPI/GraphQL schema for HTTP APIs and keep it generated from code.
-5. Add CONTRIBUTING.md (branching, commit style, how to run lint/tests) and CHANGELOG.md (Keep a Changelog + SemVer).
-
-**Vulnerable code/config:**
-```
-README.md: '# app'
-```
-
-**Safe form:**
-```
-README.md: purpose · requirements · install · run · test · config table · deploy · troubleshooting
-```
-
-**How to verify:** A teammate follows the README on a clean machine without asking you anything.
-
-- [ ] `COD-001`  — tick when fixed, then re-run the audit
-
-### 27. World-writable permissions  · **medium**  · 1 confirmed · 0 to review
-
-**What it is.** chmod 777 lets any local user modify files.
-
-**Impact.** Any local user can read/modify the data.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `app.db:1` | SQLite file is world-accessible (0o644) | 5 min |
-
-**Steps:**
-
-1. Use 750/640 and correct owner/group.
-
-**Vulnerable code/config:**
-```
-chmod -R 777 /var/www
-```
-
-**Safe form:**
-```
-chmod -R u=rwX,g=rX,o= /var/www
-```
-
-**How to verify:** `ls -l` shows no world-write.
-
-- [ ] `SEC-033`  — tick when fixed, then re-run the audit
-
-### 28. Open Redirect  · **medium**  · 1 confirmed · 0 to review
-
-**What it is.** A redirect target comes from user input without an allowlist.
-
-**Impact.** Phishing from your trusted domain; token leakage in OAuth flows.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `backend/app.py:35` | Redirect to user-controlled URL | 10 min |
-
-**Steps:**
-
-1. Redirect only to relative paths or to an allowlist of hosts.
-2. Reject URLs with a scheme/host you do not own; beware `//evil.com` and `\\evil.com`.
-3. Prefer opaque IDs (`?next=dashboard`) mapped server-side.
-
-**Vulnerable code/config:**
-```
-return redirect(request.args['next'])
-```
-
-**Safe form:**
-```
-nxt = request.args.get('next', '/')
-if not (nxt.startswith('/') and not nxt.startswith('//')): nxt = '/'
-return redirect(nxt)
-```
-
-**How to verify:** Try `?next=https://evil.com` and `?next=//evil.com`: must land on `/`.
-
-- [ ] `SEC-034`  — tick when fixed, then re-run the audit
-
-### 29. Sensitive data in logs  · **medium**  · 1 confirmed · 0 to review
-
-**What it is.** Passwords/tokens printed to logs end up in aggregators and crash reports.
-
-**Impact.** Credential exposure to anyone with log access.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `frontend/src/App.jsx:4` | Secret/password written to logs | 5 min |
-
-**Steps:**
-
-1. Remove the log or redact (`token=***`).
-2. Add a logging filter that masks known secret keys.
-
-**Vulnerable code/config:**
-```
-console.log('login', password)
-```
-
-**Safe form:**
-```
-logger.info('login attempt', {user})
-```
-
-**How to verify:** Grep logs of a test run for the secret.
-
-- [ ] `SEC-038`  — tick when fixed, then re-run the audit
+- [ ] `COD-004`, `COD-006`  — tick when fixed, then re-run the audit
 
 ### 30. Vulnerable or outdated dependency  · **low**  · 2 confirmed · 0 to review
 
@@ -2020,24 +2018,6 @@ web/index.html
 Disallow: /
 ```
 
-#### TST-001 · high · Android: no unit tests (src/test) for the app code
-
-- **Location:** `.:1`  ·  **Type:** test_gap/test-infra  ·  **Effort:** 240 min
-
-**Evidence:**
-```
-1 source files, 0 in src/test
-```
-
-#### TST-002 · high · Front-end has no unit/component test runner (Vitest/Jest/Karma)
-
-- **Location:** `package.json:1`  ·  **Type:** test_gap/test-infra  ·  **Effort:** 90 min
-
-**Evidence:**
-```
-2 UI source files, no runner in package.json
-```
-
 #### A11-001 · medium · Image without alt text
 
 - **Location:** `web/index.html:10`  ·  **Type:** bug/a11y  ·  **Effort:** 3 min
@@ -2145,16 +2125,7 @@ app.listen(3000);
 (README.md missing)
 ```
 
-#### COD-002 · medium · Public API documentation coverage is 0.0% (target 80%)
-
-- **Location:** `.:1`  ·  **Type:** code_smell/documentation  ·  **Effort:** 15 min
-
-**Evidence:**
-```
-php 0% (0/2), js 0% (0/1), Python 0% (0/12), swift 0% (0/3), kt 0% (0/1)
-```
-
-#### COD-003 · medium · Table `users` has no PRIMARY KEY
+#### COD-002 · medium · Table `users` has no PRIMARY KEY
 
 - **Location:** `app.db:1`  ·  **Type:** code_smell/database  ·  **CWE:** CWE-1007  ·  **Effort:** 25 min
 
@@ -2163,7 +2134,7 @@ php 0% (0/2), js 0% (0/1), Python 0% (0/12), swift 0% (0/3), kt 0% (0/1)
 users(email, password, balance)
 ```
 
-#### COD-004 · medium · Table `users` has no PRIMARY KEY
+#### COD-003 · medium · Table `users` has no PRIMARY KEY
 
 - **Location:** `db/schema.sql:1`  ·  **Type:** code_smell/database  ·  **CWE:** CWE-1007  ·  **Effort:** 20 min
 
@@ -2267,7 +2238,16 @@ web/index.html
 web/index.html
 ```
 
-#### TST-003 · medium · Android: no instrumented/UI tests (src/androidTest)
+#### TST-001 · medium · Android: no unit tests (src/test) for the app code
+
+- **Location:** `.:1`  ·  **Type:** test_gap/test-infra  ·  **Effort:** 240 min
+
+**Evidence:**
+```
+1 source files, 0 in src/test
+```
+
+#### TST-002 · medium · Android: no instrumented/UI tests (src/androidTest)
 
 - **Location:** `.:1`  ·  **Type:** test_gap/test-infra  ·  **Effort:** 240 min
 
@@ -2276,7 +2256,7 @@ web/index.html
 (see location)
 ```
 
-#### TST-004 · medium · Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains no assertions
+#### TST-003 · medium · Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains no assertions
 
 - **Location:** `mobile/ios/AppUITests/LoginUITests.swift:1`  ·  **Type:** test_gap/test-quality  ·  **Effort:** 20 min
 
@@ -2285,7 +2265,7 @@ web/index.html
 (no assert/expect/verify found)
 ```
 
-#### TST-005 · medium · iOS: UI tests exist but production code sets no accessibilityIdentifier
+#### TST-004 · medium · iOS: UI tests exist but production code sets no accessibilityIdentifier
 
 - **Location:** `mobile/ios/AppUITests/LoginUITests.swift:1`  ·  **Type:** test_gap/flaky  ·  **Effort:** 90 min
 
@@ -2294,13 +2274,22 @@ web/index.html
 1 text-based queries
 ```
 
-#### TST-006 · medium · iOS: 1 sleep/asyncAfter calls in tests (flaky)
+#### TST-005 · medium · iOS: 1 sleep/asyncAfter calls in tests (flaky)
 
 - **Location:** `mobile/ios/AppUITests/LoginUITests.swift:3`  ·  **Type:** test_gap/flaky  ·  **Effort:** 6 min
 
 **Evidence:**
 ```
 mobile/ios/AppUITests/LoginUITests.swift:3
+```
+
+#### TST-006 · medium · Front-end has no unit/component test runner (Vitest/Jest/Karma)
+
+- **Location:** `package.json:1`  ·  **Type:** test_gap/test-infra  ·  **Effort:** 90 min
+
+**Evidence:**
+```
+2 UI source files, no runner in package.json
 ```
 
 #### TST-007 · medium · package.json has no working `test` script
@@ -2349,6 +2338,15 @@ web/tests/checkout.spec.ts:2
 ```
 def add(x, acc=[]):
     acc.append(x)
+```
+
+#### COD-004 · low · Public API documentation coverage is 0.0% (target 60%)
+
+- **Location:** `.:1`  ·  **Type:** code_smell/documentation  ·  **Effort:** 15 min
+
+**Evidence:**
+```
+php 0% (0/2), js 0% (0/1), Python 0% (0/12), swift 0% (0/3), kt 0% (0/1)
 ```
 
 #### COD-005 · low · Foreign keys declared but PRAGMA foreign_keys is OFF by default
@@ -2514,7 +2512,7 @@ web/index.html(1)
 ```
 
 <a id="revision"></a>
-## Needs review / validation (25)
+## Needs review / validation (23)
 
 #### SEO-012 · high · Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell)
 
@@ -2793,28 +2791,6 @@ url = request.args.get("url")
 
 **Review reason:** heuristic match - review context
 
-#### HOT-021 · low · No visual regression testing
-
-- **Location:** `package.json:1`  ·  **Type:** security_hotspot/test-infra  ·  **Effort:** 90 min
-
-**Evidence:**
-```
-no toHaveScreenshot / Storybook+Chromatic / Percy
-```
-
-**Review reason:** optional but valuable for design systems
-
-#### HOT-022 · low · No performance budget (Lighthouse CI / size-limit)
-
-- **Location:** `package.json:1`  ·  **Type:** security_hotspot/performance  ·  **Effort:** 60 min
-
-**Evidence:**
-```
-(see location)
-```
-
-**Review reason:** budgets may live in RUM tooling (Sentry/Datadog)
-
 ## OWASP coverage
 
 | Standard | ID | Category | Status | Findings |
@@ -2842,10 +2818,11 @@ no toHaveScreenshot / Storybook+Chromatic / Percy
 | Unit | Pass | State | Note |
 |---|---|---|---|
 | source scan (regex + taint look-back) | audit-security,audit-bugs | covered | 22 files; truncated rules: none |
-| documentation / standards / architecture | audit-code | covered | strictness=strict |
+| documentation / standards / architecture | audit-code | covered | strictness=standard |
 | test-suite analysis (static) | audit-quality | covered | file-name matching; coverage % not measured unless --run-tests |
 | QA front-end + mobile (static) | audit-qa,audit-mobile-qa | covered | mobile=android, ios |
 | static SEO / SEM | audit-seo | covered | templates, robots, sitemap, metadata, tracking/consent |
+| PWA: manifest / service worker / offline | audit-pwa | out_of_scope | manifest, installability, service worker, caching, push, update flow |
 | crypto / web3 heuristics | audit-security | covered | Solidity, Anchor/Solana, dApp patterns |
 | live database app.db | audit-security | covered | 2 tables |
 | external scanners | audit-security | deferred | not requested (--tools) |
@@ -2854,14 +2831,15 @@ no toHaveScreenshot / Storybook+Chromatic / Percy
 | live SEO crawl | audit-seo | deferred | no --url |
 | manual-style review (auth flows, business logic, IDOR beyond lookups) | audit-security | deferred | use the Claude skills (/audit) on top of this CLI baseline |
 | auditor: domain | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
+| auditor: pwa | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
 
 ### Metrics
 
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.14 |
-| strictness | strict |
+| tool_version | 1.0.15 |
+| strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
 | duplication.top_pairs | 0 items |
@@ -2885,15 +2863,15 @@ no toHaveScreenshot / Storybook+Chromatic / Percy
 | docstrings.by_language.swift.documented | 0 |
 | docstrings.by_language.kt.public | 1 |
 | docstrings.by_language.kt.documented | 0 |
-| docstrings.target | 80 |
+| docstrings.target | 60 |
 | py_type_hints.percent | 0.0 |
 | py_type_hints.functions | 11 |
 | cycles | 0 |
 | oversized_function_files | 0 |
-| profile_limits.fn_len | 40 |
-| profile_limits.cc | 10 |
-| profile_limits.params | 5 |
-| profile_limits.nest | 3 |
+| profile_limits.fn_len | 60 |
+| profile_limits.cc | 15 |
+| profile_limits.params | 6 |
+| profile_limits.nest | 4 |
 | tests.test_files | 3 |
 | tests.test_cases | 4 |
 | tests.test_ncloc | 19 |

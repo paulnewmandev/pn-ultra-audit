@@ -40,7 +40,7 @@ def _ci(stacks, scripts):
 
 
 def plan(root, files, deps_text, arch=None):
-    rels = [r for r, *_ in files]; names = {os.path.basename(r) for r in rels}; lowset = {r.lower() for r in rels}
+    rels = [r for r, *_ in files]; lowset = {r.lower() for r in rels}
     stacks = _stacks(rels, deps_text); proj = os.path.basename(os.path.abspath(root)) or "project"; out = []
     scripts = {}
     if os.path.exists(os.path.join(root, "package.json")):
@@ -63,13 +63,13 @@ def plan(root, files, deps_text, arch=None):
     add(".editorconfig", "root = true\n\n[*]\ncharset = utf-8\nend_of_line = lf\ninsert_final_newline = true\ntrim_trailing_whitespace = true\nindent_style = space\nindent_size = 2\n\n[*.{py,java,kt,rs,go}]\nindent_size = 4\n\n[Makefile]\nindent_style = tab\n", "same formatting for every editor and AI tool")
     run_cmds = "\n".join(f"- `npm run {s}`" for s in ("dev", "start", "build", "test", "lint") if s in scripts) or "- _add the command that starts the app_"
     add("README.md", f"# {proj}\n\n> One sentence: what problem does this solve and for whom?\n\n## Requirements\n\n- {', '.join(stacks) or 'list runtimes and versions'}\n\n## Install\n\n```bash\n# clone, install dependencies\n```\n\n## Run\n\n{run_cmds}\n\n## Test\n\n```bash\n# command that runs the tests\n```\n\n## Configuration\n\nCopy `.env.example` to `.env` and fill in the values.\n\n## Project structure\n\nSee [docs/architecture.md](docs/architecture.md).\n\n## Contributing / Security\n\nSee `SECURITY.md`.\n", "a newcomer (or you in a month) can run the project in 10 minutes")
-    style = (arch or {}).get("style", ["modular monolith"]); layers = (arch or {}).get("layers", {})
+    style = (arch or {}).get("style", ["modular monolith"])
     mm = "flowchart TB\n    U[Users] --> P[Presentation / UI / API handlers]\n    P --> A[Application services]\n    A --> D[Domain / models]\n    A --> I[Infrastructure: DB, queues, external APIs]\n"
     add("docs/architecture.md", f"# Architecture\n\n**Style:** {', '.join(style)}\n\n```mermaid\n{mm}```\n\n## Modules\n\n| Module | Responsibility |\n|---|---|\n| _name_ | _one sentence_ |\n\n## Data flow\n\n_Describe one request end to end._\n\n## Decisions\n\nRecord important choices as `docs/adr/0001-title.md` (context, decision, consequences).\n", "writes down the 'why' so changes stay safe")
     add(".github/workflows/ci.yml", _ci(stacks, scripts), "runs tests and a secret scan on every change")
     add(".github/dependabot.yml", "version: 2\nupdates:\n" + "".join(f"  - package-ecosystem: {e}\n    directory: /\n    schedule: {{ interval: weekly }}\n" for e in ([{'node': 'npm', 'python': 'pip', 'php': 'composer', 'go': 'gomod', 'java': 'gradle', 'rust': 'cargo', 'ruby': 'bundler'}[s] for s in stacks if s in ('node', 'python', 'php', 'go', 'java', 'rust', 'ruby')] or ["github-actions"])) + "  - package-ecosystem: github-actions\n    directory: /\n    schedule: { interval: weekly }\n", "weekly PRs for vulnerable/outdated dependencies")
     add(".pre-commit-config.yaml", "repos:\n  - repo: https://github.com/gitleaks/gitleaks\n    rev: v8.18.4\n    hooks: [{ id: gitleaks }]\n  - repo: https://github.com/pre-commit/pre-commit-hooks\n    rev: v4.6.0\n    hooks:\n      - id: end-of-file-fixer\n      - id: trailing-whitespace\n      - id: check-merge-conflict\n      - id: detect-private-key\n", "blocks secrets and sloppy commits before they happen (pip install pre-commit; pre-commit install)")
-    add("SECURITY.md", f"# Security policy\n\n## Reporting a vulnerability\n\nPlease do **not** open a public issue. Email the maintainers (add address) with steps to reproduce. We aim to reply within 72 hours.\n\n## Supported versions\n\nThe latest release receives security fixes.\n", "tells people how to report problems privately")
+    add("SECURITY.md", "# Security policy\n\n## Reporting a vulnerability\n\nPlease do **not** open a public issue. Email the maintainers (add address) with steps to reproduce. We aim to reply within 72 hours.\n\n## Supported versions\n\nThe latest release receives security fixes.\n", "tells people how to report problems privately")
     return dict(project=proj, stacks=stacks, files=out, env_vars=len(envs))
 
 

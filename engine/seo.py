@@ -1,6 +1,6 @@
 """SEO + SEM audit.  Static (source/templates) and optional live crawl of a site you own.
 Stdlib only.  Live mode sends polite GET requests (rate-limited, robots-aware) - needs --authorized."""
-import json, os, re, shutil, subprocess, time, urllib.error, urllib.parse, urllib.request
+import json, os, re, time, urllib.error, urllib.parse, urllib.request
 from collections import Counter, defaultdict
 from html.parser import HTMLParser
 
@@ -101,7 +101,6 @@ def static_seo(root, files, S):
     rels = [r for r, *_ in files]; ab = {r: a for r, a, *_ in files}
     tpl = [(r, a) for r, a, e, _ in files if e in TPL_EXT and not TESTISH.search(r)]
     html_pages = [(r, a) for r, a, e, _ in files if e in ("html", "htm") and not TESTISH.search(r) and not re.search(r"(^|/)(partials?|includes?|components?|templates?)/", r)]
-    fw = set(S.frameworks) if S else set()
     deps = ""
     for r in rels:
         if os.path.basename(r) == "package.json" and r.count("/") <= 2:
@@ -126,7 +125,7 @@ def static_seo(root, files, S):
         out.append(_f("SEO-NO-SITEMAP", "No sitemap.xml (or generator) found", "seo-technical", "code_smell", "medium", "seo", G, 1, "", "Generate sitemap.xml automatically (next-sitemap, @astrojs/sitemap, Laravel Sitemap, django.contrib.sitemaps) and submit it in Search Console", 30, seo_cat="technical"))
     if spa: out.append(_f("SEO-CSR-ONLY", "Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell)", "seo-technical", "security_hotspot", None, "seo", G, 1, "index.html + react/vue without next/nuxt/astro/sveltekit", "Move to SSR/SSG (Next, Nuxt, Astro, SvelteKit, Remix) or prerender public routes (vite-plugin-ssr, react-snap)", 480, status="needs_validation", priority="high", why="Google can render JS but later and less reliably; other engines/social bots often cannot. Skip if the app is behind login only", seo_cat="technical"))
     # templates
-    tit_missing, desc_missing, canon_missing, h1_bad, og_missing, ld_any, imgs_ns, noindex, blocking, lang_missing, viewport_missing = [], [], [], [], [], False, [], [], [], [], []
+    tit_missing, desc_missing, canon_missing, h1_bad, og_missing, ld_any, imgs_ns, noindex, blocking, viewport_missing = [], [], [], [], [], False, [], [], [], []
     for r, a in html_pages[:300]:
         try: t = open(a, errors="ignore").read(300_000)
         except OSError: continue
@@ -184,7 +183,6 @@ def static_seo(root, files, S):
     locs = {m.group(1) for r in rels for m in [re.match(r"^(?:src/)?(?:locales?|i18n|messages|lang)/([a-z]{2}(?:[-_][A-Za-z]{2})?)[./]", r)] if m}
     if len(locs) >= 2 and not re.search(r"hreflang", " ".join(open(ab[r], errors="ignore").read(40_000) for r, _ in tpl[:300])): out.append(_f("SEO-NO-HREFLANG", f"{len(locs)} locales found but no hreflang annotations", "seo-technical", "security_hotspot", None, "seo", G, 1, ", ".join(sorted(locs)), "Add <link rel=alternate hreflang> (and x-default) or alternates.languages in Next metadata", 60, status="needs_validation", priority="medium", why="hreflang may be emitted by the framework/i18n plugin at build time", seo_cat="technical"))
     # heavy images in repo
-    big = sorted(((sz, r) for r, a, e, sz in files if e in ("png", "jpg", "jpeg", "gif", "bmp") and sz > 400_000 and re.search(r"(public|static|assets|images|img)/", r)), reverse=True)
     # files list excludes images; scan directly
     heavy = []
     for dp, dn, fn in os.walk(root):
@@ -217,7 +215,6 @@ def static_seo(root, files, S):
                       None, 120, status="confirmed" if ads else "needs_validation", priority="high", owasp=["A04:2021"], why=None if ads else "consent may be handled by the tag manager container (outside the repo)", seo_cat="tracking"))
     if re.search(r"googletagmanager\.com/gtag/js|gtag\(", blob) and re.search(CONSENT, blob, re.I) and not re.search(r"gtag\(\s*['\"]consent['\"]\s*,\s*['\"]default", blob): out.append(_f("SEM-NO-CONSENT-MODE", "Google tag without Consent Mode v2 default", "sem-tracking", "security_hotspot", None, "privacy", G, 1, "", "Add gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'}) before config", 30, status="needs_validation", priority="medium", why="the CMP may set it dynamically", seo_cat="tracking"))
     if found and not re.search(r"gtag\(\s*['\"]event['\"]|dataLayer\.push\(|fbq\(\s*['\"]track|ttq\.track|lintrk\(|pintrk\(\s*['\"]track", blob): out.append(_f("SEM-NO-CONVERSIONS", "Tracking installed but no conversion events found (purchase/lead/sign_up)", "sem-tracking", "security_hotspot", None, "sem", found[0][1] or G, 1, "", "Fire gtag('event','purchase'|'generate_lead'|'sign_up',{value,currency}) / dataLayer.push and import to Google Ads", 60, status="needs_validation", priority="medium", why="events may be configured inside GTM", seo_cat="tracking"))
-    tags = Counter(re.findall(r"G-[A-Z0-9]{6,}|GTM-[A-Z0-9]{5,}|AW-\d{6,}", blob)); dup = [k for k, v in tags.items() if v > 1 and sum(1 for t in alltext.values() if k in t) > 3]
     if "Google Tag Manager" in dict(found) and "Google Analytics 4" in dict(found) and re.search(r"gtag/js\?id=G-", blob) and re.search(r"gtm\.js", blob): out.append(_f("SEM-DUPLICATE-GA4", "GA4 hard-coded AND Google Tag Manager present (risk of double-counting)", "sem-tracking", "security_hotspot", None, "sem", G, 1, "", "Load GA4 only through GTM (or only hard-coded), not both", 20, status="needs_validation", priority="low", why="GTM may not contain a GA4 tag", seo_cat="tracking"))
     if not found and n_pages >= 3: info["no_tracking"] = True
     return out, info
@@ -257,7 +254,7 @@ def crawl(base, max_pages=25, delay=0.3, ui_note=None):
     out, pages = [], []
     u = urllib.parse.urlparse(base)
     if u.scheme not in ("http", "https") or not u.netloc: return out, {"error": "invalid URL"}
-    origin = f"{u.scheme}://{u.netloc}"; lab = base
+    origin = f"{u.scheme}://{u.netloc}"
     def F(*a, **k):
         d = _f(*a, **k); d["file"] = k.get("file_override") or d["file"]; return d
     robots = _get(origin + "/robots.txt")

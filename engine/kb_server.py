@@ -64,3 +64,66 @@ KB_SERVER = {
            "Enable log exports to CloudWatch and AutoMinorVersionUpgrade."],
     bad="PubliclyAccessible: true\nSG: 0.0.0.0/0 tcp/5432", safe="PubliclyAccessible: false\nSG ingress: sg-app only", verify="`aws rds describe-db-instances` shows the new values; external `nc` to the endpoint times out."),
 }
+
+KB_SERVER["srv-cloud"] = dict(
+    title="Cloud / VPS provider hardening",
+    explain="A server on AWS, Azure, Google Cloud, DigitalOcean, Hostinger or any VPS host is protected by TWO layers: the OS (firewall, SSH, patches) and the provider's own controls (security groups / NSGs / VPC or Cloud Firewall, metadata service, instance roles and service-account scopes, provider agents). Gaps in the provider layer are invisible from inside the OS.",
+    impact="Token-less metadata access turns any SSRF into stolen cloud credentials; over-broad instance roles or service-account scopes turn one compromised VM into account-wide access; open provider firewalls expose SSH and databases to the internet.",
+    steps=["AWS: require IMDSv2 (`aws ec2 modify-instance-metadata-options --instance-id <id> --http-tokens required --http-put-response-hop-limit 1`) and give the instance profile only the permissions the app needs.",
+           "Google Cloud: use a dedicated service account with minimal scopes/roles (never `cloud-platform` on a general VM), enable OS Login (`enable-oslogin=TRUE`) and block project-wide SSH keys when not needed.",
+           "Azure: restrict the NSG (SSH/RDP only from your IP or Bastion/JIT), prefer managed identities with least-privilege role assignments, keep the VM agent updated.",
+           "DigitalOcean / Hostinger / other VPS: enable the provider's Cloud Firewall (hPanel firewall on Hostinger) in addition to ufw; allow only 22 (restricted to your IP), 80 and 443; turn on provider backups/snapshots and the monitoring agent.",
+           "Never put secrets in user-data / cloud-init (readable from the instance and the metadata service): use the provider's secret manager (Secrets Manager, Key Vault, Secret Manager) or an encrypted .env deployed at runtime.",
+           "Review provider-level rules from your workstation with the provider CLI (commands are printed in the finding) and re-run the audit."],
+    bad="http-tokens: optional   # IMDSv1 reachable\nservice account scopes: https://www.googleapis.com/auth/cloud-platform\nuser-data: DB_PASSWORD=...",
+    safe="aws ec2 modify-instance-metadata-options --instance-id i-0abc --http-tokens required --http-put-response-hop-limit 1\ngcloud compute instances set-service-account VM --service-account=app-sa@PROJECT.iam.gserviceaccount.com --scopes=logging-write,monitoring-write\nsecrets -> AWS Secrets Manager / GCP Secret Manager / Azure Key Vault",
+    verify="From the server: `curl -s -o /dev/null -w '%{http_code}' http://169.254.169.254/latest/meta-data/` returns 401 (IMDSv2 required); provider console/CLI shows no 0.0.0.0/0 rule on 22 or database ports.")
+
+KB_SERVER["srv-data"] = dict(
+    title="Data stores & message brokers on the server (Redis, Kafka, MySQL/PostgreSQL, MongoDB, Elasticsearch, RabbitMQ, memcached)",
+    explain="Databases and brokers are often installed with defaults meant for a trusted LAN: listening on every interface, no authentication, plaintext traffic or permissive ACLs. On a public VPS they are scanned within minutes.",
+    impact="Data theft or wipe (ransom notes in Redis/MongoDB are routine), remote code execution through Redis/Elasticsearch/Kafka-JMX, and credential harvesting from message streams.",
+    steps=["Bind to 127.0.0.1 or a private interface only (`bind 127.0.0.1` / `bind-address` / `listen_addresses` / `bindIp` / `network.host`); reach them through SSH tunnels, a VPN or private networking.",
+           "Turn authentication on: Redis `requirepass` or ACL users, MongoDB `security.authorization: enabled`, Elasticsearch `xpack.security.enabled: true`, Kafka SASL + ACL authorizer, RabbitMQ delete the `guest` user.",
+           "Encrypt in transit (TLS) when traffic leaves the host: `tls-port` for Redis, `ssl=on` for PostgreSQL/MySQL, Kafka SSL/SASL_SSL listeners.",
+           "PostgreSQL `pg_hba.conf`: no `trust`, no `0.0.0.0/0` entries, use `scram-sha-256`. MySQL: no `skip-grant-tables`, disable `local-infile`, remove remote root.",
+           "Block the ports at the host firewall AND the provider firewall; keep them out of Docker `-p 0.0.0.0:` mappings (Docker bypasses ufw).",
+           "Disable dangerous commands (Redis `rename-command FLUSHALL \"\"`, `CONFIG`, `DEBUG`) and run the service as its own unprivileged user."],
+    bad="bind 0.0.0.0\nprotected-mode no\n# no requirepass",
+    safe="bind 127.0.0.1 ::1\nprotected-mode yes\nrequirepass <long random secret>\nrename-command CONFIG \"\"",
+    verify="From another machine: `nc -vz <ip> 6379` (and 9092, 27017, 5432, 3306, 9200) must fail; `redis-cli -h <ip> ping` must not answer.")
+KB_SERVER["srv-k8s"] = dict(
+    title="Kubernetes on the server (k3s / kubeadm / microk8s)",
+    explain="A single-node cluster on a VPS exposes an API server, a kubelet and etcd that control every container. Anonymous access, world-readable kubeconfigs and privileged/host-mounted pods are full-server compromise paths.",
+    impact="Cluster-admin credentials in a readable kubeconfig, anonymous kubelet access or privileged pods give root on the host and access to every secret in the cluster.",
+    steps=["Keep kubeconfig files at mode 600 owned by root (`chmod 600 /etc/rancher/k3s/k3s.yaml /etc/kubernetes/admin.conf ~/.kube/config`).",
+           "API server: `--anonymous-auth=false`, `--authorization-mode=Node,RBAC`, no insecure port, audit logging on; kubelet: `authentication.anonymous.enabled: false`, `authorization.mode: Webhook`, read-only port 0.",
+           "Firewall 6443, 10250, 2379-2380 and NodePorts: expose only the ingress (80/443); never publish etcd or the kubelet.",
+           "Workloads: no `privileged`, `hostNetwork`, `hostPID`, `hostPath` to sensitive paths; `runAsNonRoot`, `readOnlyRootFilesystem`, drop capabilities, resource limits, pinned image tags, NetworkPolicies, Pod Security Admission `restricted`.",
+           "RBAC: no subject bound to `cluster-admin` except break-glass admins; disable automount of the default service-account token where unused; keep secrets in an external manager or sealed/encrypted at rest."],
+    bad="privileged: true\nhostNetwork: true\nimage: app:latest\nkubeconfig mode 644",
+    safe="securityContext: { runAsNonRoot: true, readOnlyRootFilesystem: true, allowPrivilegeEscalation: false, capabilities: { drop: [ALL] } }\nresources: { limits: { memory: 512Mi, cpu: 500m } }\nimage: app:1.4.2",
+    verify="`kubectl auth can-i --list --as=system:anonymous` shows nothing; `kubectl get pods -A -o json | jq '.items[].spec.containers[].securityContext.privileged'` has no true.")
+KB_SERVER["srv-kernel"] = dict(
+    title="OS hardening: kernel parameters, mandatory access control, auditing, logging, SSH keys and schedules",
+    explain="Beyond services, the base OS needs safe kernel defaults (sysctl), a mandatory access control system (AppArmor/SELinux), audit/log retention, tidy SSH keys and no world-writable scheduled scripts.",
+    impact="Weak defaults make network attacks (redirects, source routing, SYN floods) and local privilege escalation easier, and the lack of logs/audit makes incidents impossible to investigate.",
+    steps=["Apply a sysctl baseline in `/etc/sysctl.d/99-hardening.conf` (rp_filter, no redirects/source routing, syncookies, kptr_restrict, dmesg_restrict, protected_symlinks/hardlinks, ASLR=2) and `sysctl --system`.",
+           "Keep AppArmor (Ubuntu/Debian) or SELinux (RHEL family) enabled/enforcing; install and enable `auditd` and persistent `journald` (`Storage=persistent`).",
+           "SSH keys: private keys mode 600 and passphrase-protected, `authorized_keys` mode 600 without `ssh-dss`/1024-bit keys, remove keys of people who left; use a named admin user instead of root.",
+           "Enforce password ageing in `/etc/login.defs` (PASS_MAX_DAYS 365 or use keys only), lock accounts without a password, remove unused login shells.",
+           "Cron/systemd: no world-writable scripts run by root; add a backup job and test restores; remove SUID binaries outside standard system paths."],
+    bad="net.ipv4.conf.all.accept_redirects = 1\nkernel.randomize_va_space = 0\nchmod 666 /etc/cron.daily/backup.sh",
+    safe="net.ipv4.conf.all.accept_redirects = 0\nnet.ipv4.tcp_syncookies = 1\nkernel.randomize_va_space = 2\nkernel.kptr_restrict = 2\nfs.protected_symlinks = 1",
+    verify="`sysctl kernel.randomize_va_space net.ipv4.tcp_syncookies` return the hardened values; `aa-status` / `getenforce` report enforcing; `systemctl is-active auditd` is active.")
+KB_SERVER["srv-backup"] = dict(
+    title="Backups and recovery on the server",
+    explain="No scheduled, off-host, tested backup means one disk failure, ransomware or a bad deploy loses the business.",
+    impact="Permanent data loss and long outages; provider snapshots alone are often same-account and same-region.",
+    steps=["Schedule encrypted off-host backups (restic/borg/rclone) of databases (`mysqldump`/`pg_dump`/volume snapshots) and uploaded files with retention (daily 7, weekly 4, monthly 6).",
+           "Enable the provider's snapshots/backups too (DigitalOcean Backups, Hostinger weekly backups, AWS Backup/EBS snapshots, Azure Backup, GCP snapshot schedules).",
+           "Restrict who can delete backups (separate credentials / object lock) and monitor job success.",
+           "Test a restore quarterly and document the runbook."],
+    bad="# no backup job, snapshots disabled",
+    safe="0 3 * * * root restic -r s3:s3.amazonaws.com/my-backups backup /var/www /var/backups/db --tag daily && restic forget --keep-daily 7 --keep-weekly 4 --prune",
+    verify="`restic snapshots` lists recent snapshots; a restore into a scratch directory succeeds.")

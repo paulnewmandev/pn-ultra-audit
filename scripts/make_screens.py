@@ -94,8 +94,19 @@ def main():
     scf = go(["vulnerable-demo", "--scaffold", "--lang", "en"])
     shutil.copytree(os.path.join(ROOT, "examples", "fintech-saas-demo"), os.path.join(work, "fintech-saas-demo"))
     fin = go(["fintech-saas-demo", "--lang", "en", "--color", "always", "--out", "audit-output/fin", "--verbose"])
-    for n, t in (("web3.ansi", web3t), ("git.ansi", gitt), ("agents.txt", agt)): open(os.path.join(OUT, n), "w").write(t)
-    for n, t in (("scan.ansi", scan), ("plan.txt", plan + "\n" + plan2), ("help.txt", helptxt), ("seo.ansi", seo)): open(os.path.join(OUT, n), "w").write(t)
+    shutil.copytree(os.path.join(ROOT, "examples", "pwa-demo"), os.path.join(work, "pwa-demo"))
+    pwa_out = go(["pwa-demo", "--lang", "en", "--color", "always", "--out", "audit-output/pwa", "--strictness", "strict", "--verbose"])
+    go(["pwa-demo", "--lang", "zh", "--color", "never", "--out", "audit-output/pwa-zh", "--strictness", "strict"])
+    # sample VPS remediation script listing (generated from a synthetic finding set; the tool never runs it)
+    sys.path.insert(0, ROOT)
+    from engine import serverfix, remote_extra
+    sec_ = {"redis": ["conf=/etc/redis/redis.conf", "bind 0.0.0.0", "ping=PONG"], "sysctlx": ["kernel.randomize_va_space=0", "apparmor=no", "auditd=inactive", "journal_persistent=no"], "userx": ["sshfile=644 /home/deploy/.ssh/id_rsa"],
+            "cronx": ["backup_refs=0"], "apache2": ["ServerTokens Full", "Options Indexes"], "dockerx": ["X|/api|net=host|pid=|caps=[]|ro=false|mem=0|restart=no|user=|health=0|mounts=|secopt=[]"]}
+    fx, _ = remote_extra.analyze_extra(sec_, "ssh://deploy@my-vps", {6379})
+    fx += [dict(rule="SRV-SSH-ROOT", title="SSH allows direct root login", status="confirmed", severity="high", evidence=""), dict(rule="SRV-NO-FIREWALL", title="No active host firewall", status="needs_validation", severity=None, evidence=""), dict(rule="SRV-NO-FAIL2BAN", title="fail2ban not active", status="confirmed", severity="low", evidence="")]
+    open(os.path.join(work, "server-fixes.sh"), "w").write(serverfix.build(fx, "ssh://deploy@my-vps", "DigitalOcean", "2026-11-08"))
+    fixes_list = subprocess.run(["bash", "server-fixes.sh", "list"], cwd=work, capture_output=True, text=True).stdout
+    
     # animated SVG: banner + stream + final tables (trim middle)
     sl = scan.split("\n"); keep = sl[:46] + ["   …"] + sl[-26:]
     open(os.path.join(ROOT, "assets", "terminal-demo.svg"), "w", encoding="utf-8").write(animated_svg("\n".join(keep), "terminal-demo.svg"))
@@ -115,13 +126,21 @@ def main():
         T = scf; shot(term_html(T, "pn-ultra-audit --scaffold"), "terminal-scaffold.png", *term_size(T))
         sl3 = scan.split("\n"); i2 = next(i for i, l in enumerate(sl3) if "AUDIT READINESS" in re.sub(r"\x1b\[[0-9;]*m", "", l)); T = "\n".join(sl3[i2:i2 + 16]); shot(term_html(T, "pn-ultra-audit — audit readiness"), "terminal-compliance.png", *term_size(T))
         # dashboard screenshots
-        runs = sorted(d for d in os.listdir(tmp) if d.startswith("run-")) if False else None
         rd = os.path.join(work, "audit-output", "demo", "run-1")
         rep = os.path.join(rd, "report.html")
-        for spec in (("dash-overview-dark.png", "v=overview&theme=dark", "dark", 1600, 1500), ("dash-overview-light.png", "v=overview&theme=light", "light", 1600, 1500), ("dash-issue.png", "v=issues&id=SEC-003&theme=dark", "dark", 1600, 1000),
-                                        ("dash-security.png", "v=security&theme=dark", "dark", 1600, 1000), ("dash-seo.png", "v=seo&theme=dark", "dark", 1600, 1100), ("dash-arch.png", "v=arch&theme=dark", "dark", 1600, 1100), ("dash-plan.png", "v=plan&theme=light", "light", 1600, 1100), ("dash-owasp.png", "v=owasp&theme=dark", "dark", 1600, 900), ("dash-print.png", "v=print&theme=light", "light", 1500, 2200), ("dash-domain.png", "v=domain&theme=dark", "dark", 1600, 1300, "fin"), ("dash-roadmap.png", "v=roadmap&theme=dark", "dark", 1600, 1500), ("dash-compliance.png", "v=compliance&theme=dark", "dark", 1600, 1300), ("dash-coverage.png", "v=coverage&theme=dark", "dark", 1600, 1000)):
+        for spec in (("dash-overview-dark.png", "v=overview&theme=dark", "dark", 1600, 1500), ("dash-overview-light.png", "v=overview&theme=light", "light", 1600, 1500), ("dash-print.png", "v=print&theme=light", "light", 1500, 2200)):
             name, frag, theme, w, h = spec[:5]; r_ = os.path.join(work, "audit-output", "fin", "run-1", "report.html") if len(spec) > 5 else rep
             subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1.5", f"--window-size={w},{h}", "--virtual-time-budget=3500", f"--screenshot={os.path.join(OUT, name)}", "file://" + r_ + "#" + frag], capture_output=True, timeout=120); print("  ->", name)
+    if CHROME:
+        def dshot(name, rpt, frag, w, h, scale):
+            subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", f"--force-device-scale-factor={scale}", f"--window-size={w},{h}", "--virtual-time-budget=4500", f"--screenshot={os.path.join(OUT, name)}", "file://" + rpt + "#" + frag], capture_output=True, timeout=120)
+        prep = os.path.join(work, "audit-output", "pwa", "run-1", "report.html"); zrep = os.path.join(work, "audit-output", "pwa-zh", "run-1", "report.html")
+        for name, rpt, frag, w, h in (("dash-report.png", prep, "v=report&theme=dark", 1600, 1500),):
+            dshot(name, rpt, frag, w, h, 1.5)
+        for name, rpt, frag in (("gal-report.png", prep, "v=report&theme=dark"), ("gal-repo.png", prep, "v=repo&theme=dark"), ("gal-pwa.png", prep, "v=pwa&theme=dark"), ("gal-zh.png", zrep, "v=report&theme=dark")):
+            dshot(name, rpt, frag, 1500, 940, 1)
+        T = pwa_out.split("\n"); ip = next((i for i, l in enumerate(T) if "PWA" in re.sub(r"\x1b\[[0-9;]*m", "", l) and "▶" in l), 0); T = "\n".join(T[max(0, ip - 2):ip + 22]); shot(term_html(T, "pn-ultra-audit — PWA audit (strict)"), "terminal-pwa.png", *term_size(T))
+        T = "$ sudo bash server-fixes.sh list      # generated by --ssh, never executed by the tool\n" + fixes_list; shot(term_html(T, "server-fixes.sh — VPS remediation (sample)"), "terminal-server-fixes.png", *term_size(T))
     # uniform gallery thumbnails: same viewport + scale for every view => tidy README grid
     if CHROME:
         for name, frag, rpt in (("gal-issue.png", "v=issues&id=SEC-003&theme=dark", rep), ("gal-security.png", "v=security&theme=dark", rep), ("gal-roadmap.png", "v=roadmap&theme=dark", rep), ("gal-compliance.png", "v=compliance&theme=dark", rep),

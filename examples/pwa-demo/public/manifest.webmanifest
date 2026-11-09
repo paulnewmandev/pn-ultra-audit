@@ -1,0 +1,1 @@
+{ "name": "Demo PWA", "display": "browser", "start_url": "http://demo.example/app", "icons": [ { "src": "/icons/64.png", "sizes": "64x64", "type": "image/png" } ] }

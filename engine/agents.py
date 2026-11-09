@@ -24,7 +24,7 @@ Auditors: `security` (SQLi, XSS, DoS, injection, secrets, crypto, auth, IaC/CI),
 `tests`, `qa` (front-end Playwright/axe + mobile Android/iOS/Flutter/RN), `seo` (SEO + SEM + consent), `web3` (Solidity/Anchor/dApps), `db` (SQL, migrations).
 Extras by flag: `--db <sqlite|postgres://|mysql://|redis://|mongodb://|mssql://>`, `--ssh user@host --authorized` (server hardening, DB tunnel), `--aws-rds`,
 `--url https://site --authorized` (live SEO crawl), `--keywords`, `--gsc-csv`, `--tools` (semgrep/gitleaks/npm audit), `--run-tests` (executes the project's own tests).
-Strictness: `--strictness strict|balanced|lenient`; for legacy code use `--baseline auto` so the gate judges only NEW findings. Language: `--lang es|en`.
+Strictness: `--strictness basic|standard|strict` (default standard; `--ask` prompts in a terminal). **Before running from an assistant, ask the user which level they want** unless they already said: 1 basic (core risks only), 2 standard (recommended, default), 3 strict (enterprise-grade). For legacy code use `--baseline auto` so the gate judges only NEW findings. Language: `--lang es|en`.
 
 ## After the run
 1. Read `audit-output/<name>/run-N/findings.json` (and `REPORT.md`); open `report.html` for the dashboard.

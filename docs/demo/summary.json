@@ -2,9 +2,9 @@
   "date": "2026-11-08",
   "counts": {
     "critical": 7,
-    "high": 31,
-    "medium": 31,
-    "low": 19,
+    "high": 29,
+    "medium": 32,
+    "low": 20,
     "info": 1
   },
   "confirmed": 89,

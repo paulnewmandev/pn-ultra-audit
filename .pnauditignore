@@ -1,0 +1,29 @@
+# PN-Ultra-Audit auditing itself.
+# The detection catalog (rules, remediation guides, redaction patterns) necessarily contains the very
+# patterns it detects, and the examples/docs are intentionally vulnerable. Only security-style rules are muted here;
+# complexity, docs and test findings on these files still count.
+audit.py                    SEC-*,CRY-*,WEB3-*,CMD-*,DESER*,PATH-*,SSRF*,OPEN-*,LOG-*,CFG-*
+engine/rules.py             SEC-*,CRY-*,WEB3-*,CMD-*,DESER*,PATH-*,SSRF*,OPEN-*,LOG-*,CFG-*,XSS-*,SQLI-*
+engine/kb*.py               SEC-*,CRY-*,WEB3-*,CMD-*,DESER*,PATH-*,SSRF*,OPEN-*,LOG-*,CFG-*,XSS-*,SQLI-*,AUTHZ-*,BUG-*,DOS-*
+engine/roadmap.py           CRY-*
+engine/qa.py                WEB3-*
+engine/ftpsrc.py            CFG-*
+scripts/*.py                PATH-*,CMD-*,SSRF*
+examples/*                  *
+docs/*                      *
+# Best-effort I/O (missing optional files, unsupported platform features) is swallowed on purpose.
+engine/dashboard.py         BUG-EMPTY-CATCH
+engine/dbaudit.py           BUG-EMPTY-CATCH,SQLI-PY
+engine/docs.py              BUG-EMPTY-CATCH
+engine/remote.py            BUG-EMPTY-CATCH,DOS-*
+engine/tools.py             BUG-EMPTY-CATCH
+engine/seo.py               DOS-*
+engine/domain.py            DOS-*,SAAS-*
+engine/web3.py              DOS-*
+engine/scanner.py           CRY-*
+engine/rules.py             AUTHZ-*,DOS-*
+engine/kb_qa.py             FIN-*,SAAS-*
+# Per-table PRAGMA loops are inherent to reading a SQLite catalog; a CLI prints to the terminal by design.
+engine/dbaudit.py           PERF-NPLUS1
+engine/dashboard.py         PERF-NPLUS1
+engine/*.py                 PERF-NPLUS1

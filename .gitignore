@@ -9,3 +9,13 @@ dist/
 build/
 .idea/
 .vscode/
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+uv.lock
+.venv/

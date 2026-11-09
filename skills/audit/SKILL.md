@@ -15,6 +15,18 @@ Goal: a **verified, deduplicated, fix-oriented** report on any project. Quality 
 
 If the request is ambiguous between Full and Focused, ask ONE question. Otherwise proceed.
 
+## Strictness (ask before running)
+
+Unless the user already stated it, **ask how strict the audit should be** (one short question, three options) and pass it as `--strictness`:
+
+| Level | Flag | Use when |
+|---|---|---|
+| 1. Basic | `--strictness basic` | quick health check, legacy/prototype code: core risks only, lenient thresholds |
+| 2. Standard (default) | `--strictness standard` | recommended balance for most projects; use it if the user has no preference |
+| 3. Strict | `--strictness strict` | enterprise/fintech/pre-certification: tight complexity, docs and typing limits plus extra QA, CI and hardening checks |
+
+In a plain terminal the user can run `python3 <suite>/audit.py <path> --ask` to get the same menu.
+
 ## Safety rules (apply to every pass)
 
 1. **Source-first, read-only.** Never modify the target's source. Fixes are *proposed* (diffs in the report) unless the user explicitly asks to apply them.

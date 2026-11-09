@@ -2,7 +2,7 @@
 
 110 pattern rules + engines (docs, QA, SEO, Web3, DB, server). *Precision*: `high` = pattern is the defect (confirmed); `taint` = confirmed only if user input reaches it (else hotspot); `taint_only` = reported only when tainted; `low` = hotspot to review.
 
-Every family links to a remediation guide with steps, vulnerable/safe examples and verification (63 guides, Spanish overlay for the main ones).
+Every family links to a remediation guide with steps, vulnerable/safe examples and verification (72 guides, Spanish overlay for the main ones).
 
 | Rule | What it finds | Family | Languages / files | Precision | CWE | OWASP |
 |---|---|---|---|---|---|---|

@@ -4,7 +4,7 @@
   * pull_tree     - stream the remote project dir as tar.gz into a local temp dir (validated)
   * Tunnel        - `ssh -L` port-forward so DB audits can reach private DB/RDS endpoints
 Nothing is written on the server. Every remote command is listed in REMOTE_SCRIPT below."""
-import datetime, io, os, re, shlex, socket, subprocess, tarfile, time
+import datetime, os, re, shlex, socket, subprocess, tarfile, time
 
 from .kb import KB
 
@@ -69,7 +69,106 @@ S php; grep -hiE '^\s*(expose_php|display_errors|allow_url_include|allow_url_fop
 S certs; for f in /etc/letsencrypt/live/*/cert.pem; do [ -f "$f" ] && echo "$f $($SUDO openssl x509 -enddate -noout -in "$f" 2>/dev/null)"; done
 S docker; if command -v docker >/dev/null 2>&1; then docker ps --format 'C|{{.Names}}|{{.Image}}|{{.Ports}}' 2>/dev/null; docker ps -q 2>/dev/null | xargs -r docker inspect --format 'I|{{.Name}}|priv={{.HostConfig.Privileged}}|user={{.Config.User}}|net={{.HostConfig.NetworkMode}}' 2>/dev/null; ls -l /var/run/docker.sock 2>/dev/null; fi
 S disk; df -P -x tmpfs -x devtmpfs 2>/dev/null | tail -n +2; free -m 2>/dev/null | sed -n 2,3p
+S cloud
+for f in sys_vendor product_name bios_vendor board_vendor chassis_asset_tag; do echo "dmi_$f=$(cat /sys/class/dmi/id/$f 2>/dev/null)"; done
+echo "hostname=$(hostname -f 2>/dev/null || hostname)"; echo "cloudid=$(cloud-id 2>/dev/null)"
+IMDS=$(curl -s -m 1 --connect-timeout 1 -o /dev/null -w "%%{http_code}" http://169.254.169.254/ 2>/dev/null); echo "imds_code=$IMDS"
+if [ "$IMDS" != "000" ] && [ -n "$IMDS" ]; then
+  C="curl -s -m 2 --connect-timeout 1"
+  echo "aws_v1_code=$($C -o /dev/null -w "%%{http_code}" http://169.254.169.254/latest/meta-data/ 2>/dev/null)"
+  TOK=$($C -X PUT -H "X-aws-ec2-metadata-token-ttl-seconds: 30" http://169.254.169.254/latest/api/token 2>/dev/null)
+  if [ -n "$TOK" ] && [ ${#TOK} -lt 200 ]; then H="X-aws-ec2-metadata-token: $TOK"
+    for k in instance-id instance-type placement/region; do echo "aws_$(echo $k | tr / _)=$($C -H "$H" http://169.254.169.254/latest/meta-data/$k 2>/dev/null)"; done
+    echo "aws_role=$($C -H "$H" http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null | head -1)"
+  fi
+  AZ=$($C -H Metadata:true "http://169.254.169.254/metadata/instance/compute?api-version=2021-02-01&format=json" 2>/dev/null | tr -d '\n' | head -c 900); [ -n "$AZ" ] && echo "azure_json=$AZ"
+  MD="metadata.google.internal/computeMetadata/v1"
+  G=$($C -H "Metadata-Flavor: Google" http://$MD/instance/machine-type 2>/dev/null)
+  if [ -n "$G" ]; then echo "gcp_machine=$G"; echo "gcp_zone=$($C -H "Metadata-Flavor: Google" http://$MD/instance/zone 2>/dev/null)"
+    echo "gcp_scopes=$($C -H "Metadata-Flavor: Google" http://$MD/instance/service-accounts/default/scopes 2>/dev/null | tr '\n' ' ')"
+    echo "gcp_oslogin=$($C -H "Metadata-Flavor: Google" http://$MD/project/attributes/enable-oslogin 2>/dev/null)"
+    echo "gcp_blockkeys=$($C -H "Metadata-Flavor: Google" http://$MD/instance/attributes/block-project-ssh-keys 2>/dev/null)"; fi
+  DOID=$($C -o /dev/null -w "%%{http_code}" http://169.254.169.254/metadata/v1/id 2>/dev/null)
+  if [ "$DOID" = "200" ]; then echo "do_region=$($C http://169.254.169.254/metadata/v1/region 2>/dev/null)"; echo "do_id=$($C http://169.254.169.254/metadata/v1/id 2>/dev/null)"; fi
+fi
+echo "agent_do=$(systemctl is-active do-agent 2>/dev/null)"; echo "agent_droplet=$(systemctl is-active droplet-agent 2>/dev/null)"
+echo "agent_ssm=$( (systemctl is-active amazon-ssm-agent snap.amazon-ssm-agent.amazon-ssm-agent) 2>/dev/null | head -1)"; echo "agent_waagent=$( (systemctl is-active walinuxagent waagent) 2>/dev/null | head -1)"; echo "agent_google=$(systemctl is-active google-guest-agent 2>/dev/null)"
+for f in /var/lib/cloud/instance/user-data.txt /var/lib/cloud/instance/cloud-config.txt; do if [ -r "$f" ]; then echo "ud_file=$f"; echo "ud_perm=$(stat -c %%a "$f" 2>/dev/null)"; echo "ud_secrets=$(grep -ciE '(password|passwd|secret|token|api[_-]?key|private[_-]?key|access[_-]?key)[a-z_]*[[:space:]]*[:=]' "$f" 2>/dev/null)"; fi; done
 S authfail; for f in /var/log/auth.log /var/log/secure; do [ -r "$f" ] || { $SUDO test -r "$f" 2>/dev/null; }; $SUDO grep -c 'Failed password' "$f" 2>/dev/null; $SUDO grep 'Failed password' "$f" 2>/dev/null | awk '{for(i=1;i<=NF;i++) if($i=="from") print $(i+1)}' | sort | uniq -c | sort -rn | head -5; done
+S apache2
+for f in /etc/apache2/apache2.conf /etc/apache2/conf-enabled/*.conf /etc/apache2/sites-enabled/*.conf /etc/apache2/mods-enabled/*.conf /etc/httpd/conf/httpd.conf /etc/httpd/conf.d/*.conf; do [ -r "$f" ] && grep -hiE '^[[:space:]]*(ServerTokens|ServerSignature|TraceEnable|SSLProtocol|SSLCipherSuite|SSLHonorCipherOrder|Header[[:space:]]+(always[[:space:]]+)?set[[:space:]]+Strict|Options|AllowOverride|<Location[[:space:]]+/server-(status|info)|LoadModule[[:space:]]+(security2|evasive|status|info|dav|userdir|autoindex)|FileETag|Timeout|KeepAlive)' "$f" 2>/dev/null; done | head -120
+S redis
+for f in /etc/redis/redis.conf /etc/redis.conf /usr/local/etc/redis.conf /etc/redis/*.conf; do [ -r "$f" ] && { echo "conf=$f"; grep -hiE '^[[:space:]]*(bind|protected-mode|requirepass|port|rename-command|tls-port|enable-debug-command|enable-protected-configs|user[[:space:]]|masterauth|aclfile)' "$f"; } ; done 2>/dev/null | head -60
+command -v redis-cli >/dev/null 2>&1 && { echo "ping=$(timeout 2 redis-cli -h 127.0.0.1 ping 2>&1 | head -1)"; }
+S kafka
+KP=$(find /opt /etc /usr/local /srv /home -maxdepth 5 -name 'server.properties' -path '*kafka*' 2>/dev/null | head -1); if [ -n "$KP" ]; then echo "conf=$KP"; grep -hiE '^[[:space:]]*(listeners|advertised\.listeners|listener\.security\.protocol\.map|security\.inter\.broker\.protocol|authorizer\.class\.name|allow\.everyone\.if\.no\.acl\.found|auto\.create\.topics\.enable|delete\.topic\.enable|ssl\.|sasl\.|super\.users|zookeeper\.connect|process\.roles)' "$KP" | grep -v 'password' | head -40; fi
+ZP=$(find /opt /etc /usr/local /srv /home -maxdepth 5 \( -name 'zoo.cfg' -o -name 'zookeeper.properties' \) 2>/dev/null | head -1); if [ -n "$ZP" ]; then echo "zoo=$ZP"; grep -hiE '^[[:space:]]*(clientPort|clientPortAddress|authProvider|admin\.enableServer|4lw\.commands\.whitelist|quorum\.auth)' "$ZP" | head -12; fi
+ps -eo args 2>/dev/null | grep -i '[k]afka' | grep -oE 'jmxremote[.a-z]*=[a-zA-Z0-9:._-]+' | head -5 | sed 's/^/jmx=/'
+S k8s
+for t in kubectl k3s microk8s kubeadm kubelet minikube kind; do command -v $t >/dev/null 2>&1 && echo "bin=$t"; done
+for f in /etc/kubernetes/admin.conf /etc/rancher/k3s/k3s.yaml /root/.kube/config /home/*/.kube/config /var/snap/microk8s/current/credentials/client.config; do [ -e "$f" ] && echo "kubeconfig=$(stat -c '%%a' "$f" 2>/dev/null) $f"; done
+[ -r /var/lib/kubelet/config.yaml ] && grep -hE '^\s*(anonymous|enabled|mode|readOnlyPort|protectKernelDefaults|authorization|webhook|x509)' /var/lib/kubelet/config.yaml | sed 's/^/kubelet=/'
+for m in kube-apiserver etcd; do f=/etc/kubernetes/manifests/$m.yaml; [ -r "$f" ] && grep -hoE -- '--(anonymous-auth|insecure-port|insecure-bind-address|authorization-mode|enable-admission-plugins|audit-log-path|client-cert-auth|auto-tls|peer-client-cert-auth|profiling|tls-min-version|encryption-provider-config)=[^ "]*' "$f" | sed "s/^/$m=/"; done
+if command -v kubectl >/dev/null 2>&1 || command -v k3s >/dev/null 2>&1; then K="kubectl"; command -v kubectl >/dev/null 2>&1 || K="k3s kubectl"; export KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}; [ -r "$KUBECONFIG" ] || K="$SUDO $K"
+ $K version --short 2>/dev/null | head -2 | sed 's/^/kver=/'
+ if command -v python3 >/dev/null 2>&1; then $K get pods -A -o json 2>/dev/null | python3 -c '
+import sys,json
+try: d=json.load(sys.stdin)
+except Exception: sys.exit()
+for p in d.get("items",[]):
+    s=p.get("spec",{}); m=p.get("metadata",{}); ns=m.get("namespace","")
+    if ns in ("kube-system","kube-public","kube-node-lease"): continue
+    cs=s.get("containers",[])+s.get("initContainers",[])
+    priv=any((c.get("securityContext") or {}).get("privileged") for c in cs)
+    root=not (s.get("securityContext") or {}).get("runAsNonRoot") and not any((c.get("securityContext") or {}).get("runAsNonRoot") or (c.get("securityContext") or {}).get("runAsUser") for c in cs)
+    latest=any((":" not in c.get("image","")) or c.get("image","").endswith(":latest") for c in cs)
+    nolim=any(not (c.get("resources") or {}).get("limits") for c in cs)
+    hp=[v["hostPath"]["path"] for v in s.get("volumes",[]) if "hostPath" in v]
+    caps=any(((c.get("securityContext") or {}).get("capabilities") or {}).get("add") for c in cs)
+    print("P|%%s/%%s|priv=%%d|hostnet=%%d|hostpid=%%d|root=%%d|latest=%%d|nolimits=%%d|hostpath=%%s|caps=%%d|sa=%%s|automount=%%s" %% (ns,m.get("name",""),priv,1 if s.get("hostNetwork") else 0,1 if s.get("hostPID") else 0,root,latest,nolim,",".join(hp),caps,s.get("serviceAccountName",""),s.get("automountServiceAccountToken")))
+' | head -300; fi
+ $K get clusterrolebindings -o json 2>/dev/null | python3 -c '
+import sys,json
+try: d=json.load(sys.stdin)
+except Exception: sys.exit()
+for b in d.get("items",[]):
+    if (b.get("roleRef") or {}).get("name")=="cluster-admin":
+        for s in b.get("subjects") or []:
+            print("CRB|%%s|%%s/%%s" %% (b["metadata"]["name"], s.get("kind"), s.get("name")))
+' 2>/dev/null | head -40
+ echo "netpol=$($K get networkpolicy -A --no-headers 2>/dev/null | wc -l)"; $K get svc -A --no-headers 2>/dev/null | awk '$3=="NodePort"||$3=="LoadBalancer"{print "SVC|"$1"/"$2"|"$3}' | head -30
+fi
+S dockerx
+if command -v docker >/dev/null 2>&1; then docker ps -q 2>/dev/null | xargs -r docker inspect --format 'X|{{.Name}}|net={{.HostConfig.NetworkMode}}|pid={{.HostConfig.PidMode}}|caps={{.HostConfig.CapAdd}}|ro={{.HostConfig.ReadonlyRootfs}}|mem={{.HostConfig.Memory}}|restart={{.HostConfig.RestartPolicy.Name}}|user={{.Config.User}}|health={{if .Config.Healthcheck}}1{{else}}0{{end}}|mounts={{range .Mounts}}{{.Source}}:{{.Destination}},{{end}}|secopt={{.HostConfig.SecurityOpt}}' 2>/dev/null | head -60
+ echo "dinfo=$(docker info --format '{{.ServerVersion}}|{{.SecurityOptions}}' 2>/dev/null)"; [ -r /etc/docker/daemon.json ] && echo "daemon=$(tr -d '\n ' < /etc/docker/daemon.json | head -c 400)"
+ echo "dsock=$(stat -c '%%a %%U:%%G' /var/run/docker.sock 2>/dev/null)"; echo "dgroup=$(getent group docker | cut -d: -f4)"; fi
+command -v podman >/dev/null 2>&1 && echo "podman=$(podman --version 2>/dev/null)"
+S dbconf
+for f in /etc/mysql/my.cnf /etc/mysql/mysql.conf.d/*.cnf /etc/mysql/mariadb.conf.d/*.cnf /etc/my.cnf /etc/my.cnf.d/*.cnf; do [ -r "$f" ] && grep -hiE '^[[:space:]]*(bind[-_]address|skip[-_]grant[-_]tables|local[-_]infile|skip[-_]networking|secure[-_]file[-_]priv|require_secure_transport|ssl[-_](ca|cert|key)|symbolic[-_]links|general[-_]log)' "$f" | sed 's/^/mysql=/'; done 2>/dev/null | head -30
+for f in $(find /etc/postgresql /var/lib/pgsql /var/lib/postgresql -maxdepth 4 -name postgresql.conf 2>/dev/null | head -2); do [ -r "$f" ] && grep -hiE '^[[:space:]]*(listen_addresses|ssl|password_encryption|log_connections|port)[[:space:]]*=' "$f" | sed 's/^/pgconf=/'; done
+for f in $(find /etc/postgresql /var/lib/pgsql /var/lib/postgresql -maxdepth 4 -name pg_hba.conf 2>/dev/null | head -2); do [ -r "$f" ] && grep -vE '^[[:space:]]*(#|$)' "$f" | grep -E '^(host|hostssl|hostnossl)' | sed 's/^/pghba=/' | head -30; done
+[ -r /etc/mongod.conf ] && grep -hiE '^[[:space:]]*(bindIp|bindIpAll|authorization|port|tls|mode)[[:space:]]*:' /etc/mongod.conf | sed 's/^/mongo=/'
+[ -r /etc/elasticsearch/elasticsearch.yml ] && grep -hiE '^[[:space:]]*(network\.host|http\.host|xpack\.security\.enabled|discovery\.type|xpack\.security\.http\.ssl\.enabled)[[:space:]]*:' /etc/elasticsearch/elasticsearch.yml | sed 's/^/elastic=/'
+[ -r /etc/memcached.conf ] && grep -hE '^[[:space:]]*-(l|U|S)[[:space:]]' /etc/memcached.conf | sed 's/^/memcached=/'
+command -v rabbitmqctl >/dev/null 2>&1 && $SUDO rabbitmqctl list_users 2>/dev/null | awk 'NR>2{print "rabbit_user="$1}' | head -10
+S sysctlx
+for k in kernel.randomize_va_space net.ipv4.ip_forward net.ipv4.conf.all.rp_filter net.ipv4.conf.all.accept_redirects net.ipv4.conf.all.send_redirects net.ipv4.conf.all.accept_source_route net.ipv4.tcp_syncookies kernel.kptr_restrict kernel.dmesg_restrict fs.suid_dumpable fs.protected_symlinks fs.protected_hardlinks net.ipv4.icmp_echo_ignore_broadcasts; do echo "$k=$(sysctl -n $k 2>/dev/null)"; done
+echo "apparmor=$(aa-status --enabled 2>/dev/null && echo yes || echo no)"; echo "selinux=$(getenforce 2>/dev/null)"; echo "auditd=$(systemctl is-active auditd 2>/dev/null)"
+echo "journal_persistent=$([ -d /var/log/journal ] && echo yes || echo no)"; echo "rsyslog=$(systemctl is-active rsyslog 2>/dev/null)"; echo "swap_mb=$(free -m 2>/dev/null | awk '/Swap/{print $2}')"
+echo "inode_full=$(df -iP -x tmpfs -x devtmpfs 2>/dev/null | awk 'NR>1 && $5+0>=90{print $6":"$5}' | head -3 | tr '\n' ' ')"
+S userx
+grep -hE '^(PASS_MAX_DAYS|PASS_MIN_DAYS|PASS_WARN_AGE|ENCRYPT_METHOD|UMASK)' /etc/login.defs 2>/dev/null | sed 's/^/logindefs=/'
+awk -F: '$7 !~ /(nologin|false|sync|shutdown|halt)$/ && $3>=1000 {print "shell_user="$1":"$3":"$7}' /etc/passwd 2>/dev/null | head -20
+for g in sudo wheel admin; do getent group $g 2>/dev/null | awk -F: '{print "group_'$g'="$4}'; done
+for d in /root /home/*; do [ -d "$d/.ssh" ] || continue; for f in "$d"/.ssh/id_* "$d"/.ssh/authorized_keys; do [ -f "$f" ] && echo "sshfile=$(stat -c '%%a' "$f" 2>/dev/null) $f"; done; [ -f "$d/.ssh/authorized_keys" ] && echo "akeys=$d $(grep -vcE '^[[:space:]]*(#|$)' "$d/.ssh/authorized_keys" 2>/dev/null) $(grep -oE '^(ssh-dss|ssh-rsa|ssh-ed25519|ecdsa-sha2-[a-z0-9]+|sk-[a-z0-9@.-]+)' "$d/.ssh/authorized_keys" 2>/dev/null | sort | uniq -c | tr '\n' ' ')"; done 2>/dev/null | head -50
+S cronx
+$SUDO find /etc/cron.d /etc/cron.daily /etc/cron.hourly /etc/cron.weekly /etc/cron.monthly /var/spool/cron -type f -perm -0002 2>/dev/null | head -10 | sed 's/^/cron_ww=/'
+echo "backup_refs=$( (cat /etc/cron.d/* /var/spool/cron/crontabs/* /var/spool/cron/* 2>/dev/null; $SUDO crontab -l 2>/dev/null; systemctl list-timers --all --no-legend 2>/dev/null; ls /etc/cron.daily 2>/dev/null) | grep -ciE 'restic|borg|rsync|mysqldump|pg_dump|rclone|duplicity|veeam|backup|snapshot|bacula|automysqlbackup')"
+$SUDO find /home /tmp /var/tmp /var/www /srv /opt -xdev -perm -4000 -type f 2>/dev/null | head -10 | sed 's/^/suid=/'
+S mailx
+command -v postconf >/dev/null 2>&1 && postconf -n mynetworks smtpd_relay_restrictions inet_interfaces smtpd_tls_security_level 2>/dev/null | sed 's/^/postfix=/'
+S sshx
+($SUDO sshd -T 2>/dev/null || true) | egrep -i '^(ciphers|macs|kexalgorithms|allowtcpforwarding|permituserenvironment|logingracetime|clientaliveinterval|allowusers|allowgroups|maxsessions|usepam|authenticationmethods|hostkeyalgorithms) ' | sed 's/^/sshd2=/'
 S end
 '''
 
@@ -276,7 +375,94 @@ def analyze(sec, label, sudo_used):
             top = [x.strip() for x in af[1:6] if re.match(r"\s*\d+\s+\S+", x)]
             F.append(_f("SRV-SSH-BRUTEFORCE", f"{n} failed SSH password attempts in the current auth log", "srv-resource", "vulnerability" if ssh.get("passwordauthentication") == "yes" else "code_smell",
                         "medium" if ssh.get("passwordauthentication") == "yes" else "info", "authn", label, "top sources: " + "; ".join(top), effort=20, cwe=["CWE-307"], owasp=["A07:2021"]))
-    return F, dict(os=pretty, listening=len(seen), firewall="active" if fw_active else ("inactive" if fw_readable else "unknown"), fail2ban=f2b)
+    cf, cinfo = analyze_cloud(sec, label); F += cf
+    from . import remote_extra
+    xf, xinfo = remote_extra.analyze_extra(sec, label, {p for p, _ in seen}, fw_active)
+    F += xf
+    return F, dict(os=pretty, listening=len(seen), firewall="active" if fw_active else ("inactive" if fw_readable else "unknown"), fail2ban=f2b, cloud=cinfo, stack=xinfo["stack"])
+
+
+
+# ───────────────────────── cloud / VPS provider layer ─────────────────────────
+PROVIDERS = [  # (id, display, regexes matched against dmi + hostname + cloud-id)
+    ("aws", "AWS EC2", r"amazon ec2|\bamazon\b|\bxen\b.*amazon"), ("azure", "Microsoft Azure", r"microsoft corporation.*virtual machine|7783-7084-3265-9085-8269-3286-77|\bazure\b"),
+    ("gcp", "Google Cloud", r"google compute engine|\bgoogle\b"), ("digitalocean", "DigitalOcean", r"digitalocean"),
+    ("hostinger", "Hostinger VPS", r"hostinger|hstgr\.(cloud|io)"), ("hetzner", "Hetzner", r"hetzner"), ("vultr", "Vultr", r"vultr"), ("linode", "Linode / Akamai", r"linode|akamai"),
+    ("oracle", "Oracle Cloud", r"oraclecloud"), ("ovh", "OVHcloud", r"\bovh"), ("contabo", "Contabo", r"contabo"), ("scaleway", "Scaleway", r"scaleway"), ("ionos", "IONOS", r"ionos|1&1|1and1"),
+    ("alibaba", "Alibaba Cloud", r"alibaba"), ("godaddy", "GoDaddy VPS", r"godaddy|secureserver"), ("namecheap", "Namecheap VPS", r"namecheap")]
+CLI_CHECKS = {
+    "aws": "aws ec2 describe-security-groups --filters Name=ip-permission.cidr,Values=0.0.0.0/0 --query 'SecurityGroups[].{{id:GroupId,name:GroupName,ports:IpPermissions[].[FromPort,ToPort]}}'",
+    "azure": "az network nsg list --query \"[].{{name:name,rules:securityRules[?sourceAddressPrefix=='*' && access=='Allow'].[destinationPortRange,name]}}\" -o json",
+    "gcp": "gcloud compute firewall-rules list --filter='sourceRanges:0.0.0.0/0 AND direction=INGRESS' --format='table(name,allowed[].map().firewall_rule().list():label=ALLOW,targetTags.list())'",
+    "digitalocean": "doctl compute firewall list --format ID,Name,InboundRules   # and: doctl compute droplet list --format ID,Name,PublicIPv4,Features",
+    "hostinger": "hPanel > VPS > Security > Firewall: allow only 22 (restricted to your IP), 80, 443; enable the Hostinger firewall and weekly backups",
+    "hetzner": "hcloud firewall list && hcloud server describe <name>", "vultr": "vultr-cli firewall group list", "linode": "linode-cli firewalls list",
+    "oracle": "oci network security-list list --compartment-id <ocid>   # Oracle images also ship restrictive iptables rules: check `iptables -S`"}
+
+
+def detect_provider(kv):
+    blob = " ".join(kv.get(k, "") for k in ("dmi_sys_vendor", "dmi_product_name", "dmi_bios_vendor", "dmi_board_vendor", "dmi_chassis_asset_tag", "hostname", "cloudid")).lower()
+    if kv.get("aws_instance-id", "").startswith("i-") or kv.get("aws_instance_id", "").startswith("i-"): return "aws", "AWS EC2"
+    if kv.get("azure_json"): return "azure", "Microsoft Azure"
+    if kv.get("gcp_machine"): return "gcp", "Google Cloud"
+    if kv.get("do_id"): return "digitalocean", "DigitalOcean"
+    for pid, name, rx in PROVIDERS:
+        if re.search(rx, blob): return pid, name
+    return None, None
+
+
+def analyze_cloud(sec, label):
+    """-> (findings, info). Reads only what the provider shows to the instance; never fetches credentials/tokens."""
+    kv = {}
+    for x in sec.get("cloud", []):
+        if "=" in x:
+            k, v = x.split("=", 1); kv[k.strip()] = v.strip()
+    F, pid, pname = [], *detect_provider(kv)
+    info = dict(provider=pid, provider_name=pname or "unknown / bare metal / other", region=None, instance_type=None, instance_id=None)
+    if not kv: return F, info
+    if pid == "aws":
+        info.update(region=kv.get("aws_placement_region"), instance_type=kv.get("aws_instance-type") or kv.get("aws_instance_type"), instance_id=kv.get("aws_instance-id") or kv.get("aws_instance_id"))
+        if kv.get("aws_v1_code") == "200":
+            F.append(_f("SRV-CLOUD-IMDSV1", "EC2 metadata service answers token-less (IMDSv1) requests", "srv-cloud", "vulnerability", "high", "cloud", label, "GET /latest/meta-data/ -> 200 without a session token",
+                        f"aws ec2 modify-instance-metadata-options --instance-id {info['instance_id'] or '<instance-id>'} --http-tokens required --http-put-response-hop-limit 1", 10, cwe=["CWE-918"], owasp=["A10:2021"]))
+        if kv.get("aws_role"):
+            F.append(_f("SRV-CLOUD-IAM-ROLE", f"Instance profile `{kv['aws_role']}` is attached: verify it is least-privilege", "srv-cloud", "security_hotspot", None, "cloud", label, f"role: {kv['aws_role']} (credentials were NOT read)",
+                        "Review the role's policies (IAM Access Analyzer) and remove wildcard actions/resources", 30, status="needs_validation", priority="medium", cwe=["CWE-269"], owasp=["A01:2021"]))
+    elif pid == "azure":
+        try:
+            import json as _j
+            c = _j.loads(kv["azure_json"] if kv["azure_json"].rstrip().endswith("}") else kv["azure_json"] + "}")
+            info.update(region=c.get("location"), instance_type=c.get("vmSize"), instance_id=c.get("vmId"))
+        except (ValueError, KeyError): m = re.search(r'"location":"([^"]+)"', kv.get("azure_json", "")); info["region"] = m.group(1) if m else None
+        if not kv.get("agent_waagent", "").startswith("active"):
+            F.append(_f("SRV-CLOUD-NO-AGENT", "Azure VM agent (waagent) is not active", "srv-cloud", "code_smell", "low", "cloud", label, f"waagent: {kv.get('agent_waagent') or 'not found'}", "Install/enable walinuxagent so extensions, patching and backups work", 15))
+    elif pid == "gcp":
+        info.update(region=(kv.get("gcp_zone") or "").rsplit("/", 1)[-1] or None, instance_type=(kv.get("gcp_machine") or "").rsplit("/", 1)[-1] or None)
+        sc = kv.get("gcp_scopes", "")
+        if "auth/cloud-platform" in sc.replace("https://www.googleapis.com/", ""):
+            F.append(_f("SRV-CLOUD-GCP-SCOPES", "VM service account has the full `cloud-platform` scope", "srv-cloud", "vulnerability", "high", "cloud", label, "scopes: https://www.googleapis.com/auth/cloud-platform",
+                        "Attach a dedicated service account with only the roles the app needs and narrow scopes (logging-write, monitoring-write)", 25, cwe=["CWE-250"], owasp=["A01:2021"]))
+        if kv.get("gcp_oslogin", "").upper() != "TRUE":
+            F.append(_f("SRV-CLOUD-GCP-OSLOGIN", "OS Login is not enforced: SSH access is governed by metadata keys", "srv-cloud", "security_hotspot", None, "cloud", label, f"enable-oslogin={kv.get('gcp_oslogin') or 'unset'}; block-project-ssh-keys={kv.get('gcp_blockkeys') or 'unset'}",
+                        "Set metadata enable-oslogin=TRUE (and block-project-ssh-keys=TRUE) so IAM controls SSH access", 15, status="needs_validation", priority="low"))
+    elif pid == "digitalocean":
+        info.update(region=kv.get("do_region"), instance_id=kv.get("do_id"))
+        if not kv.get("agent_do", "").startswith("active"):
+            F.append(_f("SRV-CLOUD-NO-AGENT", "DigitalOcean monitoring agent (do-agent) is not active", "srv-cloud", "code_smell", "low", "cloud", label, f"do-agent: {kv.get('agent_do') or 'not found'}",
+                        "Install do-agent (curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash) to get metrics and alerts", 10))
+    # user-data secrets (provider independent): names only, never values
+    try: ud = int(kv.get("ud_secrets") or 0)
+    except ValueError: ud = 0
+    if ud:
+        perm = kv.get("ud_perm", "")
+        F.append(_f("SRV-CLOUD-USERDATA-SECRETS", f"cloud-init user-data holds {ud} secret-like assignment(s)" + (f" (file mode {perm})" if perm else ""), "srv-cloud", "vulnerability", "high" if perm.endswith(("4", "5", "6", "7")) else "medium", "secrets", label,
+                    f"{kv.get('ud_file')}: {ud} lines matching password/token/key assignments (values not collected)", "Move secrets to the provider's secret manager and rotate the exposed ones; user-data is readable from the instance and the metadata service", 30, cwe=["CWE-798", "CWE-522"], owasp=["A02:2021"]))
+    # provider-level firewall can't be read from inside the VM: tell the user exactly how to check it
+    if pid in CLI_CHECKS or pid is None:
+        cmd = CLI_CHECKS.get(pid, "check your provider's firewall / security-group page: SSH (22) and database ports must not be open to 0.0.0.0/0")
+        F.append(_f("SRV-CLOUD-FIREWALL-CHECK", f"Provider-level firewall of {info['provider_name']} cannot be read from inside the VM: verify it", "srv-cloud", "security_hotspot", None, "cloud", label, cmd[:380],
+                    "Run the command from your workstation (read-only) and close any 0.0.0.0/0 rule on SSH/RDP/database ports", 15, status="needs_validation", priority="medium", cwe=["CWE-284"], owasp=["A05:2021"]))
+    return F, info
 
 
 def server_audit(ssh, roots, sudo):

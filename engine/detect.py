@@ -8,6 +8,7 @@ AUDITORS = {
     "tests": "Test inventory, untested modules, assertion-free/focused/skipped tests",
     "qa": "Front-end QA (Playwright/Cypress/axe/visual) and mobile QA (Android/iOS/Flutter/RN)",
     "seo": "SEO + SEM readiness: metadata, robots, sitemap, tracking, consent",
+    "pwa": "Progressive Web Apps: manifest, installability, service worker, offline, push, update flow",
     "web3": "Smart contracts (Solidity/Anchor) and dApp patterns",
     "db": "SQL/migrations static checks and live DB connections (--db)",
     "domain": "Deep dive for SaaS/multi-tenant, fintech, banking, health-tech and e-commerce (tenant isolation, money, idempotency, webhooks, PCI data, audit trail)",
@@ -17,7 +18,18 @@ FRONT_FW = r'"(react|react-dom|vue|svelte|@angular/core|next|nuxt|solid-js|astro
 WEB_SSR = r'"(next|nuxt|astro|gatsby|@remix-run/react|@sveltejs/kit|@angular/ssr|eleventy|@11ty/eleventy|vitepress|docusaurus|@docusaurus/core|hugo)"'
 
 
+NON_PRODUCT = re.compile(r"(^|/)(examples?|samples?|fixtures?|demos?|docs?|test-?data|testdata)(/|$)", re.I)
+
+
+def product_files(files):
+    """Files that define the product itself: examples/docs/fixtures must not turn a CLI into a "mobile + SaaS + web3" project.
+    Falls back to all files when everything lives in such folders (e.g. auditing an example directly)."""
+    prod = [f for f in files if not NON_PRODUCT.search(f[0])]
+    return prod or files
+
+
 def detect(files, deps_text=""):
+    files = product_files(files)
     rels = [r for r, *_ in files]; exts = {}
     for _, _, e, _ in files: exts[e] = exts.get(e, 0) + 1
     low = [r.lower() for r in rels]; names = {os.path.basename(r) for r in rels}
@@ -74,8 +86,13 @@ def detect(files, deps_text=""):
     if any(r.endswith((".yaml", ".yml")) and re.search(r"(k8s|kubernetes|helm|charts?)/", r.lower()) for r in rels): inf.append("Kubernetes/Helm")
     if any(r.startswith(".github/workflows/") for r in rels): inf.append("GitHub Actions")
     if inf: ev["infra"] = inf
+    try:
+        from . import pwa as _pwa
+        pe = _pwa.detect(files, deps_text)
+        if pe: ev["pwa"] = pe
+    except Exception: pass
     code = sum(exts.get(e, 0) for e in ("py", "js", "jsx", "ts", "tsx", "php", "java", "kt", "go", "rb", "cs", "rs", "swift", "dart", "c", "cpp", "scala", "ex", "lua", "sol", "vue", "svelte"))
-    kinds = [k for k in ("backend", "frontend", "mobile", "database", "web", "web3", "infra") if k in ev]
+    kinds = [k for k in ("backend", "frontend", "mobile", "database", "web", "pwa", "web3", "infra") if k in ev]
     if not [k for k in kinds if k not in ("infra",)] and code: kinds.insert(0, "library/cli")
     if not kinds: kinds = ["unknown"]
     return dict(kinds=kinds, evidence=ev, code_files=code)
@@ -90,6 +107,7 @@ def default_plan(d):
     if "web" in k or ("frontend" in k and "backend" not in k and d["evidence"].get("web")): plan.add("seo")
     if "web" in k: plan.add("seo")
     if "web3" in k: plan.add("web3")
+    if "pwa" in k: plan.update({"pwa", "qa"} if "frontend" in k or "web" in k else {"pwa"})
     if "database" in k: plan.add("db")
     return plan
 
