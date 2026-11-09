@@ -3,6 +3,18 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.26] - 2026-11-09
+
+### Changed
+- **Fix plan rebuilt** (`engine/fixplan.py`, new `fix-plan.md` / `fix-plan.json` next to every report and the dashboard view): ordered phases - 0 contain & rotate (confirmed malware, exposed secrets), 1 now, 2 sprint, 3 backlog, 4 validate (needs-review findings with how to confirm or suppress), 5 project finish. Findings are grouped by root cause (one group = one commit) and each group carries why, where (checklist), steps, safe form, verification, rotation links and an AI prompt. Every finding appears in exactly one group (checked in tests); estimates are batched (first item full, the rest half).
+- Dashboard plan view: phase cards, collapsible groups, per-occurrence checkboxes and "mark group as fixed" with live progress, copy-prompt and fix-plan.md export.
+
+### Fixed (precision, measured on ~1.1M lines of mature benign code)
+- Malware: `os.environ.copy()` + any URL no longer flags exfiltration (the whole environment must be serialized into a request); setuptools-style `.pth` files; invisible characters only when they sit inside an identifier (not in strings, comments or minified bundles); reverse-shell and stealer rules need their parts in the same code region; vendored/launcher executables are skipped and grouped per directory; nested `openspec/` directories are not agent config; "AI-generated" in product docs and quoted `'` strings are not AI traces; stray zero-width characters in prose are ignored.
+- SAST: private-key rule needs real key material (not a header constant or `XXXX` placeholder) and downgrades keys in test/fixture folders to review; credential rule ignores names (`passwordKey = ":_password"`), semver strings and `npm-shrinkwrap.json`; `lchmod 0777` on symlinks is not world-writable; hashed bundle chunks are treated as generated.
+- Result: Python stdlib, Homebrew and global npm packages report 0 confirmed findings of medium severity or higher and no malware indicators outside a test fixture. Regression tests added.
+- Malware scan is ~2-3x faster (rule-first scanning instead of line-by-line).
+
 ## [1.0.25] - 2026-11-09
 
 ### Changed

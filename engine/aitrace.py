@@ -9,9 +9,9 @@ AI_NAMES = (r"(?:ai\b|a\.i\.|artificial intelligence|chat-?gpt|gpt-?[345o][\w.-]
 AI_COMMENT = re.compile(r"(?i)(?:\b(?:generated|written|authored|co-?authored|assisted|produced|drafted|created|vibe-?coded|coded)\s+(?:in part\s+)?(?:by|with|using|via|from|through)\s+(?:an?\s+|the\s+)?" + AI_NAMES
                         + r"|\bai[- ](?:generated|written|assisted|authored)\b|🤖\s*generated|\bgenerated with \[?claude|\bas an ai (?:language model|assistant)\b|\bco-authored-by:.*(?:claude|copilot|chatgpt|gemini|cursor|codex)"
                         r"|\bthis (?:code|file|module|function|class|script) (?:was|is) (?:generated|written|created) (?:by|with|using) " + AI_NAMES + r")")
-AI_DOC_STRONG = re.compile(r"(?i)(?:🤖\s*generated|generated with \[?claude|\bai[- ]generated\b|\b(?:written|generated|created|authored) (?:by|with) (?:chat-?gpt|claude|copilot|gemini|an? ai\b|ai\b)|\bas an ai (?:language model|assistant)\b|co-authored-by:.*(?:claude|copilot|chatgpt|gemini|cursor|codex))")
+AI_DOC_STRONG = re.compile(r"(?i)(?:🤖\s*generated with \[?(?:claude|copilot|chatgpt|gemini|cursor|codex)|generated with \[?claude|\b(?:written|generated|created|authored) (?:by|with) (?:chat-?gpt|claude|copilot|gemini|an? ai\b|ai\b)|\bas an ai (?:language model|assistant)\b|co-authored-by:.*(?:claude|copilot|chatgpt|gemini|cursor|codex))")
 PLACEHOLDER = re.compile(r"(?i)(?:\.\.\.|…)\s*(?:rest of|remaining|existing|previous|other|same)\s+(?:the\s+)?(?:code|file|implementation|content|methods?|functions?|imports?)\b|\brest of (?:the )?(?:code|file|implementation|function|method)s? (?:remains?|stays?|goes here|unchanged|is the same)\b|\b(?:implementation|your code|logic) (?:goes )?here\b\s*(?:\.\.\.|…)|\.\.\.\s*existing code\s*\.\.\.|\bunchanged code\b")
-COMMENT_LINE = re.compile(r"^\s*(?://|#|--|/\*|\*|<!--|;|%|'|rem\b|\"\"\"|''')", re.I)
+COMMENT_LINE = re.compile(r"^\s*(?://|#|--|/\*|\*(?!\*)|<!--|;|%|\"\"\"|''')")
 DOC_EXT = {"md", "markdown", "rst", "txt", "adoc", "html", "htm"}
 CODE_EXT = {"py", "js", "jsx", "mjs", "cjs", "ts", "tsx", "vue", "svelte", "php", "java", "kt", "kts", "scala", "go", "rb", "cs", "dart", "swift", "rs", "c", "h", "cpp", "cc", "hpp", "sql", "sh", "bash", "ps1", "lua", "pl", "r", "sol", "css", "scss", "less", "yml", "yaml", "toml", "gradle", "m", "mm", "ex", "exs", "tf", "html", "htm", "vue"}
 
@@ -25,8 +25,8 @@ META_BYTES = re.compile(rb"(?i)(?:trainedAlgorithmicMedia|compositeWithTrainedAl
 PDF_PRODUCER = re.compile(rb"(?i)/(?:Producer|Creator)\s*\([^)]{0,80}(?:chatgpt|openai|claude|anthropic|gemini|copilot)[^)]{0,40}\)")
 META_EXT = {"png", "jpg", "jpeg", "webp", "tif", "tiff", "pdf", "svg", "avif", "heic", "docx", "pptx"}
 SKIP_DIR = re.compile(r"(^|/)(node_modules|vendor|\.git|dist|build|\.next|\.venv|venv|__pycache__|Pods|coverage|\.terraform)(/|$)")
-ZW = re.compile("[​‌‍⁠﻿᠎\U000e0000-\U000e007f]")
-BIDI = re.compile("[‪-‮⁦-⁩]")
+ZW = re.compile("[\u200b\u200c\u200d\u2060\ufeff\u180e\U000e0000-\U000e007f]")
+BIDI = re.compile("[\u202a-\u202e\u2066-\u2069]")
 
 
 RULE_FIX = {
@@ -96,6 +96,7 @@ def analyze(root, files, level="standard"):
         m = AGENT_PATH.search(p)
         if not m: continue
         top = m.group("p")
+        if top.lower() in ("openspec", "memory-bank") and p[:m.start("p")].strip("/"): continue      # a nested openspec/ is usually the tool itself, not workspace config
         key = (p[:m.start("p")] + top).lstrip("/")
         groups.setdefault(key, []).append(p)
     for key, ps in sorted(groups.items()):
@@ -113,7 +114,7 @@ def analyze(root, files, level="standard"):
         except OSError: continue
         info["scanned"] += 1
         low = text.lower()
-        if not any(k in low for k in ("ai", "claude", "gpt", "copilot", "gemini", "cursor", "codex", "llm", "generated", "rest of", "existing code", "unchanged", "goes here", "…", "​", "﻿", "‌", "‍", "⁠")):
+        if not any(k in low for k in ("ai", "claude", "gpt", "copilot", "gemini", "cursor", "codex", "llm", "generated", "rest of", "existing code", "unchanged", "goes here", "…", "\u200b", "\ufeff", "\u200c", "\u200d", "\u2060")):
             continue
         hits = 0
         for n, line in enumerate(text.split("\n"), 1):
@@ -132,11 +133,12 @@ def analyze(root, files, level="standard"):
                 hits += 1; info["placeholders"] += 1
                 out.append(_f("AITRACE-PLACEHOLDER", "Leftover AI placeholder comment (possible truncated code)", "ai-placeholder", "low", "ai-trace", rel, n, line.strip(), effort=10, status="needs_validation", priority="medium"))
         if is_doc and not is_code:
-            m = ZW.search(text) or BIDI.search(text)
-            if m and per_rule.get("inv", 0) < 20:
+            zw = ZW.findall(text); zw = [c for c in zw if c != "\ufeff"]
+            m = ZW.search(text.lstrip("\ufeff"))
+            if m and (len(zw) >= 3 or any(ord(c) >= 0xe0000 for c in zw)) and per_rule.get("inv", 0) < 20:
                 per_rule["inv"] = per_rule.get("inv", 0) + 1; info["invisible"] += 1
-                cnt = len(ZW.findall(text)) + len(BIDI.findall(text))
-                if cnt >= 2 or text[:1] != "﻿":
+                cnt = len(zw)
+                if True:
                     out.append(_f("AITRACE-INVISIBLE", f"{cnt} invisible Unicode character(s) in text", "hidden-unicode", "info", "ai-trace", rel, text[:m.start()].count("\n") + 1, f"U+{ord(m.group(0)):04X} at line {text[:m.start()].count(chr(10)) + 1}", effort=2))
     # --- git history trailers ---
     if is_git:

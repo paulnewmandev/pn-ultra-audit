@@ -124,3 +124,21 @@ class Quality(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class RealWorldFalsePositives(unittest.TestCase):
+    """Patterns that produced false positives when auditing the Python stdlib, Homebrew and global npm packages (benchmark in scripts/precision_bench.py)."""
+    def test_private_key_needs_key_material_and_fixtures_are_downgraded(self):
+        hdr = "-----BEGIN " + "PRIVATE KEY-----"
+        body = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC7VJTUt9Us8cKj"
+        self.assertNotIn("SEC-PRIVATE-KEY", rules(scan("src/fmt.py", f'HEADER = "{hdr}"\n')))                        # header constant (parsers, regexes)
+        self.assertNotIn("SEC-PRIVATE-KEY", rules(scan("docs/cfg.js", f'key = "{hdr}\\nXXXX\\nXXXX\\n-----END PRIVATE KEY-----"\n')))   # documentation placeholder
+        self.assertIn("SEC-PRIVATE-KEY", confirmed(scan("src/k.py", f'k = """{hdr}\n{body}\n"""\n')))             # real material in source
+        self.assertIn(("SEC-PRIVATE-KEY", "needs_validation"), scan("test/certdata/a.pem", f"{hdr}\n{body}\n"))    # throwaway test key: review, not critical
+
+    def test_credential_rule_ignores_names_versions_and_symlink_modes(self):
+        self.assertNotIn("SEC-HARDCODED", rules(scan("src/a.js", 'var passwordKey = ":_password";\nconst k = "_authToken";\n')))
+        self.assertNotIn("SEC-HARDCODED", rules(scan("npm-shrinkwrap.json", '{"dependencies": {"@octokit/auth-token": "^6.0.0"}}\n')))
+        self.assertNotIn("CFG-CHMOD", rules(scan("lib/k.rb", "file.lchmod 0777 if file.symlink?\n")))
+        self.assertIn("SEC-HARDCODED", confirmed(scan("src/a.js", 'const password = "Tr0ub4dor&3x9!";\n')))               # real secrets still found
+        self.assertIn("CFG-CHMOD", rules(scan("src/a.sh", "chmod 777 /var/www\n")))
+

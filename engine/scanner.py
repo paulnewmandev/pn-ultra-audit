@@ -107,7 +107,8 @@ class Scan:
         self.read_errors = 0
 
 
-GEN_PATH = re.compile(r"(^|/)(dist|build|out|\.next|\.nuxt|\.output|coverage|target|obj|generated|__generated__|_build|storybook-static|vendor|\.turbo|\.cache)(/|$)|\.min\.|\.bundle\.|\.d\.ts$|\.generated\.|\.g\.dart$|_pb2(_grpc)?\.py$|\.pb\.go$|\.designer\.cs$|\.map$", re.I)
+FIXTURE_PATH = re.compile(r"(^|/)(certdata|testdata|test-data|fixtures?|samples?|examples?|mocks?|demo)(/|$)", re.I)
+GEN_PATH = re.compile(r"(^|/)(bundles?|dist|build|out|\.next|\.nuxt|\.output|coverage|target|obj|generated|__generated__|_build|storybook-static|vendor|\.turbo|\.cache)(/|$)|\.min\.|\.bundle\.|\.d\.ts$|-[A-Za-z0-9]{8}\.(?:m?js|css)$|\.generated\.|\.g\.dart$|_pb2(_grpc)?\.py$|\.pb\.go$|\.designer\.cs$|\.map$", re.I)
 GEN_HEAD = re.compile(r"@generated|DO NOT EDIT|do not edit|auto-?generated|automatically generated|generated (?:by|from)|gencodec|code generated|sourceMappingURL=|webpack|__webpack_require__|Object\.defineProperty\(exports, ['\"]__esModule|typeof exports === ['\"]object['\"] && typeof module|\(function \(global, factory\)|var __defProp|require\(['\"]tslib['\"]\)|Babel|regeneratorRuntime", re.I)
 RAW_RULES = {"BUG-EMPTY-CATCH"}                                                # comments matter: a commented empty catch is intentional
 
@@ -222,6 +223,10 @@ def scan_files(files, progress=None, per_rule_cap=60):
                 m = rule.pattern.search(line)
                 if not m: continue
                 if rule.require and not rule.require.search(line): continue
+                if rule.id == "SEC-PRIVATE-KEY":       # a header alone (regexes, docs, parsers) is not a key: require real base64 key material after it
+                    body = " ".join(L_[i:i + 6]).replace("\\n", "\n")
+                    mb = re.search(r"[A-Za-z0-9+/]{40,}={0,2}", body.split("PRIVATE KEY-----", 1)[-1])
+                    if not mb or re.fullmatch(r"[Xx*.]+", mb.group(0)[:40]) or len(set(mb.group(0))) < 8: continue
                 if rule.id in STRIP_RULES and not rule.pattern.search(strip_literals(line)): continue
                 if rule.id in CTX_REQUIRE and not CTX_REQUIRE[rule.id].search("\n".join(L_[max(0, i - 3):i + 1])): continue
                 if rule.exclude and rule.exclude.search(line) and rule.id not in STRIP_RULES: continue
@@ -241,6 +246,8 @@ def scan_files(files, progress=None, per_rule_cap=60):
                         status, why = "confirmed", "user input reaches this call (same line or assigned within 25 lines above)"
                     else:
                         status, why = "needs_validation", "heuristic match - review context"
+                if rule.id == "SEC-PRIVATE-KEY" and status == "confirmed" and (is_test or FIXTURE_PATH.search(rel)):
+                    status, why = "needs_validation", "private key inside a test/fixture folder: usually a throwaway test key. Confirm it is not used anywhere real (if it is, rotate it)"
                 if S.caps[cap_key] >= per_rule_cap: S.truncated[cap_key] += 1; continue
                 S.caps[cap_key] += 1
                 ctx = "\n".join(l.rstrip()[:200] for l in lines[max(0, i - 1):i + 2]) if rule.family not in ("secrets", "jwt") else redact(line, m, rule.family)

@@ -34,6 +34,7 @@ Extras by flag: `--db <sqlite|postgres://|mysql://|redis://|mongodb://|mssql://>
 Strictness: `--strictness basic|standard|strict` (default standard; `--ask` prompts in a terminal). **Before running from an assistant, ask the user which level they want** unless they already said: 1 basic (core risks only), 2 standard (recommended, default), 3 strict (enterprise-grade). For legacy code use `--baseline auto` so the gate judges only NEW findings. Language: `--lang es|en`.
 
 ## After the run
+0. `fix-plan.md` (and `fix-plan.json`) in the run folder is the ordered, complete plan: phase 0 contain & rotate, 1 now, 2 sprint, 3 backlog, 4 validate, 5 polish. Every finding is in exactly one group (one root cause = one commit) with steps, safe form, verification and a prompt. Read ONE phase at a time, never the whole file.
 1. Read `audit-output/<name>/run-N/findings.json` (and `REPORT.md`); open `report.html` for the dashboard.
 2. Triage: `confirmed` = pattern with user input nearby (verify by reading the code); `needs_validation` = suspicion, confirm the source/reachability before changing code.
 3. Fix in order: critical/high security → data-loss bugs → secrets (ROTATE first) → quick wins → debt. One finding at a time: smallest safe change + regression test; re-run the audit and confirm the finding disappears.

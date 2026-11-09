@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.25"
+VER = "1.0.26"
 R = f'''<div align="center">
 
 <img src="assets/banner.svg" alt="PN-Ultra-Audit - audit everything, ship with confidence" width="100%">
@@ -127,7 +127,7 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <td width="50%" valign="top"><img src="docs/img/gal-aitrace.png" alt="AI traces" width="100%"><br><sub><b>AI traces</b> - project finish: comments, agent files, git trailers, metadata and how to remove them</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - Now / This sprint / Backlog with effort</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - ordered phases (contain &amp; rotate first), one group per root cause, with steps, verification and an AI prompt each</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-coverage.png" alt="Coverage" width="100%"><br><sub><b>Coverage</b> - what was and was not examined</sub></td>
 </tr>
 <tr>
@@ -319,7 +319,7 @@ python3 audit.py --verify-corpus                            # prove the fixes: e
 
 ## Precision first (no time wasted on false positives)
 
-Rules run on code with **comments and docstrings masked**, web input is separated from CLI arguments, Python uses the **AST** for `is` with literals, mutable defaults that are really mutated and broad empty `except`, and build outputs, bundles and library lockfiles are not judged like source. Measured on mature code with `python3 scripts/precision_bench.py <dir>`: the Python standard library (240k LOC) went from **178 confirmed findings (8 high) to 0 critical/high security findings** (0.13 confirmed per 1k lines, all real smells such as 4,800-line files); `debug`, `semver` and `minimist` report 0. Every false-positive pattern found is pinned by a test in `tests/test_precision.py`. Found one? Open an issue with the snippet.
+Rules run on code with **comments and docstrings masked**, web input is separated from CLI arguments, Python uses the **AST** for `is` with literals, mutable defaults that are really mutated and broad empty `except`, and build outputs, bundles and library lockfiles are not judged like source. Measured on mature code with `python3 scripts/precision_bench.py <dir>`: the Python standard library (240k LOC) went from **178 confirmed findings (8 high) to 0 critical/high security findings** (0.13 confirmed per 1k lines, all real smells such as 4,800-line files); `debug`, `semver` and `minimist` report 0. The same benchmark with the **security, malware and AI-trace auditors** over ~1.1 million lines of mature benign code (Python standard library, Homebrew's Ruby/shell tooling and globally installed npm packages, 7,100 files) ends with **0 confirmed findings of medium severity or higher** and 0 malware indicators outside a test fixture; the malware lens needs a malicious *shape* (e.g. request data passed to `eval`, a shell attached to a socket, a miner pool URL), never a bare `eval`/`exec`, and tests/fixtures/examples are skipped unless `--strictness strict`. Every false-positive pattern found is pinned by a test in `tests/test_precision.py` and `tests/test_malware.py`. Found one? Open an issue with the snippet.
 
 ## Audit readiness for SOC 2, ISO 27001, HIPAA, PCI and more
 

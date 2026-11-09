@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, cleanfix, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, cleanfix, fixplan, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.25"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.26"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -694,6 +694,13 @@ def main(argv=None):
                 with open(os.path.join(run_dir, "repo-fixes.sh"), "w", encoding="utf-8") as fh_: fh_.write(rfx)
                 meta["notes"].append(N("Se generó repo-fixes.sh (limpieza guiada del repositorio; la herramienta nunca lo ejecuta): `bash repo-fixes.sh list`.", "repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`."))
         except Exception as ex_: meta["notes"].append(f"repo-fixes.sh not generated: {str(ex_)[:60]}")
+    try:
+        fp_ = fixplan.build(findings, a.lang, label)
+        with open(os.path.join(run_dir, "fix-plan.md"), "w", encoding="utf-8") as fh_: fh_.write(fixplan.to_md(fp_, a.lang))
+        json.dump(fp_, open(os.path.join(run_dir, "fix-plan.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        if not fixplan.check_complete(findings, fp_): meta["notes"].append("fix plan: some findings are not in a group (please report this)")
+        else: meta["notes"].append(N(f"Se generó fix-plan.md: {fp_['total']['findings']} hallazgos en {fp_['total']['groups']} grupos y {len(fp_['phases'])} fases (la fase 0 va primero).", f"fix-plan.md was generated: {fp_['total']['findings']} findings in {fp_['total']['groups']} groups and {len(fp_['phases'])} phases (phase 0 comes first)."))
+    except Exception as ex_: meta["notes"].append(f"fix-plan.md not generated: {str(ex_)[:60]}")
     if metrics.get("malware") is not None or metrics.get("aitrace") is not None:
         try:
             cfx = cleanfix.build(findings, label, meta["date"])
@@ -772,7 +779,7 @@ def main(argv=None):
         for f in sorted(new_conf, key=lambda f: (RANK[f["severity"]], f["effort_min"]))[:6]: print(f"  {f['id']:<8} [{f['severity']:<8}] {f['title'][:70]}  {ui.c('dim', f['location']['file'] + ':' + str(f['location']['line']))}")
         print()
         print(ui.c("bold", N("Informes", "Reports")))
-        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + tuple((fn_, d_) for fn_, d_ in (("server-fixes.sh", "server fix script"), ("repo-fixes.sh", "repo fix script"), ("cleanup-fixes.sh", "AI-trace + malware fixes")) if os.path.exists(os.path.join(run_dir, fn_))): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
+        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + tuple((fn_, d_) for fn_, d_ in (("fix-plan.md", "ordered fix plan"), ("server-fixes.sh", "server fix script"), ("repo-fixes.sh", "repo fix script"), ("cleanup-fixes.sh", "AI-trace + malware fixes")) if os.path.exists(os.path.join(run_dir, fn_))): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
         print()
     ui.verdict(comp["gate_pass"], f"Quality Gate {'PASSED' if comp['gate_pass'] else 'FAILED'}")
     if a.brief: print(kbsearch.brief(run_dir, a.top, label))

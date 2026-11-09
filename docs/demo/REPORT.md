@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.25
+- **Tool:** PN-Ultra-Audit 1.0.26
 
 ## Contents
 
@@ -3294,7 +3294,7 @@ url = request.args.get("url")
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.25 |
+| tool_version | 1.0.26 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
@@ -3557,4 +3557,5 @@ xychart-beta
 This report covers only what is listed under “Coverage”. No findings does not prove absence of defects: automatic rules are heuristics (regex + nearby variable tracking), not full data-flow analysis. “To review” items depend on context or on facts outside the repository. Verify each fix with its test before deploying.
 
 - repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`.
+- fix-plan.md was generated: 124 findings in 110 groups and 6 phases (phase 0 comes first).
 - cleanup-fixes.sh was generated (remove AI traces with backups and quarantine malware; the tool never runs it): `bash cleanup-fixes.sh list`.
