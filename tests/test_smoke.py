@@ -78,7 +78,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.13", run("--version").stdout)
+        self.assertIn("1.0.14", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")
@@ -126,6 +126,37 @@ class Smoke(unittest.TestCase):
             self.assertEqual(r.returncode, 0)
             for p in (".claude/commands/pn-audit.md", ".cursor/rules/pn-ultra-audit.mdc", ".windsurf/rules/pn-ultra-audit.md", ".kiro/steering/pn-ultra-audit.md", ".opencode/command/pn-audit.md", ".trae/rules/pn-ultra-audit.md", "AGENTS.md"):
                 self.assertTrue(os.path.exists(os.path.join(d, p)), p)
+            for p in (".mcp.json", ".cursor/mcp.json"):
+                self.assertIn("pn-ultra-audit", json.load(open(os.path.join(d, p)))["mcpServers"])
+
+    def test_fix_corpus_is_verified(self):
+        """Every tested vulnerable/fixed pair: the rule fires on the flaw and is silent on the fix."""
+        from engine import corpus
+        res = corpus.verify()
+        self.assertGreaterEqual(len(res), 20)
+        self.assertEqual([x["id"] for x in res if not x["ok"]], [])
+
+    def test_kb_search_and_show(self):
+        out = run("--kb", "sql injection php").stdout
+        self.assertIn("SQLI-PHP", out); self.assertIn("SQL Injection", out)
+        with tempfile.TemporaryDirectory() as o:
+            run(DEMO, "--out", os.path.join(o, "r"), "--color", "never")
+            card = run("--show", "SEC-001", "--run", os.path.join(o, "r")).stdout
+            self.assertIn("Fix:", card); self.assertIn("Verify:", card)
+            self.assertEqual(run("--show", "NOPE-999", "--run", os.path.join(o, "r")).returncode, 2)
+
+    def test_mcp_server_roundtrip(self):
+        with tempfile.TemporaryDirectory() as o:
+            run(DEMO, "--out", os.path.join(o, "r"), "--color", "never")
+            msgs = [dict(jsonrpc="2.0", id=1, method="initialize", params={}), dict(jsonrpc="2.0", id=2, method="tools/list"),
+                    dict(jsonrpc="2.0", id=3, method="tools/call", params=dict(name="search_kb", arguments=dict(query="xss"))),
+                    dict(jsonrpc="2.0", id=4, method="tools/call", params=dict(name="get_fix_card", arguments=dict(id="SEC-001")))]
+            r = subprocess.run(CLI + ["--mcp", "--run", os.path.join(o, "r")], input="\n".join(json.dumps(m) for m in msgs) + "\n", capture_output=True, text=True, timeout=60)
+            out = [json.loads(l) for l in r.stdout.splitlines()]
+            self.assertEqual(len(out), 4)
+            self.assertGreaterEqual(len(out[1]["result"]["tools"]), 4)
+            self.assertIn("Cross-Site", out[2]["result"]["content"][0]["text"])
+            self.assertFalse(out[3]["result"]["isError"])
 
 
 if __name__ == "__main__":

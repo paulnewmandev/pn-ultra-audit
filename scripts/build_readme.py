@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.13"
+VER = "1.0.14"
 R = f'''<div align="center">
 
 <img src="assets/banner.svg" alt="PN-Ultra-Audit - audit everything, ship with confidence" width="100%">
@@ -238,6 +238,19 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 Files follow each tool's documented conventions at the time of writing; installs are idempotent and never overwrite files you wrote (`--force` to override). Skills: `audit` (orchestrator), `audit-recon`, `audit-bugs`, `audit-code`, `audit-quality`, `audit-security`, `audit-osint-owasp`, `audit-report`, `audit-qa`, `audit-mobile-qa`, `audit-seo`, `audit-coach` (mentor mode), `audit-compliance`, `audit-saas-fintech`.
 
+### Fix cards, offline search and an MCP server (token-saving)
+
+Assistants (and people) rarely need the whole report - they need the one passage that tells them how to fix a finding.
+
+```bash
+python3 audit.py --show SEC-001 --run audit-output/myapp    # compact card: code, why, steps, safe form, tested before/after, verify
+python3 audit.py --kb "sql injection php"                   # offline BM25 search over 60+ remediation guides and 110+ rules
+python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, search_kb, get_summary, verify_corpus
+python3 audit.py --verify-corpus                            # prove the fixes: each vulnerable/ example fires the rule, each fixed/ one stays silent
+```
+
+`--install-agent claude` / `cursor` also registers the MCP server (`.mcp.json`, `.cursor/mcp.json`). The tested before/after pairs live in [`examples/fixes/`](examples/fixes) and run in CI, so every "safe form" shown has been checked against the engine itself.
+
 ## Audit readiness for SOC 2, ISO 27001, HIPAA, PCI and more
 
 <p align="center">{fw}</p>
@@ -288,7 +301,7 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | `--scaffold [--write]` | create missing professional files |
 | `--export DIR` `--pdf` `--lang es\\|en` `--out DIR` | outputs |
 | `--tools` `--run-tests` | semgrep/gitleaks/npm audit/pip-audit · run the project's own tests |
-| `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
+| `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |\n| `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
 | `--fail-on SEV` `--verbose` `--quiet` `--color` | CI & output |
 
 Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs/RULES.md).

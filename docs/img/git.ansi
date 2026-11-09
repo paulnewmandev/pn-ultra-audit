@@ -1,5 +1,5 @@
 [1;35m┌──────────────────────────────────────────────────────────────┐[0m
-[1;35m│[0m[1m                   PN-Ultra-Audit  v1.0.13                    [0m[1;35m│[0m
+[1;35m│[0m[1m                   PN-Ultra-Audit  v1.0.14                    [0m[1;35m│[0m
 [1;35m└──────────────────────────────────────────────────────────────┘[0m
  [90mTarget:     [0m https://github.com/octocat/Hello-World
  [90mMode:       [0m local · read-only
@@ -11,7 +11,7 @@
    [32m✓[0m - [2m(0.0s)[0m
 
 [1m▶ [02/14] Cloning Git repository (read-only)[0m
-   [32m✓[0m https://github.com/octocat/Hello-World @ 7fd1a60 (master) · 3 commits · 3 authors [2m(0.8s)[0m
+   [32m✓[0m https://github.com/octocat/Hello-World @ 7fd1a60 (master) · 3 commits · 3 authors [2m(0.9s)[0m
 
 [1m▶ [03/14] Discovering files, languages & architecture[0m
 [90m   Detected: unknown → auditors: docs, security[0m

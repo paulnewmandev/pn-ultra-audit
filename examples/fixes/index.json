@@ -1,0 +1,156 @@
+[
+ {
+  "id": "sqli-python",
+  "rule": "SQLI-PY",
+  "engine": "scan",
+  "file": "handler.py",
+  "note": "Bind values as parameters; never format SQL strings."
+ },
+ {
+  "id": "sqli-node",
+  "rule": "SQLI-JS",
+  "engine": "scan",
+  "file": "handler.js",
+  "note": "Use $1/? placeholders and pass values separately."
+ },
+ {
+  "id": "sqli-php",
+  "rule": "SQLI-PHP",
+  "engine": "scan",
+  "file": "UserController.php",
+  "note": "Use bindings (?) instead of concatenation."
+ },
+ {
+  "id": "xss-php-echo",
+  "rule": "XSS-ECHO-PHP",
+  "engine": "scan",
+  "file": "page.php",
+  "note": "Encode output for the HTML context."
+ },
+ {
+  "id": "xss-node-reflect",
+  "rule": "XSS-REFLECT-JS",
+  "engine": "scan",
+  "file": "server.js",
+  "note": "Escape (or return JSON) before writing user input to the response."
+ },
+ {
+  "id": "xss-dom",
+  "rule": "XSS-DOM",
+  "engine": "scan",
+  "file": "app.js",
+  "note": "Use textContent; sanitize (DOMPurify) if HTML is required."
+ },
+ {
+  "id": "command-injection-python",
+  "rule": "CMD-PY",
+  "engine": "scan",
+  "file": "ping.py",
+  "note": "Pass an argument list, no shell, and validate the input."
+ },
+ {
+  "id": "deserialization-python",
+  "rule": "DESER",
+  "engine": "scan",
+  "file": "load.py",
+  "note": "Use a data-only format and validate it."
+ },
+ {
+  "id": "password-hash-python",
+  "rule": "CRY-PWD-HASH",
+  "engine": "scan",
+  "file": "auth.py",
+  "note": "Use a slow password hash (argon2id/bcrypt)."
+ },
+ {
+  "id": "jwt-secret-node",
+  "rule": "JWT-HARDCODED",
+  "engine": "scan",
+  "file": "token.js",
+  "note": "Load the signing secret from the environment and pin the algorithm."
+ },
+ {
+  "id": "hardcoded-secret",
+  "rule": "SEC-HARDCODED",
+  "engine": "scan",
+  "file": "config.py",
+  "note": "Read secrets from the environment / a secret manager."
+ },
+ {
+  "id": "tls-verify-python",
+  "rule": "CRY-TLS",
+  "engine": "scan",
+  "file": "client.py",
+  "note": "Keep certificate verification on; add the CA bundle if needed."
+ },
+ {
+  "id": "path-traversal-python",
+  "rule": "PATH-TRAVERSAL",
+  "engine": "scan",
+  "file": "files.py",
+  "note": "Resolve the path and verify it stays inside the base directory."
+ },
+ {
+  "id": "ssrf-python",
+  "rule": "SSRF",
+  "engine": "scan",
+  "file": "fetch.py",
+  "note": "Use an allowlist of destinations; never fetch a user-supplied URL."
+ },
+ {
+  "id": "idor-laravel",
+  "rule": "AUTHZ-IDOR",
+  "engine": "scan",
+  "file": "OrderController.php",
+  "note": "Look the record up through the current user."
+ },
+ {
+  "id": "cors-wildcard-node",
+  "rule": "CFG-CORS",
+  "engine": "scan",
+  "file": "app.js",
+  "note": "List only your own origins."
+ },
+ {
+  "id": "a11y-image-alt",
+  "rule": "A11Y-IMG-ALT",
+  "engine": "scan",
+  "file": "index.html",
+  "note": "Describe meaningful images (or alt=\"\" if decorative)."
+ },
+ {
+  "id": "web3-reentrancy",
+  "rule": "WEB3-REENTRANCY",
+  "engine": "web3",
+  "file": "Vault.sol",
+  "note": "Checks-effects-interactions + nonReentrant."
+ },
+ {
+  "id": "fintech-float-money",
+  "rule": "FIN-FLOAT-MONEY",
+  "engine": "domain",
+  "file": "charge.js",
+  "note": "Integer minor units (cents) or Decimal."
+ },
+ {
+  "id": "fintech-webhook-signature",
+  "rule": "FIN-WEBHOOK-UNSIGNED",
+  "engine": "domain",
+  "file": "webhooks/stripe.js",
+  "note": "Verify the provider signature over the RAW body."
+ },
+ {
+  "id": "saas-tenant-filter",
+  "rule": "SAAS-QUERY-NO-TENANT",
+  "engine": "domain",
+  "file": "repo.js",
+  "note": "Always scope by the authenticated tenant (and enforce with RLS)."
+ },
+ {
+  "id": "qa-await-expect",
+  "rule": "QA-UNAWAITED-EXPECT",
+  "engine": "qa",
+  "file": "tests/save.spec.ts",
+  "note": "Always await Playwright web-first assertions."
+ }
+]

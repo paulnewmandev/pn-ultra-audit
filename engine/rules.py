@@ -220,7 +220,7 @@ R("AUTHZ-MASS-ASSIGN", "Mass assignment / over-posting", "massassign", SRC,
 R("AUTHZ-IDOR", "Object loaded by client-supplied id (check ownership)", "idor", SRC,
   r"\b(findOrFail|find|findById|findByPk|findOne|objects\.get|first_or_404|get_object_or_404|getById|getReference|findFirst|findUnique)\s*\(",
   precision="taint_only", category="authz", cwe=["CWE-639", "CWE-862"], owasp=["A01:2021", "API1:2023"], priority="high", severity="high", effort=20,
-  exclude=r"(user|owner|account|tenant|team|org)[\w>.-]*(->|\.)\s*(\w+\(\)|\w+)\s*(->|\.)\s*(find|where)|where\s*\([^)]*(user|owner|tenant)_id|authorize|Gate::|can\("),
+  exclude=r"(user|owner|account|tenant|team|org)[\w>.()-]*(->|\.)\s*(\w+\(\)|\w+)\s*(->|\.)\s*(find|where)|where\s*\([^)]*(user|owner|tenant)_id|authorize|Gate::|can\("),
 
 # ───────────────────────── Mobile ─────────────────────────
 R("MOB-ANDROID-DEBUG", "Android: debuggable / cleartext", "android", XML | {"json"},

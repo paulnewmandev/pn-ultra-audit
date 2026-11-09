@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-08
-- **Tool:** PN-Ultra-Audit 1.0.13
+- **Tool:** PN-Ultra-Audit 1.0.14
 
 ## Contents
 
@@ -2860,7 +2860,7 @@ no toHaveScreenshot / Storybook+Chromatic / Percy
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.13 |
+| tool_version | 1.0.14 |
 | strictness | strict |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |

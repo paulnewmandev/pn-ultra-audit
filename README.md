@@ -4,7 +4,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-1.0.13-8b5cf6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.14-8b5cf6?style=for-the-badge)](CHANGELOG.md)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-22d3ee?style=for-the-badge)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3b82f6?style=for-the-badge)](#install)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-34d399?style=for-the-badge)](#install)
@@ -227,6 +227,19 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 Files follow each tool's documented conventions at the time of writing; installs are idempotent and never overwrite files you wrote (`--force` to override). Skills: `audit` (orchestrator), `audit-recon`, `audit-bugs`, `audit-code`, `audit-quality`, `audit-security`, `audit-osint-owasp`, `audit-report`, `audit-qa`, `audit-mobile-qa`, `audit-seo`, `audit-coach` (mentor mode), `audit-compliance`, `audit-saas-fintech`.
 
+### Fix cards, offline search and an MCP server (token-saving)
+
+Assistants (and people) rarely need the whole report - they need the one passage that tells them how to fix a finding.
+
+```bash
+python3 audit.py --show SEC-001 --run audit-output/myapp    # compact card: code, why, steps, safe form, tested before/after, verify
+python3 audit.py --kb "sql injection php"                   # offline BM25 search over 60+ remediation guides and 110+ rules
+python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, search_kb, get_summary, verify_corpus
+python3 audit.py --verify-corpus                            # prove the fixes: each vulnerable/ example fires the rule, each fixed/ one stays silent
+```
+
+`--install-agent claude` / `cursor` also registers the MCP server (`.mcp.json`, `.cursor/mcp.json`). The tested before/after pairs live in [`examples/fixes/`](examples/fixes) and run in CI, so every "safe form" shown has been checked against the engine itself.
+
 ## Audit readiness for SOC 2, ISO 27001, HIPAA, PCI and more
 
 <p align="center"><img src="assets/compliance/soc2.svg" alt="SOC 2 readiness" height="110"> <img src="assets/compliance/iso27001.svg" alt="ISO 27001 readiness" height="110"> <img src="assets/compliance/hipaa.svg" alt="HIPAA readiness" height="110"> <img src="assets/compliance/gdpr.svg" alt="GDPR readiness" height="110"> <img src="assets/compliance/pci.svg" alt="PCI DSS readiness" height="110"> <img src="assets/compliance/nist.svg" alt="NIST CSF readiness" height="110"> <img src="assets/compliance/dora.svg" alt="DORA readiness" height="110"> <img src="assets/compliance/euai.svg" alt="EU AI Act readiness" height="110"> <img src="assets/compliance/wcag.svg" alt="WCAG 2.2 readiness" height="110"></p>
@@ -277,6 +290,7 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | `--scaffold [--write]` | create missing professional files |
 | `--export DIR` `--pdf` `--lang es\|en` `--out DIR` | outputs |
 | `--tools` `--run-tests` | semgrep/gitleaks/npm audit/pip-audit · run the project's own tests |
+| `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |
 | `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
 | `--fail-on SEV` `--verbose` `--quiet` `--color` | CI & output |
 
@@ -293,7 +307,7 @@ Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.13
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.14
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -314,4 +328,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 63 remediation guides · 14 skills · 14 compliance frameworks · 7 AI assistants · v1.0.13</sub></div>
+<div align="center"><sub>110 rules · 63 remediation guides · 14 skills · 14 compliance frameworks · 7 AI assistants · v1.0.14</sub></div>

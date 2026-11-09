@@ -3,6 +3,18 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.14] - 2026-11-08
+
+### Added
+- **Fix cards** `--show ID [--run DIR]`: a compact, copy-ready card for one finding (flagged code with line numbers, why, steps, bad/safe form, tested before/after, how to verify). Built for humans and for AI assistants that should read one passage instead of whole files.
+- **Offline knowledge-base search** `--kb "query"`: BM25 ranking over every remediation guide and the rule catalog (ID, title, CWE, OWASP). No network.
+- **MCP server** `--mcp` (stdio, JSON-RPC 2.0, stdlib only, read-only): tools `list_findings`, `get_fix_card`, `search_kb`, `get_summary`, `verify_corpus`. `--install-agent claude|cursor|all` registers it in `.mcp.json` / `.cursor/mcp.json` without touching other entries.
+- **Verified fix corpus** `examples/fixes/` (22 vulnerable -> fixed pairs across SQLi, XSS, command injection, deserialization, crypto, JWT, SSRF, IDOR, CORS, accessibility, Web3, fintech, SaaS, QA) with `--verify-corpus`; a unit test proves each rule fires on the flaw and stays silent on the fix, so CI guards both false negatives and false positives.
+- Tests: corpus, `--kb`/`--show`, MCP round-trip, MCP registration (20 total).
+
+### Changed
+- `AUTHZ-IDOR` no longer flags lookups already scoped through the current user (`$request->user()->orders()->findOrFail($id)`).
+
 ## [1.0.13] - 2026-11-08
 
 First public release. Everything below ships together in this version.

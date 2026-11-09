@@ -79,6 +79,19 @@ def _copy_skills(dest_root, home, force, log):
     log.append(f"  + {n} skills -> {dest_root}")
 
 
+def _mcp_entry(path, home, force, log):
+    """Register the read-only MCP server in a JSON config (mcpServers.pn-ultra-audit); never touch other entries."""
+    import json
+    cfg = {}
+    if os.path.isfile(path):
+        try: cfg = json.load(open(path, encoding="utf-8"))
+        except ValueError: log.append(f"  ! skipped MCP config (invalid JSON): {path}"); return
+    srv = cfg.setdefault("mcpServers", {})
+    if "pn-ultra-audit" in srv and not force: log.append(f"  = MCP already registered: {path}"); return
+    srv["pn-ultra-audit"] = dict(command="python3", args=[os.path.join(home, "audit.py"), "--mcp"])
+    os.makedirs(os.path.dirname(path), exist_ok=True); json.dump(cfg, open(path, "w", encoding="utf-8"), indent=2); log.append(f"  + MCP server -> {path}")
+
+
 def install(tools, scope, project, home, force=False):
     log, ok = [], True
     if not os.path.isdir(os.path.join(home, "skills")):
@@ -97,6 +110,7 @@ def install(tools, scope, project, home, force=False):
             base = os.path.join(H, ".claude") if user else os.path.join(P, ".claude")
             _copy_skills(os.path.join(base, "skills"), home, force, log)
             _write(os.path.join(base, "commands", "pn-audit.md"), cmd_body, force, log)
+            if not user: _mcp_entry(os.path.join(P, ".mcp.json"), home, force, log)
         elif t == "codex":
             base = os.path.join(H, ".agents") if user else os.path.join(P, ".agents")
             _copy_skills(os.path.join(base, "skills"), home, force, log)
@@ -105,6 +119,7 @@ def install(tools, scope, project, home, force=False):
             if user: log.append("  ! Cursor rules are project-scoped; installing user-level command only")
             else:
                 _write(os.path.join(P, ".cursor", "rules", "pn-ultra-audit.mdc"), f"---\ndescription: Use when the user asks to audit, review or inspect code, tests, docs, databases, servers, SEO or smart contracts\nglobs:\nalwaysApply: false\n---\n<!-- {MARK} -->\n{g}", force, log)
+            _mcp_entry(os.path.join(H if user else P, ".cursor", "mcp.json"), home, force, log)
             _write(os.path.join(H if user else P, ".cursor", "commands", "pn-audit.md"), f"<!-- {MARK} -->\n# PN-Ultra-Audit\n\nRun the audit in the terminal on the given path (default: current project) and follow the guide.\n\n{g}", force, log)
         elif t == "windsurf":
             if user: log.append("  ! Windsurf rules/workflows are written to the project folder (user-level paths vary by version)")

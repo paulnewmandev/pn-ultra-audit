@@ -12,13 +12,13 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.13"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.14"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -191,6 +191,12 @@ def main(argv=None):
     g.add_argument("--level", default="pro", choices=["beginner", "pro"], help="beginner: friendlier output, plain-language explanations, 'Start here' plan, balanced strictness unless you set --strictness")
     g.add_argument("--scaffold", action="store_true", help="create the professional files that are MISSING (.gitignore, .env.example, README, CI, pre-commit, SECURITY.md, docs/architecture.md). Dry-run unless --write; never overwrites")
     g.add_argument("--write", action="store_true", help="with --scaffold: actually write the files")
+    g = ap.add_argument_group("Fix retrieval (offline; token-saving for humans and AI assistants)")
+    g.add_argument("--show", metavar="ID", help="print a compact fix card for one finding (e.g. SEC-001) from the latest run (see --run)")
+    g.add_argument("--kb", metavar="QUERY", help="search the offline remediation knowledge base (e.g. --kb \"sql injection php\")")
+    g.add_argument("--run", metavar="DIR", help="run dir / audit-output dir / project dir to read for --show and --mcp (default: ./audit-output)")
+    g.add_argument("--mcp", action="store_true", help="serve results to AI assistants over MCP (stdio, read-only)")
+    g.add_argument("--verify-corpus", action="store_true", help="prove every tested vulnerable->fixed pair (rule fires, then stays silent)")
     g = ap.add_argument_group("AI coding assistants (install the skills / rules / commands)")
     g.add_argument("--install-agent", metavar="TOOL[,TOOL]", help="claude, codex, cursor, windsurf, kiro, opencode, trae, or all"); g.add_argument("--agent-scope", default="project", choices=["project", "user"], help="where to install (default: current project)"); g.add_argument("--agent-dir", help="project directory for --agent-scope project (default: cwd)"); g.add_argument("--force", action="store_true", help="overwrite files not created by PN-Ultra-Audit")
     g = ap.add_argument_group("Repositories & servers (GitHub, GitLab, Bitbucket, Azure DevOps, Gitea/Forgejo, Codeberg, self-hosted, FTP/FTPS/SFTP) - read-only")
@@ -220,6 +226,20 @@ def main(argv=None):
     if a.list_auditors:
         for k, v in detect.AUDITORS.items(): print(f"  {k:<9} {v}")
         print("\n  extra (flags): --db/--aws-rds (databases), --ssh (server), --url (live SEO), --git URL (repo), --history (git secrets), --tools, --run-tests"); return 0
+    if a.kb:
+        print(kbsearch.format_results(a.kb)); return 0
+    if a.verify_corpus:
+        r = corpus.verify(); bad = [x for x in r if not x["ok"]]
+        for x in r: print(f"  {'OK  ' if x['ok'] else 'FAIL'} {x['id']:<28} {x['rule']}")
+        print(f"\n{len(r) - len(bad)}/{len(r)} pairs verified"); return 1 if bad else 0
+    if a.mcp:
+        mcpserver.serve(a.run or a.path or os.getcwd()); return 0
+    if a.show:
+        run = kbsearch.latest_run(a.run or a.path or os.getcwd())
+        if not run: print("ERROR: no audit run found. Run `python3 audit.py <project>` first, or pass --run DIR.", file=sys.stderr); return 2
+        f = kbsearch.find(kbsearch.load_findings(run), a.show)
+        if not f: print(f"ERROR: finding {a.show} not found in the latest run.", file=sys.stderr); return 2
+        print(kbsearch.card(f)); return 0
     if a.install_agent:
         res = agents.install([x.strip() for x in a.install_agent.split(",") if x.strip()], a.agent_scope, os.path.abspath(a.agent_dir or os.getcwd()), HERE, a.force)
         for line in res["log"]: print(line)
