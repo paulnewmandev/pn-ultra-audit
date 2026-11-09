@@ -32,6 +32,7 @@ First public release. Everything below ships together in this version.
 
 ### Fixed (post-release)
 - `python -m unittest` now discovers the test suite (added `tests/__init__.py`; it previously ran 0 tests).
+- CI: pinned the runner to `ubuntu-24.04` (Python 3.9 is not available on `ubuntu-latest`/26.04), `fail-fast: false`, added Python 3.13 to the matrix.
 - `--install-agent` from a pip install now explains that skills ship only with the git clone instead of crashing.
 
 ### License
