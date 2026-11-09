@@ -1,6 +1,6 @@
 # PN-Ultra-Audit wiki
 
-**One read-only command that audits code, tests, docs, databases, servers/VPS, Vercel, PWA, SEO, crypto, SaaS/fintech and audit-readiness - live in your terminal, delivered as a dashboard.** Version 1.0.26.
+**One read-only command that audits code, tests, docs, databases, servers/VPS, Vercel, PWA, SEO, crypto, SaaS/fintech and audit-readiness - live in your terminal, delivered as a dashboard.** Version 1.0.27.
 
 ![Dashboard](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/dash-overview-dark.png)
 
@@ -12,6 +12,7 @@
 | Understand the report and the dashboard | [Reading the Report](Reading-the-Report) |
 | Choose how strict it is | [Strictness Levels](Strictness-Levels) |
 | Spend as few AI tokens as possible | [Save Tokens](Save-Tokens) |
+| Run it from the chat of your LLM (copy-paste prompts) | [Run from your LLM chat](Run-from-your-LLM-Chat) |
 | Audit a VPS (AWS, Azure, GCP, DigitalOcean, Hostinger...) | [Server and VPS Audit](Server-and-VPS-Audit) |
 | Audit a Vercel project | [Vercel Audit](Vercel-Audit) |
 | Audit a PWA | [PWA Audit](PWA-Audit) |

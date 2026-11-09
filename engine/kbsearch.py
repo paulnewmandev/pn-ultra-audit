@@ -114,13 +114,28 @@ def brief(run, top=10, label=None):
     rt = sm.get("ratings") or {}
     L = [f"PN-Ultra-Audit | {label or ''} | gate {sm.get('gate', '?')} | security {rt.get('security', '?')} reliability {rt.get('reliability', '?')} maintainability {rt.get('maintainability', '?')}",
          f"{len(conf)} confirmed ({', '.join(f'{cnt[k]} {k}' for k in order[:4])}) | {rev} to review | run: {os.path.basename(os.path.dirname(run))}/{os.path.basename(run)}"]
-    best = sorted(conf, key=lambda f: (order.index(f["severity"]) if f.get("severity") in order else 9, f.get("effort_min") or 0))[:top]
+    p0 = lambda f: 0 if (str(f.get("rule", "")).startswith("MAL-") and f.get("severity") in ("critical", "high")) or f.get("category") == "secrets" or f.get("family") == "repo-secrets" else 1   # phase 0 first
+    best = sorted(conf, key=lambda f: (p0(f), order.index(f["severity"]) if f.get("severity") in order else 9, f.get("effort_min") or 0))[:top]
     if best:
         L.append(f"TOP {len(best)}:")
         for f in best:
             loc = f.get("location") or {}
             L.append(f" {f['id']} {f.get('severity')} {f.get('rule')} {loc.get('file')}:{loc.get('line')} {str(f.get('title'))[:70]}")
-    extra = [n for n in ("server-fixes.sh", "repo-fixes.sh") if os.path.exists(os.path.join(run, n))]
+    # verdict lines the assistant needs without opening any report
+    mal = [f for f in fs if str(f.get("rule", "")).startswith("MAL-")]
+    mal_c = [f for f in mal if f.get("status") == "confirmed"]
+    sec = [f for f in conf if f.get("category") == "secrets" or f.get("family") == "repo-secrets"]
+    ai = [f for f in fs if str(f.get("rule", "")).startswith("AITRACE-")]
+    L.append("malware/backdoors: " + (f"{len(mal)} indicator(s) ({len(mal_c)} confirmed) - " + ", ".join(sorted({f['rule'] for f in mal})[:6]) if mal else "clean (static, not an antivirus)")
+             + f" | exposed secrets: {len(sec)} (names only, never values) | AI traces: {len(ai)}")
+    pj = os.path.join(run, "fix-plan.json")
+    if os.path.exists(pj):
+        try:
+            pl = _j.load(open(pj, encoding="utf-8"))
+            L.append("fix plan: " + " | ".join(f"{ph['title'].split(' · ')[0].replace('Phase ', 'P').replace('Fase ', 'P')} {ph['findings']}" for ph in pl.get("phases", [])) + f" | {os.path.join(run, 'fix-plan.md')}")
+        except (OSError, ValueError): pass
+    L.append(f"report: {os.path.join(run, 'report.html')}")
+    extra = [n for n in ("server-fixes.sh", "repo-fixes.sh", "cleanup-fixes.sh") if os.path.exists(os.path.join(run, n))]
     L.append("NEXT: --show <ID> --run <run dir> (one fix card) | --kb \"<topic>\" | " + (", ".join(extra) + " (review, never auto-run) | " if extra else "") + "do NOT read report.html / REPORT.md / findings.json in full")
     return "\n".join(L)
 

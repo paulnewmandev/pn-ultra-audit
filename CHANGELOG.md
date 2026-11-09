@@ -3,6 +3,12 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.27] - 2026-11-09
+
+### Added
+- README section **"Run it from your LLM chat"** (and wiki page *Run from your LLM chat*): the one-liner (`<repo URL> install it, run it and give me the report`), a **PRO prompt** in English and Spanish (safe install outside the project, one strictness question, structured report, token discipline, phased fixes only with approval) and ready-made variants: quick scan, suspected compromise/malware, pre-delivery polish, a GitHub repository and a VPS. Prompts live in `scripts/llm_prompts.py`; a test checks that every flag they use exists.
+- `--brief` now also prints the malware/backdoor verdict, exposed-secret count, AI-trace count, the fix-plan phase summary and the absolute path of `report.html` / `fix-plan.md`; exposed secrets and critical malware are listed first in the top findings.
+
 ## [1.0.26] - 2026-11-09
 
 ### Changed

@@ -6,6 +6,7 @@
 - [Reading the Report](Reading-the-Report)
 - [Strictness Levels](Strictness-Levels)
 - [Save Tokens](Save-Tokens)
+- [Run from your LLM chat](Run-from-your-LLM-Chat)
 
 **Audit targets**
 - [Server and VPS](Server-and-VPS-Audit)

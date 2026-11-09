@@ -10,7 +10,7 @@ from engine.kb import KB  # noqa: E402
 from engine.rules import RULES  # noqa: E402
 
 OUT = os.path.join(ROOT, "docs", "wiki"); os.makedirs(OUT, exist_ok=True)
-VER = "1.0.26"
+VER = "1.0.27"
 REPO = "https://github.com/paulnewmandev/pn-ultra-audit"
 IMG = "https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/"   # absolute: works on the GitHub wiki and in the repo
 P = {}  # page name -> markdown
@@ -27,6 +27,7 @@ P["Home"] = f"""# PN-Ultra-Audit wiki
 | Understand the report and the dashboard | [Reading the Report](Reading-the-Report) |
 | Choose how strict it is | [Strictness Levels](Strictness-Levels) |
 | Spend as few AI tokens as possible | [Save Tokens](Save-Tokens) |
+| Run it from the chat of your LLM (copy-paste prompts) | [Run from your LLM chat](Run-from-your-LLM-Chat) |
 | Audit a VPS (AWS, Azure, GCP, DigitalOcean, Hostinger...) | [Server and VPS Audit](Server-and-VPS-Audit) |
 | Audit a Vercel project | [Vercel Audit](Vercel-Audit) |
 | Audit a PWA | [PWA Audit](PWA-Audit) |
@@ -600,6 +601,10 @@ The pack is auto-discovered (also in the `--lang` choices); anything you skip fa
 """
 P["Home"] = P["Home"].replace("## Start here", f"![Dashboard]({IMG}dash-overview-dark.png)\n\n## Start here",1)
 P["_Sidebar"] = P["_Sidebar"].replace("- [Strictness Levels](Strictness-Levels)","- [Strictness Levels](Strictness-Levels)\n- [Save Tokens](Save-Tokens)",1)
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
+from llm_prompts import wiki_page
+P["Run-from-your-LLM-Chat"] = wiki_page()
+P["_Sidebar"] = P["_Sidebar"].replace("- [Save Tokens](Save-Tokens)", "- [Save Tokens](Save-Tokens)\n- [Run from your LLM chat](Run-from-your-LLM-Chat)", 1)
 
 for name, body in P.items(): open(os.path.join(OUT, name + ".md"), "w", encoding="utf-8").write(body.rstrip() + "\n")
 open(os.path.join(OUT, "README.md"), "w", encoding="utf-8").write(f"""# Wiki source
