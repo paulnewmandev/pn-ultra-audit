@@ -158,7 +158,7 @@ PIC = {
  "pci": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4" stroke-linejoin="round"><rect x="68" y="66" width="84" height="54" rx="9"/></g><path d="M68 80h84" stroke="{c}" stroke-width="9"/><rect x="78" y="94" width="20" height="14" rx="3" fill="none" stroke="#fff" stroke-width="3"/><path d="M106 101h36M106 109h22" stroke="#fff" stroke-opacity=".8" stroke-width="3.4" stroke-linecap="round"/><g transform="translate(126 96) scale(.62)" fill="#0a0f26" stroke="#fff" stroke-width="5" stroke-linejoin="round"><path d="M30 8l20 7v14c0 14-8 24-20 29-12-5-20-15-20-29V15z"/></g>',
  "nist": lambda c: "".join(f'<path d="M110 86 L{110 + 40 * _m.cos(a0):.1f} {86 + 40 * _m.sin(a0):.1f} A40 40 0 0 1 {110 + 40 * _m.cos(a0 + _m.pi / 3 - .06):.1f} {86 + 40 * _m.sin(a0 + _m.pi / 3 - .06):.1f} Z" fill="{col}" fill-opacity=".9"/>' for a0, col in zip([-_m.pi / 2 + k * _m.pi / 3 for k in range(6)], ["#8b5cf6", "#6366f1", "#3b82f6", "#22d3ee", "#34d399", "#a3e635"])) + '<circle cx="110" cy="86" r="14" fill="#0a0f26" stroke="#fff" stroke-width="3"/><path d="M104 86l4 4 8-9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
  "dora": lambda c: _stars(110, 86, 40, 12, 5.4) + f'<g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M82 100h56M86 100V80M98 100V80M110 100V80M122 100V80M134 100V80M80 80h60L110 62z"/></g><path d="M82 100h56" stroke="{c}" stroke-width="3.6" stroke-linecap="round"/>',
- "euai": lambda c: '<path d="M72 60a46 46 0 0 1 76 0" fill="none"/>' + _stars(110, 90, 44, 12, 5.0).replace("fill=\"#ffcc33\"", "fill=\"#ffcc33\"") + f'<g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><rect x="92" y="72" width="36" height="36" rx="6" fill="#0a0f26"/><rect x="101" y="81" width="18" height="18" rx="3" stroke="{c}"/><path d="M99 72v-6M110 72v-6M121 72v-6M99 108v6M110 108v6M121 108v6M92 81h-6M92 90h-6M92 99h-6M128 81h6M128 90h6M128 99h6"/></g><path d="M110 85l1.6 3.7 3.7 1.6-3.7 1.6L110 96l-1.6-3.7-3.7-1.6 3.7-1.6z" fill="#fff"/>',
+ "euai": lambda c: _stars(110, 82, 41, 12, 4.6) + f'<g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="88" y="60" width="44" height="44" rx="7" fill="#0a0f26"/><rect x="99" y="71" width="22" height="22" rx="4" stroke="{c}" fill="{c}" fill-opacity=".25"/><path d="M99 60v-7M110 60v-7M121 60v-7M99 104v7M110 104v7M121 104v7M88 71h-7M88 82h-7M88 93h-7M132 71h7M132 82h7M132 93h7"/></g><path d="M110 74l2.2 5.2 5.2 2.2-5.2 2.2-2.2 5.2-2.2-5.2-5.2-2.2 5.2-2.2z" fill="#fff"/>',
  "wcag": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4"><circle cx="110" cy="86" r="38"/></g><g fill="#fff"><circle cx="110" cy="68" r="6.2"/><path d="M84 80c18 5 34 5 52 0l1.6 7c-8 2.6-15 3.6-21.6 4v10l7 19-8 3-8-18-8 18-8-3 7-19V91c-6.6-.4-13.6-1.4-21.6-4z"/></g>',
 }
 ACCENT = {"soc2": "#4f8cff", "iso27001": "#14b8a6", "hipaa": "#f43f5e", "gdpr": "#5b8def", "pci": "#f59e0b", "nist": "#8b5cf6", "dora": "#38bdf8", "euai": "#818cf8", "wcag": "#34d399"}
@@ -171,3 +171,24 @@ for name, slug in FWS:
 <rect x="32" y="138" width="156" height="34" rx="17" fill="url(#b)"/><text x="110" y="160.5" text-anchor="middle" font-family="Inter,'Segoe UI',Helvetica,Arial,sans-serif" font-size="{fs:.1f}" font-weight="800" fill="#0a0f26">{name}</text>
 <text x="110" y="193" text-anchor="middle" font-family="Inter,'Segoe UI',Helvetica,Arial,sans-serif" font-size="10" font-weight="700" letter-spacing="2.2" fill="#9fb0ff">READINESS</text></svg>''')
 print("compliance badges:", len(FWS))
+
+
+# ───────── status badges (README header) — same style as the technology badges
+def status(label, value, color, glyph, fn, ink="#ffffff"):
+    cw = 38; tl = len(label) * 7.0 + 12; tv = len(value) * 7.6 + 14; w = cw + tl + tv
+    svg = (f'<svg xmlns="http://www.w3.org/2000/svg" width="{w:.0f}" height="30" viewBox="0 0 {w:.0f} 30" role="img" aria-label="{label}: {value}"><defs><linearGradient id="s" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-opacity=".12"/></linearGradient></defs>'
+           f'<rect width="{w:.0f}" height="30" rx="8" fill="#161b33"/><rect x="{cw + tl:.0f}" width="{tv:.0f}" height="30" rx="8" fill="{color}" fill-opacity=".22"/><rect x="{cw + tl:.0f}" width="8" height="30" fill="#161b33"/><rect x="{cw + tl:.0f}" width="8" height="30" fill="{color}" fill-opacity=".22"/>'
+           f'<rect width="{cw}" height="30" rx="8" fill="{color}"/><rect x="{cw - 8}" width="8" height="30" fill="{color}"/><rect width="{w:.0f}" height="30" rx="8" fill="url(#s)"/>'
+           f'<g transform="translate({cw / 2 - 8:.1f},7) scale(.667)" fill="none" stroke="{ink}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">{glyph}</g>'
+           f'<text x="{cw + 8}" y="19.5" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" font-weight="600" fill="#9fb0ff">{label}</text>'
+           f'<text x="{cw + tl + 7:.0f}" y="19.5" font-family="Inter,Segoe UI,Helvetica,Arial,sans-serif" font-size="13" font-weight="700" fill="#f4f6ff">{value}</text></svg>')
+    W(f"badges/{fn}", svg)
+import re as _re
+_ver = _re.search(r'VER\s*=\s*"([^"]+)"', open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "build_readme.py")).read()).group(1)
+status("Version", _ver, "#8b5cf6", '<path d="M3 12l9-9h8v8l-9 9z"/><circle cx="15.5" cy="8.5" r="1.4"/>', "st-version.svg")
+status("License", "GPL-3.0", "#06b6d4", '<path d="M12 3v18M5 7h14M5 7l-3 7a3.5 3 0 0 0 6 0zM19 7l-3 7a3.5 3 0 0 0 6 0zM8 21h8"/>', "st-license.svg", "#0b1020")
+status("Python", "3.9+", "#3b82f6", '<path d="M12 3c-4 0-4 1.5-4 3v2h4v1H6c-2 0-3 2-3 4s1 4 3 4h2v-3c0-2 1-3 3-3h4c1.500 0 2.500-1 2.500-2.500V6c0-1.500-2-3-5.500-3z"/><path d="M12 21c4 0 4-1.500 4-3v-2h-4v-1h6c2 0 3-2 3-4s-1-4-3-4h-2v3c0 2-1 3-3 3H9c-1.500 0-2.500 1-2.500 2.500V18c0 1.500 2 3 5.500 3z"/>', "st-python.svg")
+status("Dependencies", "0", "#34d399", '<path d="M12 3l8 4.500v9L12 21l-8-4.500v-9z"/><path d="M4 7.500l8 4.500 8-4.500M12 12v9"/>', "st-deps.svg", "#0b1020")
+status("Target", "read-only", "#f59e0b", '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>', "st-readonly.svg", "#0b1020")
+status("PRs", "welcome", "#ec4899", '<circle cx="6" cy="6" r="2.500"/><circle cx="6" cy="18" r="2.500"/><circle cx="18" cy="18" r="2.500"/><path d="M6 8.500v7M18 15.500V10a3 3 0 0 0-3-3h-3m2-3l-2 3 2 3"/>', "st-prs.svg")
+print("status badges: 6")

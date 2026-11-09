@@ -4,12 +4,12 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-1.0.17-8b5cf6?style=for-the-badge)](CHANGELOG.md)
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-22d3ee?style=for-the-badge)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.9%2B-3b82f6?style=for-the-badge)](#install)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-34d399?style=for-the-badge)](#install)
-[![Read-only](https://img.shields.io/badge/target-read--only-f59e0b?style=for-the-badge)](#safety--privacy)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-ec4899?style=for-the-badge)](CONTRIBUTING.md)
+[![Version](assets/badges/st-version.svg)](CHANGELOG.md)
+[![License: GPL-3.0](assets/badges/st-license.svg)](LICENSE)
+[![Python 3.9+](assets/badges/st-python.svg)](#install)
+[![Dependencies: 0](assets/badges/st-deps.svg)](#install)
+[![Read-only target](assets/badges/st-readonly.svg)](#safety--privacy)
+[![PRs welcome](assets/badges/st-prs.svg)](CONTRIBUTING.md)
 
 ### One command. Fourteen lenses. Live in your terminal, delivered as a dashboard.
 
@@ -424,7 +424,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.17
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.18
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -445,4 +445,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 77 remediation guides · 18 skills · 14 compliance frameworks · 7 AI assistants · v1.0.17</sub></div>
+<div align="center"><sub>110 rules · 77 remediation guides · 18 skills · 14 compliance frameworks · 7 AI assistants · v1.0.18</sub></div>

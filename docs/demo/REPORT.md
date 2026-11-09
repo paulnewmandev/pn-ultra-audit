@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.17
+- **Tool:** PN-Ultra-Audit 1.0.18
 
 ## Contents
 
@@ -2845,7 +2845,7 @@ url = request.args.get("url")
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.17 |
+| tool_version | 1.0.18 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |

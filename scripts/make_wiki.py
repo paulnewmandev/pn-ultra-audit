@@ -10,7 +10,7 @@ from engine.kb import KB  # noqa: E402
 from engine.rules import RULES  # noqa: E402
 
 OUT = os.path.join(ROOT, "docs", "wiki"); os.makedirs(OUT, exist_ok=True)
-VER = "1.0.17"
+VER = "1.0.18"
 REPO = "https://github.com/paulnewmandev/pn-ultra-audit"
 IMG = "https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/"   # absolute: works on the GitHub wiki and in the repo
 P = {}  # page name -> markdown

@@ -8,19 +8,19 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.17"
+VER = "1.0.18"
 R = f'''<div align="center">
 
 <img src="assets/banner.svg" alt="PN-Ultra-Audit - audit everything, ship with confidence" width="100%">
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-{VER}-8b5cf6?style=for-the-badge)](CHANGELOG.md)
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-22d3ee?style=for-the-badge)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.9%2B-3b82f6?style=for-the-badge)](#install)
-[![Dependencies](https://img.shields.io/badge/dependencies-0-34d399?style=for-the-badge)](#install)
-[![Read-only](https://img.shields.io/badge/target-read--only-f59e0b?style=for-the-badge)](#safety--privacy)
-[![PRs welcome](https://img.shields.io/badge/PRs-welcome-ec4899?style=for-the-badge)](CONTRIBUTING.md)
+[![Version](assets/badges/st-version.svg)](CHANGELOG.md)
+[![License: GPL-3.0](assets/badges/st-license.svg)](LICENSE)
+[![Python 3.9+](assets/badges/st-python.svg)](#install)
+[![Dependencies: 0](assets/badges/st-deps.svg)](#install)
+[![Read-only target](assets/badges/st-readonly.svg)](#safety--privacy)
+[![PRs welcome](assets/badges/st-prs.svg)](CONTRIBUTING.md)
 
 ### One command. Fourteen lenses. Live in your terminal, delivered as a dashboard.
 
