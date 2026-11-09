@@ -182,32 +182,39 @@ A full sample report is published in [`docs/demo/`](docs/demo/) (open `docs/demo
 
 ```mermaid
 flowchart LR
-    A[Target<br/>folder · git · ssh · ftp · db · url] --> B[Detect project type<br/>backend · frontend · mobile · db · web · web3 · saas/fintech]
-    B --> C{Plan: only the auditors that apply}
-    C --> D1[security]
+    A[Target<br/>folder · git · ssh / VPS · ftp · db · url · Vercel API] --> B[Detect project type<br/>backend · frontend · mobile · db · web · pwa · vercel · web3 · saas/fintech]
+    B --> C{Plan: only the auditors that apply<br/>malware + AI traces always run}
+    C --> D1[security + repo keys / history / CI]
     C --> D2[quality + docs + architecture]
-    C --> D3[tests + QA web/mobile]
-    C --> D4[seo / sem]
+    C --> D3[tests + QA web/mobile + PWA]
+    C --> D4[seo / sem + vercel]
     C --> D5[web3]
-    C --> D6[databases / servers]
+    C --> D6[databases / servers / cloud VPS]
     C --> D7[domain deep-dive]
-    D1 & D2 & D3 & D4 & D5 & D6 & D7 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
+    C --> D8[malware and backdoors]
+    C --> D9[AI traces - project finish]
+    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
     E --> F[Roadmap + Audit readiness + SBOM]
-    F --> G[Dashboard HTML · REPORT.md · SARIF · JSON · PDF · Evidence pack]
+    F --> G[Dashboard HTML · REPORT.md · SARIF · JSON · PDF · Evidence pack<br/>9 languages · brand colors and logo]
+    F --> H[Fix scripts - generated, never executed<br/>repo-fixes.sh · server-fixes.sh · cleanup-fixes.sh]
 ```
 
 ```mermaid
 flowchart TB
     subgraph engine
-      scanner[scanner.py<br/>110 rules · taint look-back · metrics] --- docs[docs.py<br/>docstrings · complexity · cycles]
-      qa[qa.py<br/>web + mobile QA] --- seo[seo.py / seo_free.py]
+      scanner[scanner.py + lex.py + pycheck.py<br/>110 rules · taint look-back · metrics] --- docs[docs.py<br/>docstrings · complexity · cycles]
+      qa[qa.py + pwa.py<br/>web, mobile and PWA] --- seo[seo.py / seo_free.py]
       web3[web3.py] --- domain[domain.py<br/>saas · fintech]
-      dbaudit[dbaudit.py] --- remote[remote.py / aws.py]
-      gitsrc[gitsrc.py] --- ftpsrc[ftpsrc.py]
+      repo[repo.py + gitsrc.py + ftpsrc.py<br/>keys · history · CI/CD] --- vercel[vercel.py<br/>config · live · API]
+      malware[malware.py<br/>webshells · revshells · miners · stealers] --- aitrace[aitrace.py<br/>AI comments · agent files · trailers]
+      dbaudit[dbaudit.py] --- remote[remote.py / remote_extra.py / aws.py<br/>VPS · cloud · k8s · containers]
       roadmap[roadmap.py] --- compliance[compliance.py / sbom.py / policies.py]
+      kb[kb*.py + i18n.py<br/>remediation guides · 9 languages] --- fixes[repofix.py / serverfix.py / cleanfix.py<br/>reviewable fix scripts]
     end
-    engine --> render[render_report.py + dashboard.py]
+    engine --> render[render_report.py + dashboard.py<br/>fwart.py · techlogos.py · sources.py]
+    engine --> ai[kbsearch.py + mcpserver.py + agents.py<br/>token-saving brief for AI assistants]
     render --> out[(audit-output/run-N)]
+    fixes --> out
 ```
 
 ## What it audits
@@ -430,7 +437,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.24
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.25
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -451,4 +458,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 94 remediation guides · 20 skills · 14 compliance frameworks · 7 AI assistants · v1.0.24</sub></div>
+<div align="center"><sub>110 rules · 94 remediation guides · 20 skills · 14 compliance frameworks · 7 AI assistants · v1.0.25</sub></div>

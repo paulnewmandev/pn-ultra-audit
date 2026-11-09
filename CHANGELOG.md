@@ -3,6 +3,11 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.25] - 2026-11-09
+
+### Changed
+- README: both mermaid diagrams (flow and engine modules) now include PWA, Vercel, repo/history/CI, malware, AI traces, VPS/cloud, the fix-script generators and the AI-assistant brief; banner chips list the new lenses; terminal demo and screenshots refreshed.
+
 ## [1.0.24] - 2026-11-09
 
 ### Added

@@ -43,7 +43,7 @@ W("wordmark.svg", f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1
 <text x="163" y="112" font-family="Inter,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif" font-size="17" font-weight="600" letter-spacing="4.2" fill="#8a94b8">AUDIT EVERYTHING · SHIP WITH CONFIDENCE</text></svg>''')
 
 # ───────── hero banner
-chips = ["Security", "Bugs", "Code Quality", "Docs &amp; Standards", "QA · Web &amp; Mobile", "SEO · SEM", "Databases", "Servers · SSH", "Crypto · Web3", "Git"]
+chips = ["Security", "Bugs", "Code Quality", "Docs &amp; Standards", "QA · Web &amp; Mobile", "SEO · SEM", "PWA", "Vercel", "Repo &amp; Keys", "Malware", "AI Traces", "Databases", "Servers · VPS", "Crypto · Web3"]
 cx, cy, ch = 70, 380, []
 for t in chips:
     w = 44 + len(t.replace("&amp;", "&")) * 8.8
@@ -66,7 +66,7 @@ W("banner.svg", f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 52
 <svg x="60" y="64" width="150" height="150" viewBox="0 0 256 256">{mark(150, "h").split(chr(10), 1)[1].rsplit("</svg>", 1)[0]}</svg>
 <text x="232" y="132" font-family="Inter,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif" font-size="84" font-weight="800" letter-spacing="1" fill="url(#bn)">PN-Ultra-Audit</text>
 <text x="236" y="176" font-family="Inter,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="500" fill="#c3cdf5">One command to audit code, tests, docs, architecture,</text>
-<text x="236" y="208" font-family="Inter,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="500" fill="#c3cdf5">databases, servers, SEO and smart contracts -</text>
+<text x="236" y="208" font-family="Inter,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="500" fill="#c3cdf5">databases, servers, malware, SEO and smart contracts -</text>
 <text x="236" y="240" font-family="Inter,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif" font-size="24" font-weight="500" fill="#c3cdf5">live in your terminal, delivered as a dashboard.</text>
 <text x="70" y="316" font-family="'SF Mono',Menlo,Consolas,monospace" font-size="21" fill="#22d3ee">$ python3 audit.py . --export docs --pdf</text>
 <text x="70" y="362" font-family="Inter,Segoe UI,Arial" font-size="12" letter-spacing="3.5" font-weight="700" fill="#8a94b8">COVERAGE</text>
