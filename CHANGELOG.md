@@ -3,6 +3,12 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.22] - 2026-11-09
+
+### Changed
+- Dashboard: every total/circle/chart now shares the same elegant style: redesigned health gauge (gradient arc + ticks), severity donut in the executive report, fix-progress card (ring + status pills) and the Roadmap / domain dimension headers (ring + icon + status word). The old plain donut was removed.
+- Detected stack (languages, frameworks, databases) is shown as badges with the **original logo** (Simple Icons data via `engine/techlogos.py`; monogram chip when a logo is not available) in Languages & effort, Metrics and the executive summary.
+
 ## [1.0.21] - 2026-11-09
 
 ### Fixed
