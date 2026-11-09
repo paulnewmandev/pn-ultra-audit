@@ -285,6 +285,26 @@ class Smoke(unittest.TestCase):
             blob = open(os.path.join(o, "r", "run-1", "findings.json"), encoding="utf-8").read() + open(os.path.join(o, "r", "run-1", "report.html"), encoding="utf-8").read()
             self.assertNotIn("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH", blob); self.assertNotIn("AKIAABCDEFGHIJKLMNOP", blob)
 
+    def test_active_chips_and_buttons_have_readable_contrast(self):
+        """Brand colors from the audited project (even very light ones) must never produce unreadable text on active chips, tabs and primary buttons."""
+        chrome = self._chrome()
+        if not chrome: self.skipTest("Chrome/Chromium not available")
+        with tempfile.TemporaryDirectory() as o:
+            for name, color in (("light", "#b3f0ff"), ("mid", "#22d3ee"), ("dark", "#111111"), ("purple", "#7c3aed")):
+                d = os.path.join(o, name); os.makedirs(d)
+                open(os.path.join(d, "a.css"), "w").write(":root{--primary:%s}\n" % color); open(os.path.join(d, "app.py"), "w").write("import os\nos.system('ls ' + input())\n")
+                run(d, "--out", os.path.join(o, "r" + name), "--color", "never", "--lang", "es")
+                rp = os.path.join(o, "r" + name, "run-1", "report.html"); h = open(rp, encoding="utf-8").read()
+                js = """<script>setTimeout(function(){function lum(c){var m=c.match(/[\\d.]+/g).map(Number);var f=function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};return 0.2126*f(m[0])+0.7152*f(m[1])+0.0722*f(m[2])}
+                function cr(a,b){var x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)}
+                var out=[];document.documentElement.dataset.theme='dark';var chip=document.querySelector('.chip');chip.click();chip=document.querySelector('.chip.on');var cs=getComputedStyle(chip);out.push('chip='+cr(cs.color,cs.backgroundColor).toFixed(2));
+                var b=document.querySelector('.btn.primary')||null;if(b){var bs=getComputedStyle(b);out.push('btn='+cr(bs.color,bs.backgroundColor).toFixed(2))}
+                document.documentElement.dataset.theme='light';var cs2=getComputedStyle(document.querySelector('.chip.on'));out.push('chipL='+cr(cs2.color,cs2.backgroundColor).toFixed(2));
+                document.title='RESULT|'+out.join(';');},700);</script>"""
+                tp = os.path.join(o, "r" + name, "run-1", "t.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
+                res = dict(kv.split("=", 1) for kv in self._dom_title(chrome, tp, "v=issues").split(";"))
+                for k, v in res.items(): self.assertGreaterEqual(float(v), 4.4, f"{name} {color}: {k} contrast {v}")
+
     def test_report_has_static_fallback(self):
         """The HTML must show content even when scripts are blocked or fail (no header-only reports)."""
         with tempfile.TemporaryDirectory() as o:
