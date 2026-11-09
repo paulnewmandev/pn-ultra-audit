@@ -3,6 +3,11 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.21] - 2026-11-09
+
+### Fixed
+- CI: remove unused imports in `scripts/make_assets.py` that failed `ruff check` on the 1.0.19/1.0.20 pushes.
+
 ## [1.0.20] - 2026-11-09
 
 ### Changed

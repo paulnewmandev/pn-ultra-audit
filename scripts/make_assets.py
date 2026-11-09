@@ -142,7 +142,7 @@ print("assets written:", len(os.listdir(A)), "root files;", len(os.listdir(os.pa
 # Inspired by each framework's common visual language; NOT the official marks, and they say "readiness", never "certified".
 os.makedirs(os.path.join(A, "compliance"), exist_ok=True)
 import sys; sys.path.insert(0, ROOT)
-from engine.fwart import _stars, SHIELD, PIC, ACCENT
+from engine.fwart import PIC, ACCENT
 
 FWS = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 for name, slug in FWS:
