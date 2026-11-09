@@ -3,6 +3,12 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.23] - 2026-11-09
+
+### Changed
+- Dashboard: cards and data tables for which the project has no data (empty "No data" boxes, empty coverage/cycles/OWASP/SEO tables, empty grids) are hidden instead of shown. Finding lists with no results keep their "all clear" message.
+- Architecture view redesigned: KPI row, layer stack with own icons and connectors, stack & components with original-logo badges, module size bars with findings, iconed card headers.
+
 ## [1.0.22] - 2026-11-09
 
 ### Changed

@@ -77,7 +77,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.22", run("--version").stdout)
+        self.assertIn("1.0.23", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")
@@ -375,6 +375,18 @@ class Smoke(unittest.TestCase):
             js = """<script>setTimeout(function(){viewerOpen('app/big.log',1)},400);setTimeout(function(){var v=document.getElementById('viewer');document.title='RESULT|lazy='+(v.querySelectorAll('.cl').length>50)},1500);</script>"""
             tp = os.path.join(rd, "tv.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
             self.assertEqual(self._dom_title(chrome, tp, "v=overview"), "lazy=true")
+
+    def test_empty_cards_and_data_tables_are_hidden_but_clean_lists_stay(self):
+        """A project without data for a card/data table does not show an empty 'No data' box; finding lists keep their 'all clear' state."""
+        chrome = self._chrome()
+        if not chrome: self.skipTest("Chrome/Chromium not available")
+        with tempfile.TemporaryDirectory() as o:
+            d = os.path.join(o, "p"); os.makedirs(os.path.join(d, "src")); open(os.path.join(d, "src", "a.py"), "w").write("print(1)\n")
+            run(d, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en")
+            rd = os.path.join(o, "r", "run-1"); h = open(rd + "/report.html", encoding="utf-8").read()
+            js = """<script>setTimeout(function(){var m=document.getElementById('main'),o=[];ST.view='overview';render();o.push('ov='+m.querySelectorAll('.card .empty.mini').length);ST.view='issues';render();o.push('is='+m.querySelectorAll('.empty').length);document.title='RESULT|'+o.join(';')},600);</script>"""
+            tp = os.path.join(rd, "te.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
+            self.assertEqual(self._dom_title(chrome, tp, "v=overview"), "ov=0;is=1")
 
     def test_report_has_static_fallback(self):
         """The HTML must show content even when scripts are blocked or fail (no header-only reports)."""
