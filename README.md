@@ -296,7 +296,7 @@ git clone https://github.com/paulnewmandev/pn-ultra-audit
 cd pn-ultra-audit && python3 audit.py --version        # 1.0.13
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
-Python 3.9+ (developed and tested on 3.11), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
+`pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
 
 ## Limits (read them)
 

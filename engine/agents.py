@@ -81,6 +81,10 @@ def _copy_skills(dest_root, home, force, log):
 
 def install(tools, scope, project, home, force=False):
     log, ok = [], True
+    if not os.path.isdir(os.path.join(home, "skills")):
+        return dict(ok=False, log=["The skills/ folder was not found next to audit.py (a pip install only ships the CLI).",
+                                   "Use a git clone to install skills/rules for AI assistants:",
+                                   "  git clone https://github.com/paulnewmandev/pn-ultra-audit && python3 pn-ultra-audit/audit.py --install-agent all --agent-dir ."])
     if "all" in tools: tools = list(TOOLS)
     bad = [t for t in tools if t not in TOOLS]
     if bad: return dict(ok=False, log=[f"unknown tool(s): {', '.join(bad)} (valid: {', '.join(TOOLS)}, all)"])

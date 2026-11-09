@@ -30,6 +30,10 @@ First public release. Everything below ships together in this version.
 ### Changed (post-release polish)
 - README: screenshot gallery re-laid out - uniform 1500x940 thumbnails in a captioned two-column grid, terminal captures in collapsible groups.
 
+### Fixed (post-release)
+- `python -m unittest` now discovers the test suite (added `tests/__init__.py`; it previously ran 0 tests).
+- `--install-agent` from a pip install now explains that skills ship only with the git clone instead of crashing.
+
 ### License
 - GPL-3.0 (as configured on the repository).
 
