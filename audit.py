@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import vercel as vercelmod, repo as repomod, repofix, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.16"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.17"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -242,11 +242,18 @@ def main(argv=None):
     g = ap.add_argument_group("Vercel (serverless platform: audited through project config, the live site and the read-only API)")
     g.add_argument("--vercel-project", metavar="NAME", help="audit project settings and env-var metadata via the Vercel API (read-only; token from env VERCEL_TOKEN; needs --authorized)")
     g.add_argument("--vercel-team", metavar="TEAM_ID", help="team id/slug that owns the project"); g.add_argument("--vercel-token-env", default="VERCEL_TOKEN", help="env var holding the Vercel token (never pass tokens on the command line)")
+    g = ap.add_argument_group("Report")
+    g.add_argument("--embed-source", default="auto", choices=["auto", "findings", "none"], help="source code embedded in report.html for the read-only code viewer: auto (all text files within the budget, files with findings first) | findings (only files with findings) | none. Secrets are masked; .env/keys/state files are never embedded")
+    g.add_argument("--embed-budget", type=float, default=5.0, metavar="MB", help="size budget for embedded source (default 5 MB; files with findings are always included up to 2x)")
     ap.add_argument("--authorized", action="store_true", help="REQUIRED for --ssh / --aws-rds / remote DBs / --url: you own or are allowed to assess them")
     ap.add_argument("--fail-on", choices=SEV, help="exit 1 if a NEW confirmed finding is at/above this severity (CI)")
+    g = ap.add_argument_group("Token saving (for AI assistants and quick looks)")
+    g.add_argument("--brief", action="store_true", help="print only a ~40-line summary (gate, ratings, counts, top findings, next commands) instead of the live UI; implies --quiet --color never")
+    g.add_argument("--top", type=int, default=10, metavar="N", help="findings listed by --brief (default 10)")
     ap.add_argument("--color", default="auto", choices=["auto", "always", "never"]); ap.add_argument("--verbose", action="store_true", help="stream every finding (incl. low and to-review)"); ap.add_argument("--quiet", action="store_true"); ap.add_argument("--version", action="version", version=f"{NAME} {VERSION}")
     a = ap.parse_args(argv)
     a.lang = i18n.resolve(a.lang); PACK = i18n.load(a.lang); PX = PACK.get("x", {})
+    if a.brief: a.quiet = True; a.color = "never"
     es = a.lang == "es"; N = lambda x, y: x if es else PX.get(y, y)
     if a.list_auditors:
         for k, v in detect.AUDITORS.items(): print(f"  {k:<9} {v}")
@@ -679,6 +686,12 @@ def main(argv=None):
                 with open(os.path.join(run_dir, "server-fixes.sh"), "w", encoding="utf-8") as fh_: fh_.write(sfx)
                 meta["notes"].append(N("Se generó server-fixes.sh (revísalo antes; la herramienta nunca lo ejecuta): `sudo bash server-fixes.sh list`.", "server-fixes.sh was generated (review it first; the tool never runs it): `sudo bash server-fixes.sh list`."))
         except Exception as ex_: meta["notes"].append(f"server-fixes.sh not generated: {str(ex_)[:60]}")
+    try:
+        src_ = sourcesmod.collect(scan_root, files, findings, a.embed_source, int(a.embed_budget * 1_000_000), lambda l: mask_secret_line(scrub(l))) if (files and scan_root and a.embed_source != "none") else {}
+    except Exception as ex_: src_ = {}; meta["notes"].append(f"source viewer data not embedded: {str(ex_)[:60]}")
+    if src_:
+        json.dump(src_, open(os.path.join(run_dir, "sources.json"), "w", encoding="utf-8"), ensure_ascii=False)
+        metrics["sources"] = dict(files=sum(1 for v in src_.values() if v.get("t") is not None), omitted=sum(1 for v in src_.values() if v.get("t") is None), bytes=sum(len(v.get("t") or "") for v in src_.values()))
     for k, v in (("findings.json", findings), ("metrics.json", metrics), ("run-metadata.json", meta), ("owasp-matrix.json", owasp_matrix(findings))):
         json.dump(v, open(os.path.join(run_dir, k), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
     json.dump([{"unit": u["unit"], "pass": u["pass_"], "state": u["state"], "note": u.get("note", "")} for u in ledger], open(os.path.join(run_dir, "coverage-ledger.json"), "w", encoding="utf-8"), indent=2)
@@ -725,6 +738,7 @@ def main(argv=None):
         for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + tuple((fn_, d_) for fn_, d_ in (("server-fixes.sh", "server fix script"), ("repo-fixes.sh", "repo fix script")) if os.path.exists(os.path.join(run_dir, fn_))): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
         print()
     ui.verdict(comp["gate_pass"], f"Quality Gate {'PASSED' if comp['gate_pass'] else 'FAILED'}")
+    if a.brief: print(kbsearch.brief(run_dir, a.top, label))
     ui.finish(N("Auditoría completa", "Audit complete"))
     if a.fail_on and any(RANK[f["severity"]] <= RANK[a.fail_on] for f in new_conf): return 1
     return 0

@@ -16,3 +16,7 @@ PN-Ultra-Audit was designed after studying these open-source projects. **No code
 
 Complementary open-source SEO tools worth knowing: SEOnaut (MIT), Greenflare (GPL), LibreCrawl, SiteOne Crawler, advertools, SerpBear (MIT).
 Framework and standard names (SOC 2, ISO/IEC 27001, HIPAA, PCI DSS, GDPR, NIST CSF, DORA, EU AI Act, WCAG, OWASP, CIS, SOX, NYDFS, PSD2) belong to their owners; this project is not affiliated with them.
+
+## Logos
+
+Technology badges use the logos from [Simple Icons](https://simpleicons.org) (data under CC0-1.0, cached in `assets/logos/`). The logos are trademarks of their respective owners and appear only to identify the languages, databases, platforms and clouds PN-Ultra-Audit supports; no endorsement is implied. The compliance-readiness badges are original artwork inspired by each framework's common visual language - they are **not** the official marks and never claim certification.

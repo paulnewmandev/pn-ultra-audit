@@ -38,7 +38,7 @@
   ],
   [
    "C#",
-   "lang-c.svg"
+   "lang-csharp.svg"
   ],
   [
    "C",
@@ -46,7 +46,7 @@
   ],
   [
    "C++",
-   "lang-c.svg"
+   "lang-cplusplus.svg"
   ],
   [
    "Ruby",
@@ -170,7 +170,7 @@
   ],
   [
    "F#",
-   "lang-f.svg"
+   "lang-fsharp.svg"
   ],
   [
    "OCaml",
@@ -217,6 +217,10 @@
   [
    "AWS RDS",
    "db-awsrds.svg"
+  ],
+  [
+   "Elasticsearch",
+   "db-elasticsearch.svg"
   ]
  ],
  "platforms": [
@@ -287,6 +291,114 @@
   [
    "GitHub Actions",
    "plat-githubactions.svg"
+  ],
+  [
+   "Vercel",
+   "plat-vercel.svg"
+  ],
+  [
+   "Netlify",
+   "plat-netlify.svg"
+  ]
+ ],
+ "clouds": [
+  [
+   "AWS",
+   "cloud-aws.svg"
+  ],
+  [
+   "Azure",
+   "cloud-azure.svg"
+  ],
+  [
+   "Google Cloud",
+   "cloud-googlecloud.svg"
+  ],
+  [
+   "DigitalOcean",
+   "cloud-digitalocean.svg"
+  ],
+  [
+   "Hostinger",
+   "cloud-hostinger.svg"
+  ],
+  [
+   "Hetzner",
+   "cloud-hetzner.svg"
+  ],
+  [
+   "Vultr",
+   "cloud-vultr.svg"
+  ],
+  [
+   "Linode",
+   "cloud-linode.svg"
+  ],
+  [
+   "OVHcloud",
+   "cloud-ovhcloud.svg"
+  ],
+  [
+   "Cloudflare",
+   "cloud-cloudflare.svg"
+  ],
+  [
+   "Vercel",
+   "cloud-vercel.svg"
+  ],
+  [
+   "Netlify",
+   "cloud-netlify.svg"
+  ]
+ ],
+ "servers": [
+  [
+   "nginx",
+   "srv-nginx.svg"
+  ],
+  [
+   "Apache",
+   "srv-apache.svg"
+  ],
+  [
+   "Redis",
+   "srv-redis.svg"
+  ],
+  [
+   "Apache Kafka",
+   "srv-apachekafka.svg"
+  ],
+  [
+   "RabbitMQ",
+   "srv-rabbitmq.svg"
+  ],
+  [
+   "Elasticsearch",
+   "srv-elasticsearch.svg"
+  ],
+  [
+   "Docker",
+   "srv-docker.svg"
+  ],
+  [
+   "Kubernetes",
+   "srv-kubernetes.svg"
+  ],
+  [
+   "Podman",
+   "srv-podman.svg"
+  ],
+  [
+   "PostgreSQL",
+   "srv-postgresql.svg"
+  ],
+  [
+   "MySQL",
+   "srv-mysql.svg"
+  ],
+  [
+   "MongoDB",
+   "srv-mongodb.svg"
   ]
  ]
 }

@@ -1,5 +1,7 @@
 # Repository Hygiene and Leaked Keys
 
+![Repository tree](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/gal-repo.png)
+
 Runs automatically on every git project (`--only repo` to run it alone, `--skip repo` to skip it).
 
 ## What it finds

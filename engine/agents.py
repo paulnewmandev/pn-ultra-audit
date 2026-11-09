@@ -11,6 +11,12 @@ GUIDE = """# PN-Ultra-Audit - read-only audit of code, tests, docs, databases, s
 Use this when the user asks to **audit / review / inspect / find vulnerabilities or bugs / check quality, tests, docs, SEO, a database, a server or a repo**.
 Installed at: `{home}`  (CLI: `python3 {home}/audit.py`).
 
+## Token-saving protocol (always follow it)
+1. Run `python3 {home}/audit.py <path> --brief --strictness <level>` - it prints ~40 lines (gate, ratings, counts, top findings). That is all you need to start.
+2. For each finding you will fix: `python3 {home}/audit.py --show <ID> --run <run dir>` -> ONE compact fix card (code, why, steps, safe form, verify). Use `--kb "<topic>"` for guidance.
+3. NEVER open or paste `report.html`, `REPORT.md` or `findings.json` in full - they are for humans. If an MCP server is registered use `get_brief` / `get_fix_card` / `search_kb`.
+4. Re-run with `--brief --baseline auto` after fixing to see only what is new.
+
 ## How to run (terminal - show the live output to the user)
 ```bash
 python3 {home}/audit.py <path-or-.>            # AUTO: detects the project type and runs only the auditors that apply

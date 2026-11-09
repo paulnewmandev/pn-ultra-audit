@@ -15,6 +15,10 @@ Goal: a **verified, deduplicated, fix-oriented** report on any project. Quality 
 
 If the request is ambiguous between Full and Focused, ask ONE question. Otherwise proceed.
 
+## Token-saving protocol (always)
+
+Run `python3 <suite>/audit.py <path> --brief --strictness <level>` first: ~40 lines (gate, ratings, counts, top findings). Then `--show <ID> --run <dir>` for one compact fix card per finding and `--kb "<topic>"` for guidance. **Never read or paste `report.html`, `REPORT.md` or `findings.json` in full** - they are for humans. With the MCP server use `get_brief`, `get_fix_card`, `search_kb`. Re-run with `--brief --baseline auto` to see only what is new.
+
 ## Strictness (ask before running)
 
 Unless the user already stated it, **ask how strict the audit should be** (one short question, three options) and pass it as `--strictness`:

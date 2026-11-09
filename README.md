@@ -4,7 +4,7 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-1.0.16-8b5cf6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.17-8b5cf6?style=for-the-badge)](CHANGELOG.md)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-22d3ee?style=for-the-badge)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3b82f6?style=for-the-badge)](#install)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-34d399?style=for-the-badge)](#install)
@@ -29,14 +29,40 @@
 
 Most teams stitch together a SAST scanner, a linter, a coverage tool, a Lighthouse run, a database check, a pentest checklist and a compliance spreadsheet - then still don't know *what to fix first*. PN-Ultra-Audit gives you **one read-only command** that detects what you built and runs only the audits that apply, shows progress **finding by finding**, and hands you a **dashboard** you can read, filter and fix from - with plain-language explanations, safe code examples, effort estimates and a ready-made prompt for your AI assistant.
 
-| | |
-|---|---|
-| <img src="assets/features/terminal.svg" width="44" height="44" alt=""> **Terminal-first** | Live phases, streamed findings, result tables. Zero dependencies (Python standard library). |
-| <img src="assets/features/security.svg" width="44" height="44" alt=""> **Auto-detects your project** | Backend only? Backend auditors. Front end? + QA/a11y. Mobile? + Android/iOS. Website? + SEO/SEM. Smart contracts? + Web3. Fintech/SaaS? + domain deep-dive. Or choose: `--only`, `--skip`. |
-| <img src="assets/features/dashboard.svg" width="44" height="44" alt=""> **Dashboard you can work from** | Self-contained HTML (offline): issue explorer, code snippet, steps, safe example, *Copy AI prompt*, fix tracking, roadmap, compliance, charts. Also Markdown + mermaid, SARIF, JSON, PDF. |
-| <img src="assets/features/quality.svg" width="44" height="44" alt=""> **Teaches while it audits** | `--level beginner`: plain words + analogy per finding, a **Professional Roadmap** (levels 1-5) and *Start here* plan - built to take vibe coders to professional full-stack. |
-| <img src="assets/features/git.svg" width="44" height="44" alt=""> **Connects anywhere** | Local folders, **GitHub / GitLab / Bitbucket / Azure DevOps / Gitea / self-hosted**, **SSH**, **FTP/FTPS/SFTP**, databases and **AWS RDS**. |
-| <img src="assets/features/docs.svg" width="44" height="44" alt=""> **Audit-ready** | Maps findings to SOC 2, ISO 27001, HIPAA, GDPR, PCI DSS, NIST CSF, DORA, EU AI Act, WCAG, ASVS, SOX, NYDFS, PSD2, CIS; builds the **evidence pack** and policy templates for your assessor. |
+<table>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/terminal.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Terminal-first</b><br>Live phases, streamed findings and result tables. Zero dependencies (Python standard library). Output in your language: es, en, zh, ja, pt, fr, it, hi, ar.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/security.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Auto-detects your project</b><br>Backend only? Backend auditors. Front end? + QA/a11y. Mobile? + Android/iOS. Website? + SEO/SEM. PWA? Vercel? Smart contracts? Fintech/SaaS? Each adds its own deep-dive. Or choose: <code>--only</code>, <code>--skip</code>, <code>--strictness basic|standard|strict</code>.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/tokens.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Saves your tokens</b><br><code>--brief</code> prints ~40 lines instead of a report; <code>--show ID</code> returns one fix card (code, why, steps, safe form); <code>--kb</code> searches offline; an MCP server and the installed skills make AI assistants read only what they need - never whole files or reports.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/dashboard.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Dashboard you can work from</b><br>Self-contained HTML (offline): issue explorer, read-only code viewer with red breakpoints on flagged lines, steps, safe example, a ready-to-paste <i>AI prompt</i> per finding, fix tracking, roadmap, compliance, charts. Also Markdown + mermaid, SARIF, JSON and a print-ready PDF.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/key.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Keys, repos and CI</b><br>Finds secrets and sensitive files in code, git <b>history</b> and CI/CD workflows, tells you exactly how to rotate each key and writes a reviewable <code>repo-fixes.sh</code>.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/git.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Connects anywhere</b><br>Local folders, <b>GitHub / GitLab / Bitbucket / Azure DevOps / Gitea</b>, <b>SSH on any VPS</b> (AWS, Azure, GCP, DigitalOcean, Hostinger…), <b>Vercel</b>, FTP/FTPS/SFTP, databases and <b>AWS RDS</b>. Servers get a <code>server-fixes.sh</code> you review and run yourself.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/quality.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Teaches while it audits</b><br><code>--level beginner</code>: plain words + analogy per finding, a <b>Professional Roadmap</b> (levels 1-5) and a <i>Start here</i> plan - built to take vibe coders to professional full-stack.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle"><img src="assets/features/docs.svg" width="52" height="52" alt=""></td>
+<td valign="middle"><b>Audit-ready</b><br>Maps findings to SOC 2, ISO 27001, HIPAA, GDPR, PCI DSS, NIST CSF, DORA, EU AI Act, WCAG, ASVS, SOX, NYDFS, PSD2, CIS; builds the <b>evidence pack</b> and policy templates for your assessor.</td>
+</tr>
+</table>
 
 > **Honest positioning.** This is a fast, broad, read-only *triage and readiness* tool built on heuristics (regex + nearby-variable taint, AST for Python, structure analysis). It is not a replacement for a full data-flow SAST, DAST, a manual penetration test, a smart-contract audit firm or an accredited certification body - it tells you where to look, what to fix first and how to prepare.
 
@@ -95,7 +121,11 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-pwa.png" alt="PWA" width="100%"><br><sub><b>PWA</b> - installability checklist + findings</sub></td>
-<td width="50%" valign="top"><img src="docs/img/gal-zh.png" alt="Chinese dashboard" width="100%"><br><sub><b>中文</b> - same report in Chinese (<code>--lang zh</code>); add your language with one JSON file</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-viewer.png" alt="Read-only code viewer" width="100%"><br><sub><b>Code viewer</b> - any file, read-only, <b>red breakpoints</b> on every flagged line, find, next/previous finding</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/gal-ar.png" alt="Arabic dashboard (RTL)" width="100%"><br><sub><b>العربية</b> - right-to-left layout (<code>--lang ar</code>)</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-ja.png" alt="Japanese report" width="100%"><br><sub><b>日本語</b> - es · en · zh · ja · pt · fr · it · hi · ar, or add yours with one JSON file</sub></td>
 </tr>
 </table>
 
@@ -136,6 +166,7 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/terminal-pwa.png" alt="PWA audit" width="100%"><br><sub><b>PWA</b> audit (strict level)</sub></td>
+<td width="50%" valign="top"><img src="docs/img/terminal-brief.png" alt="Brief mode" width="100%"><br><sub><b>--brief</b> - a ~40-line summary for AI assistants (saves tokens)</sub></td>
 <td width="50%" valign="top"><img src="docs/img/terminal-server-fixes.png" alt="Server fix script" width="100%"><br><sub><b>VPS</b> - <code>server-fixes.sh</code> generated from an <code>--ssh</code> audit (sample)</sub></td>
 </tr>
 </table>
@@ -195,13 +226,17 @@ flowchart TB
 
 ### Languages, databases and platforms
 
-**Languages & file types with dedicated rules (48) · size/complexity metrics for 101 extensions** *(monogram badges are our own artwork, not official logos)*
+**Languages & file types with dedicated rules (48) · size/complexity metrics for 101 extensions** *(logos: [Simple Icons](https://simpleicons.org), CC0 data; trademarks of their owners, shown only to identify supported technologies)*
 
-<p><img src="assets/badges/lang-python.svg" alt="Python" height="26"> <img src="assets/badges/lang-javascript.svg" alt="JavaScript" height="26"> <img src="assets/badges/lang-typescript.svg" alt="TypeScript" height="26"> <img src="assets/badges/lang-php.svg" alt="PHP" height="26"> <img src="assets/badges/lang-java.svg" alt="Java" height="26"> <img src="assets/badges/lang-kotlin.svg" alt="Kotlin" height="26"> <img src="assets/badges/lang-swift.svg" alt="Swift" height="26"> <img src="assets/badges/lang-go.svg" alt="Go" height="26"> <img src="assets/badges/lang-rust.svg" alt="Rust" height="26"> <img src="assets/badges/lang-c.svg" alt="C#" height="26"> <img src="assets/badges/lang-c.svg" alt="C" height="26"> <img src="assets/badges/lang-c.svg" alt="C++" height="26"> <img src="assets/badges/lang-ruby.svg" alt="Ruby" height="26"> <img src="assets/badges/lang-dart.svg" alt="Dart" height="26"> <img src="assets/badges/lang-scala.svg" alt="Scala" height="26"> <img src="assets/badges/lang-solidity.svg" alt="Solidity" height="26"> <img src="assets/badges/lang-vyper.svg" alt="Vyper" height="26"> <img src="assets/badges/lang-move.svg" alt="Move" height="26"> <img src="assets/badges/lang-vue.svg" alt="Vue" height="26"> <img src="assets/badges/lang-react.svg" alt="React" height="26"> <img src="assets/badges/lang-svelte.svg" alt="Svelte" height="26"> <img src="assets/badges/lang-angular.svg" alt="Angular" height="26"> <img src="assets/badges/lang-shell.svg" alt="Shell" height="26"> <img src="assets/badges/lang-powershell.svg" alt="PowerShell" height="26"> <img src="assets/badges/lang-lua.svg" alt="Lua" height="26"> <img src="assets/badges/lang-perl.svg" alt="Perl" height="26"> <img src="assets/badges/lang-r.svg" alt="R" height="26"> <img src="assets/badges/lang-elixir.svg" alt="Elixir" height="26"> <img src="assets/badges/lang-haskell.svg" alt="Haskell" height="26"> <img src="assets/badges/lang-clojure.svg" alt="Clojure" height="26"> <img src="assets/badges/lang-julia.svg" alt="Julia" height="26"> <img src="assets/badges/lang-terraform.svg" alt="Terraform" height="26"> <img src="assets/badges/lang-docker.svg" alt="Docker" height="26"> <img src="assets/badges/lang-sql.svg" alt="SQL" height="26"> <img src="assets/badges/lang-plsql.svg" alt="PL/SQL" height="26"> <img src="assets/badges/lang-tsql.svg" alt="T-SQL" height="26"> <img src="assets/badges/lang-graphql.svg" alt="GraphQL" height="26"> <img src="assets/badges/lang-zig.svg" alt="Zig" height="26"> <img src="assets/badges/lang-cobol.svg" alt="COBOL" height="26"> <img src="assets/badges/lang-fortran.svg" alt="Fortran" height="26"> <img src="assets/badges/lang-objectivec.svg" alt="Objective-C" height="26"> <img src="assets/badges/lang-groovy.svg" alt="Groovy" height="26"> <img src="assets/badges/lang-f.svg" alt="F#" height="26"> <img src="assets/badges/lang-ocaml.svg" alt="OCaml" height="26"> <img src="assets/badges/lang-erlang.svg" alt="Erlang" height="26"></p>
+<p><img src="assets/badges/lang-python.svg" alt="Python" height="26"> <img src="assets/badges/lang-javascript.svg" alt="JavaScript" height="26"> <img src="assets/badges/lang-typescript.svg" alt="TypeScript" height="26"> <img src="assets/badges/lang-php.svg" alt="PHP" height="26"> <img src="assets/badges/lang-java.svg" alt="Java" height="26"> <img src="assets/badges/lang-kotlin.svg" alt="Kotlin" height="26"> <img src="assets/badges/lang-swift.svg" alt="Swift" height="26"> <img src="assets/badges/lang-go.svg" alt="Go" height="26"> <img src="assets/badges/lang-rust.svg" alt="Rust" height="26"> <img src="assets/badges/lang-csharp.svg" alt="C#" height="26"> <img src="assets/badges/lang-c.svg" alt="C" height="26"> <img src="assets/badges/lang-cplusplus.svg" alt="C++" height="26"> <img src="assets/badges/lang-ruby.svg" alt="Ruby" height="26"> <img src="assets/badges/lang-dart.svg" alt="Dart" height="26"> <img src="assets/badges/lang-scala.svg" alt="Scala" height="26"> <img src="assets/badges/lang-solidity.svg" alt="Solidity" height="26"> <img src="assets/badges/lang-vyper.svg" alt="Vyper" height="26"> <img src="assets/badges/lang-move.svg" alt="Move" height="26"> <img src="assets/badges/lang-vue.svg" alt="Vue" height="26"> <img src="assets/badges/lang-react.svg" alt="React" height="26"> <img src="assets/badges/lang-svelte.svg" alt="Svelte" height="26"> <img src="assets/badges/lang-angular.svg" alt="Angular" height="26"> <img src="assets/badges/lang-shell.svg" alt="Shell" height="26"> <img src="assets/badges/lang-powershell.svg" alt="PowerShell" height="26"> <img src="assets/badges/lang-lua.svg" alt="Lua" height="26"> <img src="assets/badges/lang-perl.svg" alt="Perl" height="26"> <img src="assets/badges/lang-r.svg" alt="R" height="26"> <img src="assets/badges/lang-elixir.svg" alt="Elixir" height="26"> <img src="assets/badges/lang-haskell.svg" alt="Haskell" height="26"> <img src="assets/badges/lang-clojure.svg" alt="Clojure" height="26"> <img src="assets/badges/lang-julia.svg" alt="Julia" height="26"> <img src="assets/badges/lang-terraform.svg" alt="Terraform" height="26"> <img src="assets/badges/lang-docker.svg" alt="Docker" height="26"> <img src="assets/badges/lang-sql.svg" alt="SQL" height="26"> <img src="assets/badges/lang-plsql.svg" alt="PL/SQL" height="26"> <img src="assets/badges/lang-tsql.svg" alt="T-SQL" height="26"> <img src="assets/badges/lang-graphql.svg" alt="GraphQL" height="26"> <img src="assets/badges/lang-zig.svg" alt="Zig" height="26"> <img src="assets/badges/lang-cobol.svg" alt="COBOL" height="26"> <img src="assets/badges/lang-fortran.svg" alt="Fortran" height="26"> <img src="assets/badges/lang-objectivec.svg" alt="Objective-C" height="26"> <img src="assets/badges/lang-groovy.svg" alt="Groovy" height="26"> <img src="assets/badges/lang-fsharp.svg" alt="F#" height="26"> <img src="assets/badges/lang-ocaml.svg" alt="OCaml" height="26"> <img src="assets/badges/lang-erlang.svg" alt="Erlang" height="26"></p>
 
-**Databases** <p><img src="assets/badges/db-sqlite.svg" alt="SQLite" height="26"> <img src="assets/badges/db-postgresql.svg" alt="PostgreSQL" height="26"> <img src="assets/badges/db-mysql.svg" alt="MySQL" height="26"> <img src="assets/badges/db-mariadb.svg" alt="MariaDB" height="26"> <img src="assets/badges/db-sqlserver.svg" alt="SQL Server" height="26"> <img src="assets/badges/db-oracle.svg" alt="Oracle" height="26"> <img src="assets/badges/db-mongodb.svg" alt="MongoDB" height="26"> <img src="assets/badges/db-redis.svg" alt="Redis" height="26"> <img src="assets/badges/db-awsrds.svg" alt="AWS RDS" height="26"></p>
+**Databases** <p><img src="assets/badges/db-sqlite.svg" alt="SQLite" height="26"> <img src="assets/badges/db-postgresql.svg" alt="PostgreSQL" height="26"> <img src="assets/badges/db-mysql.svg" alt="MySQL" height="26"> <img src="assets/badges/db-mariadb.svg" alt="MariaDB" height="26"> <img src="assets/badges/db-sqlserver.svg" alt="SQL Server" height="26"> <img src="assets/badges/db-oracle.svg" alt="Oracle" height="26"> <img src="assets/badges/db-mongodb.svg" alt="MongoDB" height="26"> <img src="assets/badges/db-redis.svg" alt="Redis" height="26"> <img src="assets/badges/db-awsrds.svg" alt="AWS RDS" height="26"> <img src="assets/badges/db-elasticsearch.svg" alt="Elasticsearch" height="26"></p>
 
-**Frameworks, platforms & infrastructure** <p><img src="assets/badges/plat-android.svg" alt="Android" height="26"> <img src="assets/badges/plat-ios.svg" alt="iOS" height="26"> <img src="assets/badges/plat-flutter.svg" alt="Flutter" height="26"> <img src="assets/badges/plat-reactnative.svg" alt="React Native" height="26"> <img src="assets/badges/plat-expo.svg" alt="Expo" height="26"> <img src="assets/badges/plat-nextjs.svg" alt="Next.js" height="26"> <img src="assets/badges/plat-nodejs.svg" alt="Node.js" height="26"> <img src="assets/badges/plat-laravel.svg" alt="Laravel" height="26"> <img src="assets/badges/plat-django.svg" alt="Django" height="26"> <img src="assets/badges/plat-spring.svg" alt="Spring" height="26"> <img src="assets/badges/plat-net.svg" alt=".NET" height="26"> <img src="assets/badges/plat-rails.svg" alt="Rails" height="26"> <img src="assets/badges/plat-hardhat.svg" alt="Hardhat" height="26"> <img src="assets/badges/plat-foundry.svg" alt="Foundry" height="26"> <img src="assets/badges/plat-anchor.svg" alt="Anchor" height="26"> <img src="assets/badges/plat-kubernetes.svg" alt="Kubernetes" height="26"> <img src="assets/badges/plat-githubactions.svg" alt="GitHub Actions" height="26"></p>
+**Frameworks, platforms & infrastructure** <p><img src="assets/badges/plat-android.svg" alt="Android" height="26"> <img src="assets/badges/plat-ios.svg" alt="iOS" height="26"> <img src="assets/badges/plat-flutter.svg" alt="Flutter" height="26"> <img src="assets/badges/plat-reactnative.svg" alt="React Native" height="26"> <img src="assets/badges/plat-expo.svg" alt="Expo" height="26"> <img src="assets/badges/plat-nextjs.svg" alt="Next.js" height="26"> <img src="assets/badges/plat-nodejs.svg" alt="Node.js" height="26"> <img src="assets/badges/plat-laravel.svg" alt="Laravel" height="26"> <img src="assets/badges/plat-django.svg" alt="Django" height="26"> <img src="assets/badges/plat-spring.svg" alt="Spring" height="26"> <img src="assets/badges/plat-net.svg" alt=".NET" height="26"> <img src="assets/badges/plat-rails.svg" alt="Rails" height="26"> <img src="assets/badges/plat-hardhat.svg" alt="Hardhat" height="26"> <img src="assets/badges/plat-foundry.svg" alt="Foundry" height="26"> <img src="assets/badges/plat-anchor.svg" alt="Anchor" height="26"> <img src="assets/badges/plat-kubernetes.svg" alt="Kubernetes" height="26"> <img src="assets/badges/plat-githubactions.svg" alt="GitHub Actions" height="26"> <img src="assets/badges/plat-vercel.svg" alt="Vercel" height="26"> <img src="assets/badges/plat-netlify.svg" alt="Netlify" height="26"></p>
+
+**Clouds, VPS & hosting (auto-detected over SSH)** <p><img src="assets/badges/cloud-aws.svg" alt="AWS" height="26"> <img src="assets/badges/cloud-azure.svg" alt="Azure" height="26"> <img src="assets/badges/cloud-googlecloud.svg" alt="Google Cloud" height="26"> <img src="assets/badges/cloud-digitalocean.svg" alt="DigitalOcean" height="26"> <img src="assets/badges/cloud-hostinger.svg" alt="Hostinger" height="26"> <img src="assets/badges/cloud-hetzner.svg" alt="Hetzner" height="26"> <img src="assets/badges/cloud-vultr.svg" alt="Vultr" height="26"> <img src="assets/badges/cloud-linode.svg" alt="Linode" height="26"> <img src="assets/badges/cloud-ovhcloud.svg" alt="OVHcloud" height="26"> <img src="assets/badges/cloud-cloudflare.svg" alt="Cloudflare" height="26"> <img src="assets/badges/cloud-vercel.svg" alt="Vercel" height="26"> <img src="assets/badges/cloud-netlify.svg" alt="Netlify" height="26"></p>
+
+**Servers, brokers & containers audited over SSH** <p><img src="assets/badges/srv-nginx.svg" alt="nginx" height="26"> <img src="assets/badges/srv-apache.svg" alt="Apache" height="26"> <img src="assets/badges/srv-redis.svg" alt="Redis" height="26"> <img src="assets/badges/srv-apachekafka.svg" alt="Apache Kafka" height="26"> <img src="assets/badges/srv-rabbitmq.svg" alt="RabbitMQ" height="26"> <img src="assets/badges/srv-elasticsearch.svg" alt="Elasticsearch" height="26"> <img src="assets/badges/srv-docker.svg" alt="Docker" height="26"> <img src="assets/badges/srv-kubernetes.svg" alt="Kubernetes" height="26"> <img src="assets/badges/srv-podman.svg" alt="Podman" height="26"> <img src="assets/badges/srv-postgresql.svg" alt="PostgreSQL" height="26"> <img src="assets/badges/srv-mysql.svg" alt="MySQL" height="26"> <img src="assets/badges/srv-mongodb.svg" alt="MongoDB" height="26"></p>
 
 ## Connect to anything
 
@@ -249,6 +284,7 @@ Files follow each tool's documented conventions at the time of writing; installs
 Assistants (and people) rarely need the whole report - they need the one passage that tells them how to fix a finding.
 
 ```bash
+python3 audit.py . --brief                                  # ~40 lines (gate, ratings, top findings) - what an AI assistant should read first
 python3 audit.py --show SEC-001 --run audit-output/myapp    # compact card: code, why, steps, safe form, tested before/after, verify
 python3 audit.py --kb "sql injection php"                   # offline BM25 search over 60+ remediation guides and 110+ rules
 python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, search_kb, get_summary, verify_corpus
@@ -256,6 +292,10 @@ python3 audit.py --verify-corpus                            # prove the fixes: e
 ```
 
 `--install-agent claude` / `cursor` also registers the MCP server (`.mcp.json`, `.cursor/mcp.json`). The tested before/after pairs live in [`examples/fixes/`](examples/fixes) and run in CI, so every "safe form" shown has been checked against the engine itself.
+
+## Precision first (no time wasted on false positives)
+
+Rules run on code with **comments and docstrings masked**, web input is separated from CLI arguments, Python uses the **AST** for `is` with literals, mutable defaults that are really mutated and broad empty `except`, and build outputs, bundles and library lockfiles are not judged like source. Measured on mature code with `python3 scripts/precision_bench.py <dir>`: the Python standard library (240k LOC) went from **178 confirmed findings (8 high) to 0 critical/high security findings** (0.13 confirmed per 1k lines, all real smells such as 4,800-line files); `debug`, `semver` and `minimist` report 0. Every false-positive pattern found is pinned by a test in `tests/test_precision.py`. Found one? Open an issue with the snippet.
 
 ## Audit readiness for SOC 2, ISO 27001, HIPAA, PCI and more
 
@@ -324,11 +364,17 @@ Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs
 
 In a terminal, `--ask` shows a 1-2-3 menu. From an AI assistant the installed skills **ask you which level you want** before running (`lenient`/`balanced` still work as aliases).
 
-## Languages
+## Languages (9 built in, open to more)
 
-`--lang auto` (default) follows your system language - English if your locale is English, Chinese for `zh`, **Spanish otherwise**. Force one with `--lang es|en|zh` or `PN_AUDIT_LANG=en`. The terminal output, dashboard and Markdown report are fully translated.
+| Code | Language | Code | Language | Code | Language |
+|---|---|---|---|---|---|
+| `es` | Español *(default)* | `en` | English | `zh` | 中文 |
+| `ja` | 日本語 | `pt` | Português | `fr` | Français |
+| `it` | Italiano | `hi` | हिन्दी | `ar` | العربية *(right-to-left)* |
 
-**Add a language in 10 minutes:** copy [`engine/locales/zh.json`](engine/locales/zh.json) to `engine/locales/<code>.json`, translate the values (`ui` = dashboard, `md` = Markdown report, `x` = English sentence → translation for CLI/dashboard text) and run `python3 audit.py --lang <code>`. It is auto-discovered; anything you skip falls back to English. PRs welcome.
+`--lang auto` (default) follows your system language and falls back to **Spanish**. Force one with `--lang ja` or `PN_AUDIT_LANG=ja`. The terminal output, dashboard and Markdown report are translated (the AI-prompt templates stay in English on purpose).
+
+**Add a language in 10 minutes:** copy [`engine/locales/ja.json`](engine/locales/ja.json) to `engine/locales/<code>.json`, translate the values (set `"dir": "rtl"` for right-to-left languages) (`ui` = dashboard, `md` = Markdown report, `x` = English sentence → translation for CLI/dashboard text) and run `python3 audit.py --lang <code>`. It is auto-discovered; anything you skip falls back to English. PRs welcome.
 
 ## Servers and VPS (AWS · Azure · Google Cloud · DigitalOcean · Hostinger · …)
 
@@ -378,7 +424,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.16
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.17
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -399,4 +445,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 77 remediation guides · 18 skills · 14 compliance frameworks · 7 AI assistants · v1.0.16</sub></div>
+<div align="center"><sub>110 rules · 77 remediation guides · 18 skills · 14 compliance frameworks · 7 AI assistants · v1.0.17</sub></div>

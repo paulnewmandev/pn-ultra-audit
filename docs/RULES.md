@@ -23,8 +23,8 @@ Every family links to a remediation guide with steps, vulnerable/safe examples a
 | `MOB-WEBVIEW` | WebView risk (JS enabled / bridge / file access) | android | cjs, dart, groovy, java, js, jsx, kt, kts… | low | CWE-749, CWE-79 | M4:2024 |
 | `BUG-JS-FOREACH-ASYNC` | async callback in forEach (not awaited) | bug-misc | cjs, js, jsx, mjs, svelte, ts, tsx, vue | high | CWE-662 |  |
 | `BUG-PHP-LOOSE-AUTH` | Loose comparison in auth/token check | bug-misc | php, phtml | high | CWE-697, CWE-1025 | A07:2021 |
-| `BUG-PY-IS-LITERAL` | `is` used to compare with literal | bug-misc | py | high | CWE-597 |  |
-| `BUG-PY-MUTABLE-DEFAULT` | Mutable default argument | bug-misc | py | high | CWE-665 |  |
+| `BUG-PY-IS-LITERAL` | `is` used to compare with literal | bug-misc | __ast__ | high | CWE-597 |  |
+| `BUG-PY-MUTABLE-DEFAULT` | Mutable default argument that is mutated or leaked | bug-misc | __ast__ | high | CWE-665 |  |
 | `C-MEM-LEAK-HINT` | malloc without free in same file (leak hint) | bug-misc | c, cc, cpp, cu, cxx, h, hpp, m… | low | CWE-401 |  |
 | `RUST-UNSAFE` | unsafe block | bug-misc | rs | low | CWE-119 |  |
 | `RUST-UNWRAP` | .unwrap()/.expect() on fallible value | bug-misc | rs | low | CWE-248 |  |

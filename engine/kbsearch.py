@@ -101,6 +101,30 @@ def find(findings, ident):
     return None
 
 
+def brief(run, top=10, label=None):
+    """Compact summary for AI assistants: ~40 lines, no report to read. `run` = run directory."""
+    import json as _j
+    fs = load_findings(run)
+    try: sm = _j.load(open(os.path.join(run, "summary.json"), encoding="utf-8"))
+    except (OSError, ValueError): sm = {}
+    order = ["critical", "high", "medium", "low", "info"]
+    conf = [f for f in fs if f.get("status") == "confirmed" and not f.get("legacy")]
+    cnt = {k: sum(1 for f in conf if f.get("severity") == k) for k in order}
+    rev = sum(1 for f in fs if f.get("status") != "confirmed")
+    rt = sm.get("ratings") or {}
+    L = [f"PN-Ultra-Audit | {label or ''} | gate {sm.get('gate', '?')} | security {rt.get('security', '?')} reliability {rt.get('reliability', '?')} maintainability {rt.get('maintainability', '?')}",
+         f"{len(conf)} confirmed ({', '.join(f'{cnt[k]} {k}' for k in order[:4])}) | {rev} to review | run: {os.path.basename(os.path.dirname(run))}/{os.path.basename(run)}"]
+    best = sorted(conf, key=lambda f: (order.index(f["severity"]) if f.get("severity") in order else 9, f.get("effort_min") or 0))[:top]
+    if best:
+        L.append(f"TOP {len(best)}:")
+        for f in best:
+            loc = f.get("location") or {}
+            L.append(f" {f['id']} {f.get('severity')} {f.get('rule')} {loc.get('file')}:{loc.get('line')} {str(f.get('title'))[:70]}")
+    extra = [n for n in ("server-fixes.sh", "repo-fixes.sh") if os.path.exists(os.path.join(run, n))]
+    L.append("NEXT: --show <ID> --run <run dir> (one fix card) | --kb \"<topic>\" | " + (", ".join(extra) + " (review, never auto-run) | " if extra else "") + "do NOT read report.html / REPORT.md / findings.json in full")
+    return "\n".join(L)
+
+
 def card(f, with_pair=True):
     loc = f.get("location") or {}; sn = f.get("snippet") or {}
     L = [f"{f.get('id')}  {f.get('severity', '').upper()}  {f.get('status', '')}  {f.get('rule')}  {','.join(f.get('cwe') or [])}",

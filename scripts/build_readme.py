@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.16"
+VER = "1.0.17"
 R = f'''<div align="center">
 
 <img src="assets/banner.svg" alt="PN-Ultra-Audit - audit everything, ship with confidence" width="100%">
@@ -40,14 +40,40 @@ R = f'''<div align="center">
 
 Most teams stitch together a SAST scanner, a linter, a coverage tool, a Lighthouse run, a database check, a pentest checklist and a compliance spreadsheet - then still don't know *what to fix first*. PN-Ultra-Audit gives you **one read-only command** that detects what you built and runs only the audits that apply, shows progress **finding by finding**, and hands you a **dashboard** you can read, filter and fix from - with plain-language explanations, safe code examples, effort estimates and a ready-made prompt for your AI assistant.
 
-| | |
-|---|---|
-| {icon("terminal")} **Terminal-first** | Live phases, streamed findings, result tables. Zero dependencies (Python standard library). |
-| {icon("security")} **Auto-detects your project** | Backend only? Backend auditors. Front end? + QA/a11y. Mobile? + Android/iOS. Website? + SEO/SEM. Smart contracts? + Web3. Fintech/SaaS? + domain deep-dive. Or choose: `--only`, `--skip`. |
-| {icon("dashboard")} **Dashboard you can work from** | Self-contained HTML (offline): issue explorer, code snippet, steps, safe example, *Copy AI prompt*, fix tracking, roadmap, compliance, charts. Also Markdown + mermaid, SARIF, JSON, PDF. |
-| {icon("quality")} **Teaches while it audits** | `--level beginner`: plain words + analogy per finding, a **Professional Roadmap** (levels 1-5) and *Start here* plan - built to take vibe coders to professional full-stack. |
-| {icon("git")} **Connects anywhere** | Local folders, **GitHub / GitLab / Bitbucket / Azure DevOps / Gitea / self-hosted**, **SSH**, **FTP/FTPS/SFTP**, databases and **AWS RDS**. |
-| {icon("docs")} **Audit-ready** | Maps findings to SOC 2, ISO 27001, HIPAA, GDPR, PCI DSS, NIST CSF, DORA, EU AI Act, WCAG, ASVS, SOX, NYDFS, PSD2, CIS; builds the **evidence pack** and policy templates for your assessor. |
+<table>
+<tr>
+<td width="84" align="center" valign="middle">{icon("terminal", 52)}</td>
+<td valign="middle"><b>Terminal-first</b><br>Live phases, streamed findings and result tables. Zero dependencies (Python standard library). Output in your language: es, en, zh, ja, pt, fr, it, hi, ar.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("security", 52)}</td>
+<td valign="middle"><b>Auto-detects your project</b><br>Backend only? Backend auditors. Front end? + QA/a11y. Mobile? + Android/iOS. Website? + SEO/SEM. PWA? Vercel? Smart contracts? Fintech/SaaS? Each adds its own deep-dive. Or choose: <code>--only</code>, <code>--skip</code>, <code>--strictness basic|standard|strict</code>.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("tokens", 52)}</td>
+<td valign="middle"><b>Saves your tokens</b><br><code>--brief</code> prints ~40 lines instead of a report; <code>--show ID</code> returns one fix card (code, why, steps, safe form); <code>--kb</code> searches offline; an MCP server and the installed skills make AI assistants read only what they need - never whole files or reports.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("dashboard", 52)}</td>
+<td valign="middle"><b>Dashboard you can work from</b><br>Self-contained HTML (offline): issue explorer, read-only code viewer with red breakpoints on flagged lines, steps, safe example, a ready-to-paste <i>AI prompt</i> per finding, fix tracking, roadmap, compliance, charts. Also Markdown + mermaid, SARIF, JSON and a print-ready PDF.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("key", 52)}</td>
+<td valign="middle"><b>Keys, repos and CI</b><br>Finds secrets and sensitive files in code, git <b>history</b> and CI/CD workflows, tells you exactly how to rotate each key and writes a reviewable <code>repo-fixes.sh</code>.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("git", 52)}</td>
+<td valign="middle"><b>Connects anywhere</b><br>Local folders, <b>GitHub / GitLab / Bitbucket / Azure DevOps / Gitea</b>, <b>SSH on any VPS</b> (AWS, Azure, GCP, DigitalOcean, Hostinger…), <b>Vercel</b>, FTP/FTPS/SFTP, databases and <b>AWS RDS</b>. Servers get a <code>server-fixes.sh</code> you review and run yourself.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("quality", 52)}</td>
+<td valign="middle"><b>Teaches while it audits</b><br><code>--level beginner</code>: plain words + analogy per finding, a <b>Professional Roadmap</b> (levels 1-5) and a <i>Start here</i> plan - built to take vibe coders to professional full-stack.</td>
+</tr>
+<tr>
+<td width="84" align="center" valign="middle">{icon("docs", 52)}</td>
+<td valign="middle"><b>Audit-ready</b><br>Maps findings to SOC 2, ISO 27001, HIPAA, GDPR, PCI DSS, NIST CSF, DORA, EU AI Act, WCAG, ASVS, SOX, NYDFS, PSD2, CIS; builds the <b>evidence pack</b> and policy templates for your assessor.</td>
+</tr>
+</table>
 
 > **Honest positioning.** This is a fast, broad, read-only *triage and readiness* tool built on heuristics (regex + nearby-variable taint, AST for Python, structure analysis). It is not a replacement for a full data-flow SAST, DAST, a manual penetration test, a smart-contract audit firm or an accredited certification body - it tells you where to look, what to fix first and how to prepare.
 
@@ -106,7 +132,11 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-pwa.png" alt="PWA" width="100%"><br><sub><b>PWA</b> - installability checklist + findings</sub></td>
-<td width="50%" valign="top"><img src="docs/img/gal-zh.png" alt="Chinese dashboard" width="100%"><br><sub><b>中文</b> - same report in Chinese (<code>--lang zh</code>); add your language with one JSON file</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-viewer.png" alt="Read-only code viewer" width="100%"><br><sub><b>Code viewer</b> - any file, read-only, <b>red breakpoints</b> on every flagged line, find, next/previous finding</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/gal-ar.png" alt="Arabic dashboard (RTL)" width="100%"><br><sub><b>العربية</b> - right-to-left layout (<code>--lang ar</code>)</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-ja.png" alt="Japanese report" width="100%"><br><sub><b>日本語</b> - es · en · zh · ja · pt · fr · it · hi · ar, or add yours with one JSON file</sub></td>
 </tr>
 </table>
 
@@ -147,6 +177,7 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/terminal-pwa.png" alt="PWA audit" width="100%"><br><sub><b>PWA</b> audit (strict level)</sub></td>
+<td width="50%" valign="top"><img src="docs/img/terminal-brief.png" alt="Brief mode" width="100%"><br><sub><b>--brief</b> - a ~40-line summary for AI assistants (saves tokens)</sub></td>
 <td width="50%" valign="top"><img src="docs/img/terminal-server-fixes.png" alt="Server fix script" width="100%"><br><sub><b>VPS</b> - <code>server-fixes.sh</code> generated from an <code>--ssh</code> audit (sample)</sub></td>
 </tr>
 </table>
@@ -206,13 +237,17 @@ flowchart TB
 
 ### Languages, databases and platforms
 
-**Languages & file types with dedicated rules ({len({scanner.LANG[e] for r in RULES if r.exts for e in r.exts if e in scanner.LANG})}) · size/complexity metrics for {len(scanner.LANG)} extensions** *(monogram badges are our own artwork, not official logos)*
+**Languages & file types with dedicated rules ({len({scanner.LANG[e] for r in RULES if r.exts for e in r.exts if e in scanner.LANG})}) · size/complexity metrics for {len(scanner.LANG)} extensions** *(logos: [Simple Icons](https://simpleicons.org), CC0 data; trademarks of their owners, shown only to identify supported technologies)*
 
 <p>{b("languages")}</p>
 
 **Databases** <p>{b("databases")}</p>
 
 **Frameworks, platforms & infrastructure** <p>{b("platforms")}</p>
+
+**Clouds, VPS & hosting (auto-detected over SSH)** <p>{b("clouds")}</p>
+
+**Servers, brokers & containers audited over SSH** <p>{b("servers")}</p>
 
 ## Connect to anything
 
@@ -260,6 +295,7 @@ Files follow each tool's documented conventions at the time of writing; installs
 Assistants (and people) rarely need the whole report - they need the one passage that tells them how to fix a finding.
 
 ```bash
+python3 audit.py . --brief                                  # ~40 lines (gate, ratings, top findings) - what an AI assistant should read first
 python3 audit.py --show SEC-001 --run audit-output/myapp    # compact card: code, why, steps, safe form, tested before/after, verify
 python3 audit.py --kb "sql injection php"                   # offline BM25 search over 60+ remediation guides and 110+ rules
 python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, search_kb, get_summary, verify_corpus
@@ -267,6 +303,10 @@ python3 audit.py --verify-corpus                            # prove the fixes: e
 ```
 
 `--install-agent claude` / `cursor` also registers the MCP server (`.mcp.json`, `.cursor/mcp.json`). The tested before/after pairs live in [`examples/fixes/`](examples/fixes) and run in CI, so every "safe form" shown has been checked against the engine itself.
+
+## Precision first (no time wasted on false positives)
+
+Rules run on code with **comments and docstrings masked**, web input is separated from CLI arguments, Python uses the **AST** for `is` with literals, mutable defaults that are really mutated and broad empty `except`, and build outputs, bundles and library lockfiles are not judged like source. Measured on mature code with `python3 scripts/precision_bench.py <dir>`: the Python standard library (240k LOC) went from **178 confirmed findings (8 high) to 0 critical/high security findings** (0.13 confirmed per 1k lines, all real smells such as 4,800-line files); `debug`, `semver` and `minimist` report 0. Every false-positive pattern found is pinned by a test in `tests/test_precision.py`. Found one? Open an issue with the snippet.
 
 ## Audit readiness for SOC 2, ISO 27001, HIPAA, PCI and more
 
@@ -334,11 +374,17 @@ Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs
 
 In a terminal, `--ask` shows a 1-2-3 menu. From an AI assistant the installed skills **ask you which level you want** before running (`lenient`/`balanced` still work as aliases).
 
-## Languages
+## Languages (9 built in, open to more)
 
-`--lang auto` (default) follows your system language - English if your locale is English, Chinese for `zh`, **Spanish otherwise**. Force one with `--lang es|en|zh` or `PN_AUDIT_LANG=en`. The terminal output, dashboard and Markdown report are fully translated.
+| Code | Language | Code | Language | Code | Language |
+|---|---|---|---|---|---|
+| `es` | Español *(default)* | `en` | English | `zh` | 中文 |
+| `ja` | 日本語 | `pt` | Português | `fr` | Français |
+| `it` | Italiano | `hi` | हिन्दी | `ar` | العربية *(right-to-left)* |
 
-**Add a language in 10 minutes:** copy [`engine/locales/zh.json`](engine/locales/zh.json) to `engine/locales/<code>.json`, translate the values (`ui` = dashboard, `md` = Markdown report, `x` = English sentence → translation for CLI/dashboard text) and run `python3 audit.py --lang <code>`. It is auto-discovered; anything you skip falls back to English. PRs welcome.
+`--lang auto` (default) follows your system language and falls back to **Spanish**. Force one with `--lang ja` or `PN_AUDIT_LANG=ja`. The terminal output, dashboard and Markdown report are translated (the AI-prompt templates stay in English on purpose).
+
+**Add a language in 10 minutes:** copy [`engine/locales/ja.json`](engine/locales/ja.json) to `engine/locales/<code>.json`, translate the values (set `"dir": "rtl"` for right-to-left languages) (`ui` = dashboard, `md` = Markdown report, `x` = English sentence → translation for CLI/dashboard text) and run `python3 audit.py --lang <code>`. It is auto-discovered; anything you skip falls back to English. PRs welcome.
 
 ## Servers and VPS (AWS · Azure · Google Cloud · DigitalOcean · Hostinger · …)
 

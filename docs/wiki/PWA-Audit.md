@@ -1,5 +1,7 @@
 # PWA Audit
 
+![PWA view](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/gal-pwa.png)
+
 Detected automatically from a web app manifest, a service worker, or tooling (Workbox, vite-plugin-pwa, next-pwa, Serwist, Angular service worker).
 
 ```bash

@@ -24,6 +24,11 @@ TAINT = re.compile(
     r"|\$_(GET|POST|REQUEST|COOKIE|FILES|SERVER)|\$request->|Request\[|\bparams\[|\binput\(|sys\.argv|getParameter\(|@RequestParam|@PathVariable"
     r"|ctx\.(query|request|params)|c\.(Query|Param|PostForm|DefaultQuery)|r\.URL\.Query|r\.FormValue|\bevent\.(body|queryStringParameters)|searchParams)")
 TAINT_DOM = re.compile(TAINT.pattern[:-1] + r"|location\.(hash|search|href)|document\.(URL|referrer|cookie)|window\.name|URLSearchParams)")
+# Web vs command-line sources: argv/stdin are the OPERATOR's own input (not an attacker across a trust boundary), so path/SSRF/redirect/XSS/IDOR rules
+# only fire on web sources; command/SQL/deserialization rules downgrade CLI-only taint to "needs validation".
+TAINT_CLI = re.compile(r"\binput\(|sys\.argv|process\.argv|os\.Args|\$argv|\bARGV\b")
+TAINT_WEB = re.compile(TAINT.pattern.replace(r"\binput\(|sys\.argv|", ""))
+TAINT_DOM_WEB = re.compile(TAINT_DOM.pattern.replace(r"\binput\(|sys\.argv|", ""))
 SQLKW = re.compile(r"\b(select|insert\s+into|update|delete\s+from|drop\s+table|where|order\s+by|union|values)\b", re.I)
 
 Rule = namedtuple("Rule", "id title family exts pattern type category severity precision cwe owasp effort priority require exclude multiline skip_paths")
@@ -243,14 +248,14 @@ R("LOG-SECRET", "Secret/password written to logs", "logsecret", SRC,
   exclude=r"[\"'][^\"']*(password|token|secret)[^\"']*[\"']\s*\)|missing|invalid|expired|required|enter|forgot|reset link|sent|error:|failed|not found|\bhas\b|\bis\b", skip_paths=TESTPATH),
 
 # ───────────────────────── Bugs / smells ─────────────────────────
-R("BUG-EMPTY-CATCH", "Empty catch/except (swallowed error)", "errors", SRC,
-  r"catch\s*(\([^)]*\))?\s*\{\s*(//[^\n]*)?\s*\}|except[^\n:]*:\s*\n\s*pass\b|rescue[^\n]*\n\s*end\b|if\s+err\s*!=\s*nil\s*\{\s*\}",
+R("BUG-EMPTY-CATCH", "Empty catch/except (swallowed error)", "errors", SRC - PY,
+  r"catch\s*(\([^)]*\))?\s*\{\s*\}|except[^\n:]*:\s*\n\s*pass\b|rescue[^\n]*\n\s*end\b|if\s+err\s*!=\s*nil\s*\{\s*\}",
   type="code_smell", severity="low", category="error-handling", cwe=["CWE-390"], owasp=["A09:2021"], effort=10, multiline=True),
-R("BUG-PY-MUTABLE-DEFAULT", "Mutable default argument", "bug-misc", PY, r"def\s+\w+\([^)]*=\s*(\[\]|\{\}|set\(\))\s*[,)]",
+R("BUG-PY-MUTABLE-DEFAULT", "Mutable default argument that is mutated or leaked", "bug-misc", {"__ast__"}, r"def\s+\w+\([^)]*=\s*(\[\]|\{\}|set\(\))\s*[,)]",
   type="bug", severity="low", category="logic", cwe=["CWE-665"], effort=10),
 R("BUG-JS-FOREACH-ASYNC", "async callback in forEach (not awaited)", "bug-misc", JSLOGIC, r"\.forEach\(\s*async\b",
   type="bug", severity="medium", category="async", cwe=["CWE-662"], effort=15),
-R("BUG-PY-IS-LITERAL", "`is` used to compare with literal", "bug-misc", PY, r"\bis\s+(not\s+)?([\"']|\d)",
+R("BUG-PY-IS-LITERAL", "`is` used to compare with literal", "bug-misc", {"__ast__"}, r"\bis\s+(not\s+)?([\"']|\d)",
   type="bug", severity="low", category="logic", cwe=["CWE-597"], effort=5, exclude=r"#.*\bis\b|[\"'][^\"']*\bis\s"),
 R("BUG-PHP-LOOSE-AUTH", "Loose comparison in auth/token check", "bug-misc", PHP, r"(password|token|hash|secret|otp|signature)\w*\s*(==|!=)\s*(?!=)[^=]",
   type="bug", severity="medium", category="authn", cwe=["CWE-697", "CWE-1025"], owasp=["A07:2021"], effort=10, exclude=r"===|!==|\bnull\b|\bempty\b|isset|\?\?"),

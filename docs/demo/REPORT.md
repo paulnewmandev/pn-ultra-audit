@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.16
+- **Tool:** PN-Ultra-Audit 1.0.17
 
 ## Contents
 
@@ -233,7 +233,7 @@ gantt
 | TST-008 | medium | test_gap | `tests/test_app.py:1` | Test file `tests/test_app.py` defines tests but contains no assertions | 20 min |
 | TST-009 | medium | test_gap | `web/tests/checkout.spec.ts:4` | Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) | 8 min |
 | A11-003 | low | bug | `web/index.html:2` | <html> without lang attribute | 2 min |
-| BUG-011 | low | bug | `backend/app.py:53` | Mutable default argument | 10 min |
+| BUG-011 | low | bug | `backend/app.py:53` | Mutable default argument that is mutated or leaked | 10 min |
 | COD-004 | low | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
 | COD-005 | low | code_smell | `app.db:1` | Foreign keys declared but PRAGMA foreign_keys is OFF by default | 10 min |
 | COD-006 | low | code_smell | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
@@ -1007,7 +1007,7 @@ composeRule.onNodeWithTag(Tags.LoginButton).performClick()   // XCUITest: app.bu
 |---|---|---|---|
 | medium | `app/Http/UserController.php:9` | Loose comparison in auth/token check | 10 min |
 | medium | `backend/server.js:10` | async callback in forEach (not awaited) | 15 min |
-| low | `backend/app.py:53` | Mutable default argument | 10 min |
+| low | `backend/app.py:53` | Mutable default argument that is mutated or leaked | 10 min |
 
 **Steps:**
 
@@ -2334,14 +2334,13 @@ web/tests/checkout.spec.ts:2
 <head>
 ```
 
-#### BUG-011 · low · Mutable default argument
+#### BUG-011 · low · Mutable default argument that is mutated or leaked
 
 - **Location:** `backend/app.py:53`  ·  **Type:** bug/logic  ·  **CWE:** CWE-665  ·  **Effort:** 10 min
 
 **Evidence:**
 ```
 def add(x, acc=[]):
-    acc.append(x)
 ```
 
 #### COD-004 · low · Public API documentation coverage is 0.0% (target 60%)
@@ -2846,7 +2845,7 @@ url = request.args.get("url")
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.16 |
+| tool_version | 1.0.17 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |

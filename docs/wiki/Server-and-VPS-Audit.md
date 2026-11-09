@@ -1,5 +1,7 @@
 # Server and VPS Audit
 
+![server-fixes.sh](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/terminal-server-fixes.png)
+
 ```bash
 python3 audit.py --ssh deploy@my-vps --authorized --sudo --remote-path /var/www/app
 ```

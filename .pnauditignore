@@ -38,3 +38,10 @@ engine/secrets_playbook.py  SEC-*,CRY-*
 engine/pwa.py               SEC-*,CRY-*,CFG-*,DOS-*
 engine/serverfix.py         SEC-*,CRY-*,CFG-*,CMD-*
 engine/brand.py             SEC-*,CRY-*
+tests/test_precision.py     SEC-*,CRY-*,CFG-*
+scripts/locale_data/*       *
+scripts/make_locales.py     *
+engine/locales/*            *
+engine/sources.py           SEC-*,CRY-*
+engine/lex.py               SEC-*,CRY-*
+engine/pycheck.py           SEC-*,CRY-*

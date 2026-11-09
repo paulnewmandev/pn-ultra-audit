@@ -10,8 +10,9 @@ from engine.kb import KB  # noqa: E402
 from engine.rules import RULES  # noqa: E402
 
 OUT = os.path.join(ROOT, "docs", "wiki"); os.makedirs(OUT, exist_ok=True)
-VER = "1.0.16"
+VER = "1.0.17"
 REPO = "https://github.com/paulnewmandev/pn-ultra-audit"
+IMG = "https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/"   # absolute: works on the GitHub wiki and in the repo
 P = {}  # page name -> markdown
 
 P["Home"] = f"""# PN-Ultra-Audit wiki
@@ -25,6 +26,7 @@ P["Home"] = f"""# PN-Ultra-Audit wiki
 | Install it (git, pip, AI assistant) | [Installation](Installation) |
 | Understand the report and the dashboard | [Reading the Report](Reading-the-Report) |
 | Choose how strict it is | [Strictness Levels](Strictness-Levels) |
+| Spend as few AI tokens as possible | [Save Tokens](Save-Tokens) |
 | Audit a VPS (AWS, Azure, GCP, DigitalOcean, Hostinger...) | [Server and VPS Audit](Server-and-VPS-Audit) |
 | Audit a Vercel project | [Vercel Audit](Vercel-Audit) |
 | Audit a PWA | [PWA Audit](PWA-Audit) |
@@ -47,7 +49,9 @@ P["Home"] = f"""# PN-Ultra-Audit wiki
 - **Honest limits.** The report lists what was and was not examined.
 """
 
-P["Getting-Started"] = """# Getting Started
+P["Getting-Started"] = f"""# Getting Started
+
+![Terminal]({IMG}terminal-scan.png)
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit && cd pn-ultra-audit
@@ -531,6 +535,71 @@ P["_Sidebar"] = """**[PN-Ultra-Audit](Home)**
 - [Security and Privacy](Security-and-Privacy)
 """
 P["_Footer"] = f"PN-Ultra-Audit {VER} - GPL-3.0 - [Repository]({REPO}) - [Changelog]({REPO}/blob/main/CHANGELOG.md) - [Report an issue]({REPO}/issues)\n"
+
+
+# ------------- late edits: new page, viewer/languages updates and screenshots -------------
+P["Save-Tokens"] = f"""# Save Tokens
+
+PN-Ultra-Audit is built so an AI assistant (or you) reads **the minimum**: never a whole report.
+
+![brief]({IMG}terminal-brief.png)
+
+## The protocol (installed in every assistant's skill/rule)
+1. `python3 audit.py <path> --brief --strictness <level>` - about 40 lines: gate, ratings, counts and the top findings. Roughly 300-500 tokens.
+2. `python3 audit.py --show <ID> --run <run dir>` - ONE compact fix card: the flagged code, why, steps, safe form, a tested before/after and how to verify.
+3. `python3 audit.py --kb "<topic>"` - offline search of the remediation guides when you need guidance, not a finding.
+4. After fixing: `--brief --baseline auto` shows only what is new.
+
+**Never** open or paste `report.html`, `REPORT.md` or `findings.json` in full: they are for humans.
+
+## With MCP
+Register the read-only server (`python3 audit.py --mcp`, installed automatically for Claude Code and Cursor) and use `get_brief`, `get_fix_card`, `search_kb`, `list_findings` (15 compact rows by default).
+
+## What else keeps it cheap
+- Findings have fixed fields, so cards are small and predictable.
+- Secret values are never copied, so nothing sensitive is spent or leaked.
+- `--only` / `--skip` and automatic project detection avoid running (and reading) irrelevant audits.
+- The dashboard's **suggested AI prompt** per finding already contains just the code, cause and steps for that single finding - paste it into your editor instead of describing the problem.
+"""
+def _after(page, marker, md):
+    assert marker in P[page], (page, marker)
+    P[page] = P[page].replace(marker, marker + "\n\n" + md, 1)
+_after("Reading-the-Report", "# Reading the Report", f"![Executive report]({IMG}gal-report.png)\n\n![Overview]({IMG}dash-overview-dark.png)")
+P["Reading-the-Report"] = P["Reading-the-Report"].replace("## Tables\n", f"""## Read-only code viewer
+Click any `file:line` (or a file in **Repository**) to open it inside the report - any file type, read-only, with syntax colors. Every line with a finding has a **red breakpoint** (filled = confirmed, hollow = to review); click it to open that finding, use `n` / `p` to jump between findings, search inside the file, and press *Open in editor* to continue in your IDE. Source is embedded within a size budget (`--embed-source auto|findings|none`, `--embed-budget MB`); secrets are masked and `.env`, keys and state files are never embedded.
+
+![Code viewer]({IMG}gal-viewer.png)
+
+## Tables
+""", 1).replace("Every table is the same component: search box, sortable columns,", "Every table is the same component: search box, every column sortable (click the header),")
+_after("Server-and-VPS-Audit", "# Server and VPS Audit", f"![server-fixes.sh]({IMG}terminal-server-fixes.png)")
+_after("PWA-Audit", "# PWA Audit", f"![PWA view]({IMG}gal-pwa.png)")
+_after("Repository-Hygiene-and-Leaked-Keys", "# Repository Hygiene and Leaked Keys", f"![Repository tree]({IMG}gal-repo.png)")
+_after("Compliance-Readiness", "# Compliance Readiness", f"![Compliance]({IMG}gal-compliance.png)")
+_after("AI-Assistants-and-MCP", "# AI Assistants and MCP", f"![Installing]({IMG}terminal-agents.png)")
+P["AI-Assistants-and-MCP"] = P["AI-Assistants-and-MCP"].replace("## Save tokens: fix cards and search", "## Save tokens (see [Save Tokens](Save-Tokens))\n```bash\npython3 audit.py <path> --brief            # ~40-line summary, start here\n```\n\n### Fix cards and search",1).replace("exposes `list_findings`,","exposes `get_brief`, `list_findings`,")
+P["Languages-and-Translations"] = f"""# Languages and Translations
+
+![Arabic]({IMG}gal-ar.png)
+
+Built in: {", ".join(f"`{c}` ({n})" for c, n in i18n.available().items())} - nine languages, including right-to-left Arabic.
+
+`--lang auto` (default) follows your system language and falls back to **Spanish**. Force one with `--lang ja` or the `PN_AUDIT_LANG` environment variable. The terminal, the dashboard and the Markdown report are translated; the AI-prompt templates and the long remediation guides stay in English/Spanish (they fall back automatically).
+
+![Japanese]({IMG}gal-ja.png)
+
+## Add a language (10 minutes)
+1. Copy `engine/locales/ja.json` to `engine/locales/<code>.json` (for example `ko.json`, `de.json`, `ru.json`).
+2. Translate the values:
+   - `name` - the language's own name, `html_lang` - for example `ko`, `dir` - `ltr` or `rtl`
+   - `ui` - dashboard labels (95), `md` - Markdown report strings (73)
+   - `x` - English sentence -> translation for the CLI and dashboard text
+3. Run `python3 audit.py examples/vulnerable-demo --lang <code>`.
+
+The pack is auto-discovered (also in the `--lang` choices); anything you skip falls back to English. The maintainers' packs are generated from `scripts/locale_data/` by `python3 scripts/make_locales.py`. Send a pull request!
+"""
+P["Home"] = P["Home"].replace("## Start here", f"![Dashboard]({IMG}dash-overview-dark.png)\n\n## Start here",1)
+P["_Sidebar"] = P["_Sidebar"].replace("- [Strictness Levels](Strictness-Levels)","- [Strictness Levels](Strictness-Levels)\n- [Save Tokens](Save-Tokens)",1)
 
 for name, body in P.items(): open(os.path.join(OUT, name + ".md"), "w", encoding="utf-8").write(body.rstrip() + "\n")
 open(os.path.join(OUT, "README.md"), "w", encoding="utf-8").write(f"""# Wiki source

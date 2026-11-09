@@ -3,7 +3,8 @@
 *Generated from `python3 audit.py --help`.*
 
 ```text
-usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,en,es,zh}] [--profile {quick,standard,deep}]
+usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}]
+                      [--profile {quick,standard,deep}]
                       [--strictness {basic,standard,strict,lenient,balanced}] [--ask] [--baseline auto|FILE]
                       [--exclude EXCLUDE] [--tools] [--semgrep-config SEMGREP_CONFIG] [--run-tests]
                       [--test-timeout TEST_TIMEOUT] [--only ONLY] [--skip SKIP] [--plan] [--list-auditors]
@@ -21,12 +22,12 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,en,es,zh}] [--profile {quic
                       [--crawl-max CRAWL_MAX] [--psi] [--psi-key PSI_KEY] [--keywords KEYWORDS]
                       [--kw-lang KW_LANG] [--kw-country KW_COUNTRY] [--gsc-csv GSC_CSV]
                       [--competitor COMPETITOR] [--vercel-project NAME] [--vercel-team TEAM_ID]
-                      [--vercel-token-env VERCEL_TOKEN_ENV] [--authorized]
-                      [--fail-on {critical,high,medium,low,info}] [--color {auto,always,never}] [--verbose]
-                      [--quiet] [--version]
+                      [--vercel-token-env VERCEL_TOKEN_ENV] [--embed-source {auto,findings,none}]
+                      [--embed-budget MB] [--authorized] [--fail-on {critical,high,medium,low,info}]
+                      [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.16 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.17 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -34,7 +35,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --out OUT             output base dir (default ./audit-output/<name>)
-  --lang {auto,en,es,zh}
+  --lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                         report/UI language: auto (system language, Spanish by default) | es | en | zh ...
                         (any pack in engine/locales/). report language (default es)
   --profile {quick,standard,deep}
@@ -172,4 +173,17 @@ Vercel (serverless platform: audited through project config, the live site and t
                         team id/slug that owns the project
   --vercel-token-env VERCEL_TOKEN_ENV
                         env var holding the Vercel token (never pass tokens on the command line)
+
+Report:
+  --embed-source {auto,findings,none}
+                        source code embedded in report.html for the read-only code viewer: auto (all text
+                        files within the budget, files with findings first) | findings (only files with
+                        findings) | none. Secrets are masked; .env/keys/state files are never embedded
+  --embed-budget MB     size budget for embedded source (default 5 MB; files with findings are always
+                        included up to 2x)
+
+Token saving (for AI assistants and quick looks):
+  --brief               print only a ~40-line summary (gate, ratings, counts, top findings, next commands)
+                        instead of the live UI; implies --quiet --color never
+  --top N               findings listed by --brief (default 10)
 ```

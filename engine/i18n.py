@@ -6,7 +6,7 @@ import json, os, re, subprocess, sys
 
 LOCALES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "locales")
 BUILTIN = {"es": "Español", "en": "English"}
-ALIASES = {"zh-cn": "zh", "zh_cn": "zh", "zh-hans": "zh", "zh-tw": "zh", "zh_tw": "zh", "zh-hk": "zh", "cmn": "zh", "chinese": "zh", "spanish": "es", "english": "en", "español": "es"}
+ALIASES = {"japanese": "ja", "portuguese": "pt", "portugues": "pt", "português": "pt", "french": "fr", "francais": "fr", "français": "fr", "italian": "it", "italiano": "it", "hindi": "hi", "arabic": "ar", "arabe": "ar", "árabe": "ar", "jp": "ja", "chino": "zh", "japones": "ja", "japonés": "ja", "frances": "fr", "francés": "fr", "indu": "hi", "hindú": "hi", "zh-cn": "zh", "zh_cn": "zh", "zh-hans": "zh", "zh-tw": "zh", "zh_tw": "zh", "zh-hk": "zh", "cmn": "zh", "chinese": "zh", "spanish": "es", "english": "en", "español": "es"}
 
 
 def available():

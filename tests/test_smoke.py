@@ -77,7 +77,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.16", run("--version").stdout)
+        self.assertIn("1.0.17", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")
@@ -304,6 +304,53 @@ class Smoke(unittest.TestCase):
                 tp = os.path.join(o, "r" + name, "run-1", "t.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
                 res = dict(kv.split("=", 1) for kv in self._dom_title(chrome, tp, "v=issues").split(";"))
                 for k, v in res.items(): self.assertGreaterEqual(float(v), 4.4, f"{name} {color}: {k} contrast {v}")
+
+    def test_brief_mode_is_compact(self):
+        with tempfile.TemporaryDirectory() as o:
+            out = run(DEMO, "--out", os.path.join(o, "r"), "--brief", "--top", "5", "--lang", "en").stdout
+            self.assertLess(len(out), 2500); self.assertIn("TOP 5:", out); self.assertIn("gate", out); self.assertIn("--show", out)
+            self.assertNotIn("▶", out)  # no live UI
+
+    def test_all_language_packs_are_complete(self):
+        from engine import i18n, dashboard, render_report
+        av = i18n.available()
+        for code in ("es", "en", "zh", "ja", "pt", "fr", "it", "hi", "ar"): self.assertIn(code, av)
+        for code in ("zh", "ja", "pt", "fr", "it", "hi", "ar"):
+            pk = i18n.load(code)
+            self.assertEqual([k for k in dashboard.I18N["en"] if k not in pk["ui"]], [], code)
+            self.assertEqual([k for k in render_report.T["en"] if k not in pk["md"]], [], code)
+            self.assertGreater(len(pk["x"]), 150, code)
+        self.assertEqual(i18n.load("ar")["dir"], "rtl")
+        with tempfile.TemporaryDirectory() as o:
+            run(DEMO, "--out", os.path.join(o, "a"), "--color", "never", "--lang", "ar")
+            h = open(os.path.join(o, "a", "run-1", "report.html"), encoding="utf-8").read()
+            self.assertIn('dir="rtl"', h); self.assertIn('lang="ar"', h)
+
+    def test_source_viewer_data_is_masked_and_sensitive_files_are_not_embedded(self):
+        with tempfile.TemporaryDirectory() as o:
+            d = os.path.join(o, "p"); os.makedirs(os.path.join(d, "src"))
+            open(os.path.join(d, "src", "app.py"), "w").write("import os\nSECRET_TOKEN = 'abcdefghijklmnopqrstuvwxyz012345'\nos.system('ls ' + input())\n")
+            open(os.path.join(d, ".env"), "w").write("DB_PASSWORD=supersecretvalue123\n")
+            run(d, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en")
+            src = json.load(open(os.path.join(o, "r", "run-1", "sources.json"), encoding="utf-8"))
+            self.assertIn("src/app.py", src); self.assertNotIn("abcdefghijklmnopqrstuvwxyz012345", src["src/app.py"]["t"])
+            self.assertIn("os.system", src["src/app.py"]["t"])
+            self.assertEqual(src.get(".env", {}).get("x"), "sensitive"); self.assertNotIn("supersecretvalue123", json.dumps(src))
+            self.assertNotIn("supersecretvalue123", open(os.path.join(o, "r", "run-1", "report.html"), encoding="utf-8").read())
+            run(d, "--out", os.path.join(o, "n"), "--color", "never", "--embed-source", "none")
+            self.assertFalse(os.path.exists(os.path.join(o, "n", "run-1", "sources.json")))
+
+    def test_code_viewer_shows_breakpoints_in_a_real_browser(self):
+        chrome = self._chrome()
+        if not chrome: self.skipTest("Chrome/Chromium not available")
+        with tempfile.TemporaryDirectory() as o:
+            run(DEMO, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en")
+            rp = os.path.join(o, "r", "run-1", "report.html"); h = open(rp, encoding="utf-8").read()
+            js = """<script>setTimeout(function(){var out=[];viewerOpen('backend/app.py',25);var v=document.getElementById('viewer');out.push('open='+v.classList.contains('open'));out.push('lines='+(v.querySelectorAll('.cl').length>20));out.push('bps='+(v.querySelectorAll('.bp').length>3));out.push('err='+(v.querySelectorAll('.cl.err').length>3));
+            viewerOpen('does/not/exist.bin',1);out.push('msg='+!!document.querySelector('#viewer .vmsg'));document.title='RESULT|'+out.join(';')},700);</script>"""
+            tp = os.path.join(o, "r", "run-1", "tv.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
+            res = dict(kv.split("=", 1) for kv in self._dom_title(chrome, tp, "v=overview").split(";"))
+            self.assertEqual(res, {"open": "true", "lines": "true", "bps": "true", "err": "true", "msg": "true"})
 
     def test_report_has_static_fallback(self):
         """The HTML must show content even when scripts are blocked or fail (no header-only reports)."""

@@ -4,8 +4,10 @@ Stdlib only. Read-only on the target."""
 import fnmatch, hashlib, os, re, subprocess
 from collections import Counter, defaultdict
 
-from .rules import RULES, TAINT, TAINT_DOM
+from .rules import RULES, TAINT, TAINT_WEB, TAINT_DOM_WEB, TAINT_CLI
 from .kb import KB
+from .lex import mask_noncode, strip_literals
+from . import pycheck
 
 SKIP_DIRS = {".git", ".hg", ".svn", "node_modules", "vendor", "bower_components", "dist", "build", "out", "target", ".venv", "venv", "env", "__pycache__",
              ".tox", ".mypy_cache", ".pytest_cache", ".gradle", ".idea", ".vscode", "Pods", "Carthage", "DerivedData", ".next", ".nuxt", ".svelte-kit",
@@ -105,6 +107,21 @@ class Scan:
         self.read_errors = 0
 
 
+GEN_PATH = re.compile(r"(^|/)(dist|build|out|\.next|\.nuxt|\.output|coverage|target|obj|generated|__generated__|_build|storybook-static|vendor|\.turbo|\.cache)(/|$)|\.min\.|\.bundle\.|\.d\.ts$|\.generated\.|\.g\.dart$|_pb2(_grpc)?\.py$|\.pb\.go$|\.designer\.cs$|\.map$", re.I)
+GEN_HEAD = re.compile(r"@generated|DO NOT EDIT|do not edit|auto-?generated|automatically generated|generated (?:by|from)|gencodec|code generated|sourceMappingURL=|webpack|__webpack_require__|Object\.defineProperty\(exports, ['\"]__esModule|typeof exports === ['\"]object['\"] && typeof module|\(function \(global, factory\)|var __defProp|require\(['\"]tslib['\"]\)|Babel|regeneratorRuntime", re.I)
+RAW_RULES = {"BUG-EMPTY-CATCH"}                                                # comments matter: a commented empty catch is intentional
+
+
+def is_generated(rel, text):
+    """Build outputs, bundles and generated sources must not be judged by size/complexity/duplication metrics."""
+    return bool(GEN_PATH.search(rel)) or bool(GEN_HEAD.search(text[:1500]))
+
+
+CTX_REQUIRE = {"CFG-COOKIE": re.compile(r"cookie|session|set-?cookie", re.I)}   # the match must be about cookies/sessions (e.g. not `secure=False` of an HTTP client)
+STRIP_RULES = {"LOG-SECRET"}                                                   # secret word must be a variable/interpolation, not prose inside a string
+CLI_RELEVANT = {"cmdi", "sqli", "deser"}                                       # families where CLI/stdin input is still worth a (low-priority) review
+
+
 def is_tainted(lines, i, rx=TAINT):
     line = lines[i]
     if rx.search(line): return True
@@ -126,6 +143,9 @@ def mkf(rule, rel, line_no, evidence, status, why=None):
                 effort_min=rule.effort, cwe=list(rule.cwe), owasp=list(rule.owasp), status=status, priority=rule.priority if status != "confirmed" else None, why=why)
 
 
+RULE_BY_ID = {r.id: r for r in RULES}
+
+
 def scan_files(files, progress=None, per_rule_cap=60):
     S = Scan()
     by_ext = defaultdict(list)
@@ -144,6 +164,8 @@ def scan_files(files, progress=None, per_rule_cap=60):
         if b"\0" in raw[:4096]: continue
         text = raw.decode("utf-8", "ignore")
         lines = text.split("\n")
+        mtext = mask_noncode(text, ext); mlines = mtext.split("\n")
+        if len(mlines) != len(lines): mtext, mlines = text, lines
         if ext in ("js", "css") and lines and len(text) / max(len(lines), 1) > 400: continue  # minified/bundled
         lang = LANG.get(ext)
         is_test = bool(TESTFILE.search(rel))
@@ -153,7 +175,8 @@ def scan_files(files, progress=None, per_rule_cap=60):
             for m in WEBFW.finditer(text): S.frameworks.add(m.group(1).lower())
         if RATELIMIT.search(text): S.has_ratelimit = True
         # ── size / complexity (code languages only)
-        if lang in CODE_LANGS or ext in ("html", "vue", "svelte"):
+        gen = is_generated(rel, text)
+        if (lang in CODE_LANGS or ext in ("html", "vue", "svelte")) and not gen:
             nl = [l for l in lines if l.strip() and not COMMENT.match(l)]
             ncloc = len(nl)
             if lang in CODE_LANGS or ext in ("vue", "svelte"):
@@ -183,26 +206,35 @@ def scan_files(files, progress=None, per_rule_cap=60):
             seen_rules.add(rule.id)
             if rule.skip_paths and rule.skip_paths.search(rel): continue
             if rule.id.startswith("SEC-") and base in ("package-lock.json",): continue
-            if not rule.pattern.search(text): continue
+            secretish = rule.family in ("secrets", "jwt") or rule.id.startswith("SEC-") or rule.id in RAW_RULES
+            T_, L_ = (text, lines) if secretish else (mtext, mlines)   # code rules never match inside comments/docstrings
+            if not rule.pattern.search(T_): continue
             cap_key = rule.id
             if rule.multiline:
-                for m in rule.pattern.finditer(text):
+                for m in rule.pattern.finditer(T_):
                     ln = text[:m.start()].count("\n") + 1
                     if S.caps[cap_key] >= per_rule_cap: S.truncated[cap_key] += 1; continue
                     S.caps[cap_key] += 1
                     S.findings.append(mkf(rule, rel, ln, redact(lines[ln - 1], m, rule.family), "confirmed" if rule.precision == "high" else "needs_validation"))
                 continue
-            for i, line in enumerate(lines):
+            for i, line in enumerate(L_):
                 if len(line) > 2000: continue
                 m = rule.pattern.search(line)
                 if not m: continue
                 if rule.require and not rule.require.search(line): continue
-                if rule.exclude and rule.exclude.search(line): continue
+                if rule.id in STRIP_RULES and not rule.pattern.search(strip_literals(line)): continue
+                if rule.id in CTX_REQUIRE and not CTX_REQUIRE[rule.id].search("\n".join(L_[max(0, i - 3):i + 1])): continue
+                if rule.exclude and rule.exclude.search(line) and rule.id not in STRIP_RULES: continue
                 if COMMENT.match(line) and (rule.family not in ("secrets", "jwt") or rule.id == "SEC-HARDCODED"): continue
                 if rule.precision == "high": status, why = "confirmed", None
                 else:
-                    tainted = is_tainted(lines, i, TAINT_DOM if rule.id in ("XSS-DOM", "CODE-EVAL", "XSS-FRAMEWORK") else TAINT)
-                    if rule.precision == "taint":
+                    dom = rule.id in ("XSS-DOM", "CODE-EVAL", "XSS-FRAMEWORK")
+                    web = is_tainted(L_, i, TAINT_DOM_WEB if dom else TAINT_WEB)
+                    cli = (not web) and (not dom) and is_tainted(L_, i, TAINT_CLI)
+                    tainted = web
+                    if rule.precision == "taint" and cli and rule.family in CLI_RELEVANT:
+                        status, why = "needs_validation", "input comes from command-line arguments / stdin: only exploitable if this program runs with more privileges than whoever invokes it (setuid, service, CI)"
+                    elif rule.precision == "taint":
                         status, why = ("confirmed", "user input reaches this call (same line or assigned within 25 lines above)") if tainted else ("needs_validation", "pattern is dangerous but no user-input source was found nearby - confirm the value's origin")
                     elif rule.precision == "taint_only":
                         if not tainted: continue
@@ -213,12 +245,18 @@ def scan_files(files, progress=None, per_rule_cap=60):
                 S.caps[cap_key] += 1
                 ctx = "\n".join(l.rstrip()[:200] for l in lines[max(0, i - 1):i + 2]) if rule.family not in ("secrets", "jwt") else redact(line, m, rule.family)
                 S.findings.append(mkf(rule, rel, i + 1, ctx, status, why))
+        # ── Python AST checks (precise replacements for regex rules)
+        if ext == "py" and not is_test:
+            for rid, ln_, ev, why in pycheck.analyze(text, lines):
+                if S.caps[rid] >= per_rule_cap: S.truncated[rid] += 1; continue
+                S.caps[rid] += 1
+                S.findings.append(mkf(RULE_BY_ID[rid], rel, ln_, ev, "confirmed", why))
         # ── N+1 (hotspot)
         if lang in ("Python", "JavaScript", "TypeScript", "PHP", "Java", "Kotlin", "Ruby", "Go", "C#") and not is_test:
             for i, line in enumerate(lines):
-                if LOOP.match(line) and len(line) < 300:
+                if LOOP.match(mlines[i]) and len(line) < 300:
                     for j in range(i + 1, min(i + 7, len(lines))):
-                        if DBCALL.search(lines[j]) and not COMMENT.match(lines[j]):
+                        if DBCALL.search(mlines[j]) and not COMMENT.match(mlines[j]):
                             if S.caps["PERF-NPLUS1"] < per_rule_cap:
                                 S.caps["PERF-NPLUS1"] += 1
                                 S.findings.append(dict(rule="PERF-NPLUS1", title="Query inside a loop (possible N+1)", family="nplus1", type="performance", severity=None, category="n+1",
@@ -226,6 +264,19 @@ def scan_files(files, progress=None, per_rule_cap=60):
                                                        fix="; ".join(KB["nplus1"]["steps"][:2]), effort_min=30, cwe=["CWE-1073"], owasp=[], status="needs_validation", priority="medium",
                                                        why="a data-access call appears within 6 lines of a loop header - confirm the loop iterates over many rows"))
                             break
+    # build variants of one module (index.js / index.es.js / index.mjs ...) are outputs, not sources: exclude them from size/duplication metrics
+    groups = defaultdict(list)
+    for rel in list(S.file_stats):
+        d, b = os.path.dirname(rel), os.path.basename(rel)
+        m = re.match(r"(.+?)(\.(es|esm|cjs|umd|browser|node))?\.(js|mjs|cjs)$", b)
+        if m: groups[(d, m.group(1))].append((rel, bool(m.group(2)) or b.endswith((".mjs", ".cjs"))))
+    gen_variants = {r for g in groups.values() if len(g) >= 3 or (len(g) == 2 and any(v for _, v in g)) for r, _ in g} if groups else set()
+    if gen_variants:
+        for rel in gen_variants:
+            S.file_stats.pop(rel, None); S.src_files.pop(rel, None); S.test_files.pop(rel, None)
+        for h in list(S.dup_hashes):
+            S.dup_hashes[h] = [(f, k) for f, k in S.dup_hashes[h] if f not in gen_variants]
+            if not S.dup_hashes[h]: del S.dup_hashes[h]
     if progress: progress(total, total, S.findings)
     return S
 
@@ -248,6 +299,21 @@ def duplication(S):
                 for b in range(a + 1, len(fs)): pairs[(fs[a], fs[b])] += 8
     top = [dict(a=a, b=b, lines=n) for (a, b), n in pairs.most_common(5)]
     return dict(percent=round(pct, 1), duplicated_lines=dup_lines, top_pairs=top, method="8-line window hash")
+
+
+def _is_library(ab, base):
+    """Published libraries conventionally do NOT commit a lockfile; only applications need one."""
+    try: raw = open(ab, encoding="utf-8", errors="ignore").read(60_000)
+    except OSError: return False
+    if base == "package.json":
+        import json as _j
+        try: j = _j.loads(raw)
+        except ValueError: return False
+        scripts = j.get("scripts") or {}
+        app = j.get("private") is True or any(k in scripts for k in ("start", "dev", "serve", "deploy")) or any(d in (j.get("dependencies") or {}) for d in ("next", "nuxt", "react-scripts", "express", "fastify", "@nestjs/core", "electron"))
+        return (not app) and any(k in j for k in ("main", "module", "exports", "bin", "types", "typings"))
+    if base == "composer.json": return bool(re.search(r'"type"\s*:\s*"library"', raw))
+    return False
 
 
 def project_checks(root, files, tracked, S):
@@ -289,7 +355,7 @@ def project_checks(root, files, tracked, S):
     for rel in list(names):
         b = os.path.basename(rel); d = os.path.dirname(rel)
         pairs = {"package.json": ("package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lockb"), "composer.json": ("composer.lock",), "Gemfile": ("Gemfile.lock",), "Cargo.toml": ("Cargo.lock",)}
-        if b in pairs and "/node_modules/" not in "/" + rel:
+        if b in pairs and "/node_modules/" not in "/" + rel and not _is_library(names[rel][0], b):
             if not any(os.path.exists(os.path.join(root, d, l)) for l in pairs[b]):
                 f("DEP-NO-LOCKFILE", f"`{rel}` has no lockfile", "dep", "dependency", "low", "supply-chain", rel, 1, "(missing lockfile)", "Non-reproducible builds; supply-chain drift.", "Commit the lockfile (npm i / composer install / bundle install)", 5, cwe=["CWE-1104"], owasp=["A06:2021", "A08:2021"])
     # .gitignore must cover env

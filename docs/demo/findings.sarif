@@ -474,7 +474,7 @@
               "id": "BUG-PY-MUTABLE-DEFAULT",
               "name": "logic",
               "shortDescription": {
-                "text": "Mutable default argument"
+                "text": "Mutable default argument that is mutated or leaked"
               }
             },
             {
@@ -3104,10 +3104,10 @@
           "ruleIndex": 66,
           "level": "note",
           "message": {
-            "text": "Mutable default argument \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
+            "text": "Mutable default argument that is mutated or leaked \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
           },
           "partialFingerprints": {
-            "auditFingerprint/v1": "BUG-PY-MUTABLE-DEFAULT:backend/app.py:1e984e258d"
+            "auditFingerprint/v1": "BUG-PY-MUTABLE-DEFAULT:backend/app.py:47a06d1c4d"
           },
           "locations": [
             {

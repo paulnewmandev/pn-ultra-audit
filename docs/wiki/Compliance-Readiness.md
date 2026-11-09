@@ -1,5 +1,7 @@
 # Compliance Readiness
 
+![Compliance](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/gal-compliance.png)
+
 **Not a certification.** It maps technical findings to framework controls and tells you what evidence an auditor will ask for, so the real audit is faster and cheaper.
 
 ```bash

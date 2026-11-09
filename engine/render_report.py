@@ -448,7 +448,7 @@ def render(d, lang="es", strict=False, ncloc=None):
     metrics = load(os.path.join(d, "metrics.json"), {}); meta = load(os.path.join(d, "run-metadata.json"), {})
     ledger = load(os.path.join(d, "coverage-ledger.json"), []); owasp = load(os.path.join(d, "owasp-matrix.json"), [])
     comp = compute(confirmed, ncloc or metrics.get("ncloc") or 0, meta.get("profile", "standard"), ledger)
-    ctx = dict(confirmed=confirmed, nv=nv, rejected=rejected, metrics=metrics, meta=meta, ledger=ledger, owasp=owasp, comp=comp)
+    ctx = dict(confirmed=confirmed, nv=nv, rejected=rejected, metrics=metrics, meta=meta, ledger=ledger, owasp=owasp, comp=comp, sources=load(os.path.join(d, "sources.json")) or {})
     t = dict(T["en"]); t.update(T.get(lang, {})); t.update(_pack_md(lang))
     open(os.path.join(d, "REPORT.md"), "w", encoding="utf-8").write(build_md(ctx, t))
     ctx["all"] = confirmed + nv

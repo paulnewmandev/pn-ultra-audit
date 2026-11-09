@@ -3,6 +3,23 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.17] - 2026-11-09
+
+### Added
+- **Nine languages**: Spanish (default), English, Chinese, **Japanese, Portuguese, French, Italian, Hindi and Arabic** (right-to-left layout). Dashboard (95 labels), Markdown report (73) and CLI/dashboard text (~200 sentences) are translated; `--lang auto` follows the system language. Packs live in `engine/locales/*.json` (generated from `scripts/locale_data/` by `scripts/make_locales.py`), so adding a language is one JSON file.
+- **Read-only code viewer** in the dashboard: any file or extension, syntax colors, line numbers, **red breakpoints on every line with a finding** (hollow for "to review"), problems bar, find-in-file, next/previous finding (`n`/`p`), wrap, copy path and open in editor. File links and the Repository tree open it. Source is embedded with a budget (`--embed-source auto|findings|none`, `--embed-budget`); secrets are masked and `.env`, keys, Terraform state and binaries are never embedded.
+- **Token saving**: `--brief` (+ `--top N`) prints ~40 lines instead of the live UI; MCP `get_brief`; the installed assistant guide and the `audit` skill now state a token-saving protocol (brief -> `--show ID` -> `--kb`, never read whole reports).
+- **Real technology logos** in the README badges (Simple Icons, CC0 data; cached in `assets/logos/`), plus new groups for clouds/VPS providers and servers/brokers; **redesigned compliance badges** with a distinct pictogram per framework and fitted text.
+- Repository **Expand all / Collapse all**; **every data-table column is sortable**; the sidebar is wider so long labels do not wrap; `.pnauditignore` and wiki: new *Save Tokens* page, screenshots in the pages, viewer and language docs.
+- `scripts/precision_bench.py`: audit mature code and list what the tool confirms (a conservative false-positive measure).
+
+### Changed
+- **Precision overhaul of the detection engine** (see README "Precision first"): comment/docstring masking for code rules; web input vs CLI input in taint (path/SSRF/redirect/XSS/IDOR fire only on web sources, command/SQL/deserialization from argv become low-priority reviews); AST checks for Python `is` with literals, mutated/leaked mutable defaults and broad empty `except`; `LOG-SECRET` ignores prose in strings; `CFG-COOKIE` requires a cookie/session context; empty-`catch` respects an explanatory comment; generated files, bundles, build variants and `lib` lockfiles are no longer judged as source. Python stdlib: 178 confirmed (8 high) -> 0 critical/high security findings.
+- Cards no longer use colored top/left accent borders (neutral cards with icon chips); the data-table footer, status icons and OWASP tiles were refined.
+
+### Fixed
+- Arabic/RTL layout; badge filename collisions (C / C# / C++); empty-state and executive-summary layout (full width, tables default to 10 rows, empty states inside the table); cover gradient without a brand color; README features table alignment.
+
 ## [1.0.16] - 2026-11-09
 
 ### Added

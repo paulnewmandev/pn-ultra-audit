@@ -1,6 +1,8 @@
 # PN-Ultra-Audit wiki
 
-**One read-only command that audits code, tests, docs, databases, servers/VPS, Vercel, PWA, SEO, crypto, SaaS/fintech and audit-readiness - live in your terminal, delivered as a dashboard.** Version 1.0.16.
+**One read-only command that audits code, tests, docs, databases, servers/VPS, Vercel, PWA, SEO, crypto, SaaS/fintech and audit-readiness - live in your terminal, delivered as a dashboard.** Version 1.0.17.
+
+![Dashboard](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/dash-overview-dark.png)
 
 ## Start here
 | I want to... | Page |
@@ -9,6 +11,7 @@
 | Install it (git, pip, AI assistant) | [Installation](Installation) |
 | Understand the report and the dashboard | [Reading the Report](Reading-the-Report) |
 | Choose how strict it is | [Strictness Levels](Strictness-Levels) |
+| Spend as few AI tokens as possible | [Save Tokens](Save-Tokens) |
 | Audit a VPS (AWS, Azure, GCP, DigitalOcean, Hostinger...) | [Server and VPS Audit](Server-and-VPS-Audit) |
 | Audit a Vercel project | [Vercel Audit](Vercel-Audit) |
 | Audit a PWA | [PWA Audit](PWA-Audit) |

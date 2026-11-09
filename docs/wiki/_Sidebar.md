@@ -5,6 +5,7 @@
 - [Installation](Installation)
 - [Reading the Report](Reading-the-Report)
 - [Strictness Levels](Strictness-Levels)
+- [Save Tokens](Save-Tokens)
 
 **Audit targets**
 - [Server and VPS](Server-and-VPS-Audit)

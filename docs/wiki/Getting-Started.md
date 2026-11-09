@@ -1,5 +1,7 @@
 # Getting Started
 
+![Terminal](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/terminal-scan.png)
+
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit && cd pn-ultra-audit
 python3 audit.py /path/to/your/project
