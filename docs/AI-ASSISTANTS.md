@@ -13,3 +13,12 @@
 | Trae | `.trae/rules/pn-ultra-audit.md` | project only |
 
 Locations/format follow each tool's public docs at the time of writing and may change - if a feature doesn't appear, check the tool's current documentation. Installed files carry a `pn-ultra-audit:managed` marker; foreign files are never overwritten without `--force`.
+
+
+## Token-saving retrieval (v1.0.14)
+
+Instead of reading whole reports or files, an assistant can ask for exactly what it needs:
+
+- `python3 audit.py --show SEC-001 --run <audit-output dir>` - compact fix card for one finding.
+- `python3 audit.py --kb "sql injection php"` - offline search of the remediation guides.
+- `python3 audit.py --mcp --run <dir>` - read-only MCP server (tools: `list_findings`, `get_fix_card`, `search_kb`, `get_summary`, `verify_corpus`). `--install-agent claude|cursor` registers it in `.mcp.json` / `.cursor/mcp.json`; for other assistants add a stdio server running `python3 /path/to/audit.py --mcp`.

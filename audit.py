@@ -230,6 +230,7 @@ def main(argv=None):
         print(kbsearch.format_results(a.kb)); return 0
     if a.verify_corpus:
         r = corpus.verify(); bad = [x for x in r if not x["ok"]]
+        if not r: print("The fix corpus (examples/fixes/) is not available in this install; use a git clone.", file=sys.stderr); return 2
         for x in r: print(f"  {'OK  ' if x['ok'] else 'FAIL'} {x['id']:<28} {x['rule']}")
         print(f"\n{len(r) - len(bad)}/{len(r)} pairs verified"); return 1 if bad else 0
     if a.mcp:

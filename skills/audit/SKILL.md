@@ -83,6 +83,9 @@ Invoke `audit-report`. Then give the user a short summary in chat: ratings, qual
 7. Duplicating one root cause across many findings.
 8. Claiming "no vulnerabilities" — say "none found within the examined coverage" and show the coverage.
 
+## Fix retrieval (save tokens)
+After a run, do not re-read whole files or reports. Use `python3 <suite>/audit.py --show <ID> --run <audit-output dir>` for one finding's card, and `--kb "<topic>"` for remediation guidance. If the MCP server is registered, use its `get_fix_card` / `search_kb` tools instead.
+
 ## References
 - `references/finding-schema.md` — the one JSON shape every pass must emit
 - `references/severity-and-scoring.md` — severity anchors, ratings A–E, quality gate, debt ratio

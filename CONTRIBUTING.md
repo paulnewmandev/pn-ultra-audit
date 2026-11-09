@@ -12,6 +12,7 @@ python3 audit.py examples/vulnerable-demo --out /tmp/out
 1. Add it to `engine/rules.py` with `R(id, title, family, exts, pattern, precision=…)` (`high` | `taint` | `taint_only` | `low`).
 2. Make sure its `family` has a guide in `engine/kb*.py` (explanation, steps, vulnerable/safe example, verification) - add the Spanish overlay in `engine/kb_es.py` if you can.
 3. Add a vulnerable sample to `examples/` and an assertion in `tests/test_smoke.py`.
+   Better: add a tested pair under `examples/fixes/<id>/{vulnerable,fixed}/` and list it in `examples/fixes/index.json`; `python3 audit.py --verify-corpus` (and the test-suite) prove the rule fires on the flaw and stays silent on the fix.
 4. `python3 scripts/gen_docs.py` regenerates `docs/RULES.md` and `docs/CLI.md`.
 ## Principles
 - Prefer **few precise** findings over noise; label suspicion as *to review*, not *confirmed*.

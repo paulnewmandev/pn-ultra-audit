@@ -301,7 +301,8 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | `--scaffold [--write]` | create missing professional files |
 | `--export DIR` `--pdf` `--lang es\\|en` `--out DIR` | outputs |
 | `--tools` `--run-tests` | semgrep/gitleaks/npm audit/pip-audit · run the project's own tests |
-| `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |\n| `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
+| `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |
+| `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
 | `--fail-on SEV` `--verbose` `--quiet` `--color` | CI & output |
 
 Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs/RULES.md).
