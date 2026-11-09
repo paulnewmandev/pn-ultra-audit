@@ -3,6 +3,12 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.20] - 2026-11-09
+
+### Changed
+- Dashboard: score cards redesigned. Compliance readiness now uses framework medallions (own pictogram per framework + readiness ring + percentage ribbon, same art as the README badges; new pictograms for ASVS, SOX, NYDFS, PSD2, CIS) with colored pass/gap/manual pills. SEO & SEM scores use a shared score card (icon chip, ring, progress bar, status word) with new SEO icons.
+- Shared framework art lives in `engine/fwart.py` (used by `scripts/make_assets.py` and the dashboard).
+
 ## [1.0.19] - 2026-11-09
 
 ### Fixed

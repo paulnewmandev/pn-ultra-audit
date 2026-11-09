@@ -141,27 +141,9 @@ print("assets written:", len(os.listdir(A)), "root files;", len(os.listdir(os.pa
 # ───────── compliance readiness badges: own iconography (a distinct pictogram per framework, name fitted to a ribbon, no overflow).
 # Inspired by each framework's common visual language; NOT the official marks, and they say "readiness", never "certified".
 os.makedirs(os.path.join(A, "compliance"), exist_ok=True)
-import math as _m
-def _stars(cx, cy, r, n=12, size=5.2, fill="#ffcc33"):
-    out = []
-    for i in range(n):
-        a = -_m.pi / 2 + i * 2 * _m.pi / n; x, y = cx + r * _m.cos(a), cy + r * _m.sin(a)
-        pts = " ".join(f"{x + (size if k % 2 == 0 else size * .42) * _m.cos(-_m.pi / 2 + k * _m.pi / 5):.1f},{y + (size if k % 2 == 0 else size * .42) * _m.sin(-_m.pi / 2 + k * _m.pi / 5):.1f}" for k in range(10))
-        out.append(f'<polygon points="{pts}" fill="{fill}"/>')
-    return "".join(out)
-SHIELD = '<path d="M110 52l30 11v22c0 20-12 34-30 42-18-8-30-22-30-42V63z"/>'
-PIC = {
- "soc2": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M110 56l24 9v18c0 16-10 28-24 34-14-6-24-18-24-34V65z"/><path d="M99 87l8 8 15-17"/></g><g fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="3" stroke-linecap="round"><path d="M62 96a48 48 0 0 1 14-34M158 96a48 48 0 0 1-14 34"/><path d="M76 62l-1 8-8-2M144 130l1-8 8 2"/></g>',
- "iso27001": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4" stroke-linecap="round"><circle cx="110" cy="86" r="32"/><ellipse cx="110" cy="86" rx="13" ry="32"/><path d="M78 86h64M84 70h52M84 102h52"/></g><g transform="translate(128 98)"><rect x="0" y="9" width="24" height="20" rx="4" fill="#0a0f26" stroke="#fff" stroke-width="3"/><path d="M5 9V5a7 7 0 0 1 14 0v4" fill="none" stroke="#fff" stroke-width="3"/></g>',
- "hipaa": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4" stroke-linejoin="round">{SHIELD}</g><path d="M110 70v34M93 87h34" stroke="#fff" stroke-width="9" stroke-linecap="round"/><path d="M76 108c10 4 18 2 24-6" fill="none" stroke="{c}" stroke-opacity=".6" stroke-width="3" stroke-linecap="round"/>',
- "gdpr": lambda c: _stars(110, 86, 38, 12, 6.2) + f'<g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><rect x="95" y="84" width="30" height="24" rx="5" fill="#0a0f26"/><path d="M101 84V76a9 9 0 0 1 18 0v8"/></g><circle cx="110" cy="96" r="3.6" fill="{c}"/>',
- "pci": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4" stroke-linejoin="round"><rect x="68" y="66" width="84" height="54" rx="9"/></g><path d="M68 80h84" stroke="{c}" stroke-width="9"/><rect x="78" y="94" width="20" height="14" rx="3" fill="none" stroke="#fff" stroke-width="3"/><path d="M106 101h36M106 109h22" stroke="#fff" stroke-opacity=".8" stroke-width="3.4" stroke-linecap="round"/><g transform="translate(126 96) scale(.62)" fill="#0a0f26" stroke="#fff" stroke-width="5" stroke-linejoin="round"><path d="M30 8l20 7v14c0 14-8 24-20 29-12-5-20-15-20-29V15z"/></g>',
- "nist": lambda c: "".join(f'<path d="M110 86 L{110 + 40 * _m.cos(a0):.1f} {86 + 40 * _m.sin(a0):.1f} A40 40 0 0 1 {110 + 40 * _m.cos(a0 + _m.pi / 3 - .06):.1f} {86 + 40 * _m.sin(a0 + _m.pi / 3 - .06):.1f} Z" fill="{col}" fill-opacity=".9"/>' for a0, col in zip([-_m.pi / 2 + k * _m.pi / 3 for k in range(6)], ["#8b5cf6", "#6366f1", "#3b82f6", "#22d3ee", "#34d399", "#a3e635"])) + '<circle cx="110" cy="86" r="14" fill="#0a0f26" stroke="#fff" stroke-width="3"/><path d="M104 86l4 4 8-9" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
- "dora": lambda c: _stars(110, 86, 40, 12, 5.4) + f'<g fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M82 100h56M86 100V80M98 100V80M110 100V80M122 100V80M134 100V80M80 80h60L110 62z"/></g><path d="M82 100h56" stroke="{c}" stroke-width="3.6" stroke-linecap="round"/>',
- "euai": lambda c: _stars(110, 82, 41, 12, 4.6) + f'<g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><rect x="88" y="60" width="44" height="44" rx="7" fill="#0a0f26"/><rect x="99" y="71" width="22" height="22" rx="4" stroke="{c}" fill="{c}" fill-opacity=".25"/><path d="M99 60v-7M110 60v-7M121 60v-7M99 104v7M110 104v7M121 104v7M88 71h-7M88 82h-7M88 93h-7M132 71h7M132 82h7M132 93h7"/></g><path d="M110 74l2.2 5.2 5.2 2.2-5.2 2.2-2.2 5.2-2.2-5.2-5.2-2.2 5.2-2.2z" fill="#fff"/>',
- "wcag": lambda c: f'<g fill="none" stroke="{c}" stroke-width="4"><circle cx="110" cy="86" r="38"/></g><g fill="#fff"><circle cx="110" cy="68" r="6.2"/><path d="M84 80c18 5 34 5 52 0l1.6 7c-8 2.6-15 3.6-21.6 4v10l7 19-8 3-8-18-8 18-8-3 7-19V91c-6.6-.4-13.6-1.4-21.6-4z"/></g>',
-}
-ACCENT = {"soc2": "#4f8cff", "iso27001": "#14b8a6", "hipaa": "#f43f5e", "gdpr": "#5b8def", "pci": "#f59e0b", "nist": "#8b5cf6", "dora": "#38bdf8", "euai": "#818cf8", "wcag": "#34d399"}
+import sys; sys.path.insert(0, ROOT)
+from engine.fwart import _stars, SHIELD, PIC, ACCENT
+
 FWS = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 for name, slug in FWS:
     ac = ACCENT[slug]; fs = min(21, 126 / (0.62 * len(name)))
