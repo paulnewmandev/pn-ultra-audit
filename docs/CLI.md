@@ -27,7 +27,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.23 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.24 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -54,7 +54,7 @@ options:
   --run-tests           EXECUTES the project's own test suite (runs target code)
   --test-timeout TEST_TIMEOUT
   --only ONLY           run only these auditors (comma list):
-                        security,quality,docs,tests,qa,seo,repo,vercel,pwa,web3,db,domain
+                        security,quality,docs,tests,qa,seo,repo,malware,aitrace,vercel,pwa,web3,db,domain
   --skip SKIP           skip these auditors (comma list)
   --plan                detect the project type, print which auditors would run, and exit
   --list-auditors       list the auditors and exit
@@ -200,6 +200,8 @@ Token saving (for AI assistants and quick looks):
 | `qa` | Front-end QA (Playwright/Cypress/axe/visual) and mobile QA (Android/iOS/Flutter/RN) |
 | `seo` | SEO + SEM readiness: metadata, robots, sitemap, tracking, consent |
 | `repo` | Repository hygiene: sensitive files and keys in git (and history), CI/CD workflow security, SECURITY.md / CODEOWNERS / dependabot / secret scanning |
+| `malware` | Malware & backdoors: webshells, reverse shells, decode-and-execute payloads, miners, stealers, malicious install hooks, persistence, polyglot files, Trojan Source |
+| `aitrace` | AI traces (project finish): comments, docs, agent/spec files, git trailers and metadata that reveal AI-assisted development, with removal guidance |
 | `vercel` | Vercel: vercel.json, next.config, crons, API routes, public env vars, headers, CVEs; live site and project settings (API) |
 | `pwa` | Progressive Web Apps: manifest, installability, service worker, offline, push, update flow |
 | `web3` | Smart contracts (Solidity/Anchor) and dApp patterns |

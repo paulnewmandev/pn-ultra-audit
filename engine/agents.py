@@ -28,6 +28,7 @@ python3 {home}/audit.py <path> --export docs --pdf      # write the dashboard/MD
 ```
 Auditors: `security` (SQLi, XSS, DoS, injection, secrets, crypto, auth, IaC/CI), `quality`, `docs` (docstrings, standards, complexity, cycles, architecture),
 `tests`, `qa` (front-end Playwright/axe + mobile Android/iOS/Flutter/RN), `seo` (SEO + SEM + consent), `web3` (Solidity/Anchor/dApps), `db` (SQL, migrations).
+`malware` (webshells, reverse shells, miners, stealers, malicious install hooks, persistence, Trojan Source; static, not an antivirus - never execute suspicious code, follow the incident-response steps) and `aitrace` (project finish: AI comments, agent/spec files, git trailers, metadata; ask about disclosure obligations before removing anything). Both write `cleanup-fixes.sh` (never executed by the tool; backups and quarantine).
 Extras by flag: `--db <sqlite|postgres://|mysql://|redis://|mongodb://|mssql://>`, `--ssh user@host --authorized` (server hardening, DB tunnel), `--aws-rds`,
 `--url https://site --authorized` (live SEO crawl), `--keywords`, `--gsc-csv`, `--tools` (semgrep/gitleaks/npm audit), `--run-tests` (executes the project's own tests).
 Strictness: `--strictness basic|standard|strict` (default standard; `--ask` prompts in a terminal). **Before running from an assistant, ask the user which level they want** unless they already said: 1 basic (core risks only), 2 standard (recommended, default), 3 strict (enterprise-grade). For legacy code use `--baseline auto` so the gate judges only NEW findings. Language: `--lang es|en`.

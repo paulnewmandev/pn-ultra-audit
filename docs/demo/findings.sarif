@@ -58,6 +58,34 @@
               }
             },
             {
+              "id": "MAL-EXEC-SHB64",
+              "name": "malware",
+              "shortDescription": {
+                "text": "Shell decodes a blob and pipes it to a shell"
+              }
+            },
+            {
+              "id": "MAL-REVSHELL-BASH",
+              "name": "malware",
+              "shortDescription": {
+                "text": "Bash reverse shell (/dev/tcp)"
+              }
+            },
+            {
+              "id": "MAL-WEBSHELL-EVAL",
+              "name": "malware",
+              "shortDescription": {
+                "text": "PHP executes request data (webshell)"
+              }
+            },
+            {
+              "id": "MAL-CI-EXFIL",
+              "name": "malware",
+              "shortDescription": {
+                "text": "Pipes environment/credentials to a network tool"
+              }
+            },
+            {
               "id": "SQLI-PHP",
               "name": "sqli",
               "shortDescription": {
@@ -146,6 +174,13 @@
               "name": "authn",
               "shortDescription": {
                 "text": "JWT signed with hard-coded secret"
+              }
+            },
+            {
+              "id": "MAL-MINER",
+              "name": "malware",
+              "shortDescription": {
+                "text": "Cryptocurrency miner (stratum / XMRig / CoinHive)"
               }
             },
             {
@@ -240,6 +275,13 @@
               }
             },
             {
+              "id": "CODE-EVAL",
+              "name": "code-injection",
+              "shortDescription": {
+                "text": "Dynamic code evaluation"
+              }
+            },
+            {
               "id": "SEM-NO-CONSENT",
               "name": "privacy",
               "shortDescription": {
@@ -272,6 +314,13 @@
               "name": "seo",
               "shortDescription": {
                 "text": "No sitemap.xml (or generator) found"
+              }
+            },
+            {
+              "id": "STD-CI-GAPS",
+              "name": "standards",
+              "shortDescription": {
+                "text": "CI does not appear to run: tests, lint"
               }
             },
             {
@@ -555,6 +604,20 @@
               }
             },
             {
+              "id": "AITRACE-AGENT-FILE",
+              "name": "ai-trace",
+              "shortDescription": {
+                "text": "Cursor configuration committed: .cursor"
+              }
+            },
+            {
+              "id": "AITRACE-COMMENT",
+              "name": "ai-trace",
+              "shortDescription": {
+                "text": "Comment reveals AI-assisted authoring"
+              }
+            },
+            {
               "id": "SEO-ROBOTS-NO-SITEMAP",
               "name": "seo",
               "shortDescription": {
@@ -618,6 +681,13 @@
               }
             },
             {
+              "id": "MAL-UPLOAD-SCRIPT",
+              "name": "malware",
+              "shortDescription": {
+                "text": "Server-side script stored in an upload/cache/media folder"
+              }
+            },
+            {
               "id": "SEC-ENV-PRESENT",
               "name": "secrets",
               "shortDescription": {
@@ -657,6 +727,13 @@
               "name": "misconfiguration",
               "shortDescription": {
                 "text": "Permissive CORS (*)"
+              }
+            },
+            {
+              "id": "AITRACE-PLACEHOLDER",
+              "name": "ai-trace",
+              "shortDescription": {
+                "text": "Leftover AI placeholder comment (possible truncated code)"
               }
             },
             {
@@ -943,8 +1020,148 @@
           }
         },
         {
-          "ruleId": "SQLI-PHP",
+          "ruleId": "MAL-EXEC-SHB64",
           "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "Shell decodes a blob and pipes it to a shell \u2014 Do not run it: decode the blob with base64 -d and read it, then remove the line and treat the host as compromised if you did not write it."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MAL-EXEC-SHB64:scripts/setup.sh:ec91dffcac"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/setup.sh"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-008",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-506",
+              "CWE-78"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "MAL-REVSHELL-BASH",
+          "ruleIndex": 8,
+          "level": "error",
+          "message": {
+            "text": "Bash reverse shell (/dev/tcp) \u2014 Active-compromise pattern: isolate the host, remove the code, rotate secrets and find which commit/account added it."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MAL-REVSHELL-BASH:scripts/update.sh:fffa6ab28f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "scripts/update.sh"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-009",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-506",
+              "CWE-78"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "MAL-WEBSHELL-EVAL",
+          "ruleIndex": 9,
+          "level": "error",
+          "message": {
+            "text": "PHP executes request data (webshell) \u2014 Delete the file after copying it as evidence, rotate secrets, find the entry point (upload form / plugin / stolen credentials) and rebuild from a clean release."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MAL-WEBSHELL-EVAL:web/uploads/shell.php:07bd7fda8f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/uploads/shell.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-010",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-506",
+              "CWE-94"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "MAL-CI-EXFIL",
+          "ruleIndex": 10,
+          "level": "error",
+          "message": {
+            "text": "Pipes environment/credentials to a network tool \u2014 Remove the step, rotate the exposed secrets and review who changed the workflow (git log -p -- .github/workflows)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MAL-CI-EXFIL:.github/workflows/deploy.yml:a7a0e3ce9a"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".github/workflows/deploy.yml"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-011",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-200",
+              "CWE-506"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQLI-PHP",
+          "ruleIndex": 11,
           "level": "error",
           "message": {
             "text": "SQL built with string concatenation (PHP) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
@@ -965,7 +1182,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-008",
+            "id": "SEC-012",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -978,7 +1195,7 @@
         },
         {
           "ruleId": "XSS-ECHO-PHP",
-          "ruleIndex": 8,
+          "ruleIndex": 12,
           "level": "error",
           "message": {
             "text": "Request data echoed without encoding (PHP) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -999,7 +1216,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-009",
+            "id": "SEC-013",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1012,7 +1229,7 @@
         },
         {
           "ruleId": "AUTHZ-IDOR",
-          "ruleIndex": 9,
+          "ruleIndex": 13,
           "level": "error",
           "message": {
             "text": "Object loaded by client-supplied id (check ownership) \u2014 Scope the lookup through the owner: `$user->orders()->findOrFail($id)` / `Order.objects.get(pk=id, owner=request.user)`.; Or authorize explicitly (`Gate::authorize('view', $order)`, policies, `@PreAuthorize`)."
@@ -1033,7 +1250,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-010",
+            "id": "SEC-014",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1048,7 +1265,7 @@
         },
         {
           "ruleId": "SEC-HARDCODED",
-          "ruleIndex": 10,
+          "ruleIndex": 14,
           "level": "error",
           "message": {
             "text": "Hard-coded credential \u2014 ROTATE/REVOKE the secret now - assume it is compromised.; Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime."
@@ -1069,7 +1286,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-011",
+            "id": "SEC-015",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1082,7 +1299,7 @@
         },
         {
           "ruleId": "SEC-DB-URL",
-          "ruleIndex": 11,
+          "ruleIndex": 15,
           "level": "error",
           "message": {
             "text": "Database URL with credentials \u2014 ROTATE/REVOKE the secret now - assume it is compromised.; Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime."
@@ -1103,7 +1320,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-012",
+            "id": "SEC-016",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1116,7 +1333,7 @@
         },
         {
           "ruleId": "SQLI-PY",
-          "ruleIndex": 12,
+          "ruleIndex": 16,
           "level": "error",
           "message": {
             "text": "SQL built with string formatting (Python) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
@@ -1137,7 +1354,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-013",
+            "id": "SEC-017",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1150,7 +1367,7 @@
         },
         {
           "ruleId": "SQLI-PY",
-          "ruleIndex": 12,
+          "ruleIndex": 16,
           "level": "error",
           "message": {
             "text": "SQL built with string formatting (Python) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
@@ -1171,7 +1388,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-014",
+            "id": "SEC-018",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1184,7 +1401,7 @@
         },
         {
           "ruleId": "XSS-REFLECT-PY",
-          "ruleIndex": 13,
+          "ruleIndex": 17,
           "level": "error",
           "message": {
             "text": "User input rendered as HTML without escaping (Python) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -1205,7 +1422,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-015",
+            "id": "SEC-019",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1218,7 +1435,7 @@
         },
         {
           "ruleId": "SSRF",
-          "ruleIndex": 14,
+          "ruleIndex": 18,
           "level": "error",
           "message": {
             "text": "Outbound request to user-controlled URL \u2014 Prefer an allowlist of hostnames/schemes.; Resolve DNS yourself, reject private/loopback/link-local ranges, then connect to that validated IP (prevents DNS rebinding)."
@@ -1239,7 +1456,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-016",
+            "id": "SEC-020",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1253,7 +1470,7 @@
         },
         {
           "ruleId": "PATH-TRAVERSAL",
-          "ruleIndex": 15,
+          "ruleIndex": 19,
           "level": "error",
           "message": {
             "text": "File access with user-controlled path \u2014 Never use the raw name. Map an ID to a stored path, or generate random server-side file names.; Resolve the final path and verify it stays under the base directory (`realpath(base + name).startswith(realpath(base))`)."
@@ -1274,7 +1491,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-017",
+            "id": "SEC-021",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1287,7 +1504,7 @@
         },
         {
           "ruleId": "CRY-PWD-HASH",
-          "ruleIndex": 16,
+          "ruleIndex": 20,
           "level": "error",
           "message": {
             "text": "Password hashed with MD5/SHA-1 \u2014 Switch to argon2id (or bcrypt cost \u2265 12 / scrypt) via the framework (`password_hash`, `bcrypt`, `passlib`, Spring `BCryptPasswordEncoder`).; On next successful login, re-hash the password with the new algorithm (transparent migration); keep a `hash_version` column."
@@ -1308,7 +1525,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-018",
+            "id": "SEC-022",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1322,7 +1539,7 @@
         },
         {
           "ruleId": "XSS-REFLECT-JS",
-          "ruleIndex": 17,
+          "ruleIndex": 21,
           "level": "error",
           "message": {
             "text": "User input written straight into HTML response (Node) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -1343,7 +1560,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-019",
+            "id": "SEC-023",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1356,7 +1573,7 @@
         },
         {
           "ruleId": "SQLI-JS",
-          "ruleIndex": 18,
+          "ruleIndex": 22,
           "level": "error",
           "message": {
             "text": "SQL built with template/concatenation (JS/TS) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
@@ -1377,7 +1594,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-020",
+            "id": "SEC-024",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1390,7 +1607,7 @@
         },
         {
           "ruleId": "XSS-REFLECT-JS",
-          "ruleIndex": 17,
+          "ruleIndex": 21,
           "level": "error",
           "message": {
             "text": "User input written straight into HTML response (Node) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -1411,7 +1628,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-021",
+            "id": "SEC-025",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1424,7 +1641,7 @@
         },
         {
           "ruleId": "JWT-HARDCODED",
-          "ruleIndex": 19,
+          "ruleIndex": 23,
           "level": "error",
           "message": {
             "text": "JWT signed with hard-coded secret \u2014 Load the secret/private key from a secret manager/env; rotate the leaked one.; Pin the algorithm on verify (`algorithms=['HS256']` / `RS256`); never accept `none`."
@@ -1445,7 +1662,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-022",
+            "id": "SEC-026",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1459,7 +1676,7 @@
         },
         {
           "ruleId": "AUTHZ-IDOR",
-          "ruleIndex": 9,
+          "ruleIndex": 13,
           "level": "error",
           "message": {
             "text": "Object loaded by client-supplied id (check ownership) \u2014 Scope the lookup through the owner: `$user->orders()->findOrFail($id)` / `Order.objects.get(pk=id, owner=request.user)`.; Or authorize explicitly (`Gate::authorize('view', $order)`, policies, `@PreAuthorize`)."
@@ -1480,7 +1697,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-023",
+            "id": "SEC-027",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1494,8 +1711,42 @@
           }
         },
         {
+          "ruleId": "MAL-MINER",
+          "ruleIndex": 24,
+          "level": "error",
+          "message": {
+            "text": "Cryptocurrency miner (stratum / XMRig / CoinHive) \u2014 Remove the miner and its persistence (processes, cron, containers), find how it got in and rotate secrets."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MAL-MINER:config/pool.json:32d934d6ad"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "config/pool.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-028",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-506"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
           "ruleId": "WEB3-REENTRANCY",
-          "ruleIndex": 20,
+          "ruleIndex": 25,
           "level": "error",
           "message": {
             "text": "`withdraw()` updates state AFTER an external call (reentrancy) \u2014 Checks-Effects-Interactions: update balances before the call, and add OpenZeppelin `nonReentrant`"
@@ -1516,7 +1767,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-024",
+            "id": "SEC-029",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1527,7 +1778,7 @@
         },
         {
           "ruleId": "WEB3-NO-ACCESS-CONTROL",
-          "ruleIndex": 21,
+          "ruleIndex": 26,
           "level": "error",
           "message": {
             "text": "`sweep()` moves value/mints/burns/selfdestructs but has no visible access control \u2014 Restrict with onlyOwner/onlyRole (OpenZeppelin AccessControl) or verify msg.sender against the caller's own balance/allowance"
@@ -1548,7 +1799,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-025",
+            "id": "SEC-030",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1559,7 +1810,7 @@
         },
         {
           "ruleId": "SOL-TX-ORIGIN",
-          "ruleIndex": 22,
+          "ruleIndex": 27,
           "level": "error",
           "message": {
             "text": "Solidity tx.origin authorization \u2014 Load the secret/private key from a secret manager/env; rotate the leaked one.; Pin the algorithm on verify (`algorithms=['HS256']` / `RS256`); never accept `none`."
@@ -1580,7 +1831,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-026",
+            "id": "SEC-031",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1591,7 +1842,7 @@
         },
         {
           "ruleId": "WEB3-TX-ORIGIN",
-          "ruleIndex": 23,
+          "ruleIndex": 28,
           "level": "error",
           "message": {
             "text": "tx.origin used for authorization (phishing via intermediate contract) \u2014 Use msg.sender"
@@ -1612,7 +1863,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-027",
+            "id": "SEC-032",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1623,7 +1874,7 @@
         },
         {
           "ruleId": "WEB3-WEAK-RANDOMNESS",
-          "ruleIndex": 24,
+          "ruleIndex": 29,
           "level": "error",
           "message": {
             "text": "`pickWinner()` derives randomness from block data (miner/validator-influenced) \u2014 Use Chainlink VRF (or commit-reveal); never block data for value-bearing randomness"
@@ -1644,7 +1895,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-028",
+            "id": "SEC-033",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1655,7 +1906,7 @@
         },
         {
           "ruleId": "SQL-GRANT-ALL",
-          "ruleIndex": 25,
+          "ruleIndex": 30,
           "level": "error",
           "message": {
             "text": "Over-broad GRANT \u2014 Grant only the needed privileges on the needed schema/tables to a dedicated app role."
@@ -1676,7 +1927,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-029",
+            "id": "SEC-034",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1689,7 +1940,7 @@
         },
         {
           "ruleId": "SQL-PLAIN-PWD",
-          "ruleIndex": 26,
+          "ruleIndex": 31,
           "level": "error",
           "message": {
             "text": "Database user password in SQL script \u2014 Rotate it; create users out-of-band or inject via secret manager."
@@ -1710,7 +1961,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-030",
+            "id": "SEC-035",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1723,7 +1974,7 @@
         },
         {
           "ruleId": "XSS-DOM",
-          "ruleIndex": 27,
+          "ruleIndex": 32,
           "level": "error",
           "message": {
             "text": "Raw HTML sink (innerHTML/document.write) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -1744,7 +1995,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-031",
+            "id": "SEC-036",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1757,7 +2008,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-DEBUG",
-          "ruleIndex": 28,
+          "ruleIndex": 33,
           "level": "error",
           "message": {
             "text": "Android: debuggable / cleartext \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -1778,7 +2029,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-032",
+            "id": "SEC-037",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -1792,7 +2043,7 @@
         },
         {
           "ruleId": "MOB-IOS-PERM-MISSING",
-          "ruleIndex": 29,
+          "ruleIndex": 34,
           "level": "error",
           "message": {
             "text": "iOS: code uses a protected API but Info.plist lacks NSLocationWhenInUseUsageDescription (crash + App Store rejection) \u2014 Android: add `<uses-permission android:name=\"...\"/>` and request it at runtime before use.; iOS: add the matching `NS\u2026UsageDescription` key to Info.plist with a clear, user-facing reason."
@@ -1826,7 +2077,7 @@
         },
         {
           "ruleId": "SEO-NO-TITLE",
-          "ruleIndex": 30,
+          "ruleIndex": 35,
           "level": "error",
           "message": {
             "text": "Pages without <title> (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -1856,7 +2107,7 @@
         },
         {
           "ruleId": "SEO-ROBOTS-BLOCKS-ALL",
-          "ruleIndex": 31,
+          "ruleIndex": 36,
           "level": "error",
           "message": {
             "text": "robots.txt blocks the whole site (Disallow: /) \u2014 Remove the blanket Disallow before launch (keep it only on staging via auth, not robots)"
@@ -1886,7 +2137,7 @@
         },
         {
           "ruleId": "QA-UNAWAITED-EXPECT",
-          "ruleIndex": 32,
+          "ruleIndex": 37,
           "level": "error",
           "message": {
             "text": "1 web-first assertion(s) not awaited - they never fail the test \u2014 Add `await` before every Playwright web-first expect(...) (enable no-floating-promises + playwright/missing-playwright-await)"
@@ -1917,8 +2168,42 @@
           }
         },
         {
+          "ruleId": "CODE-EVAL",
+          "ruleIndex": 38,
+          "level": "error",
+          "message": {
+            "text": "Dynamic code evaluation \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CODE-EVAL:web/uploads/shell.php:07bd7fda8f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/uploads/shell.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-038",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-95"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
           "ruleId": "SEM-NO-CONSENT",
-          "ruleIndex": 33,
+          "ruleIndex": 39,
           "level": "warning",
           "message": {
             "text": "Tracking tags found (Google Analytics 4, Meta Pixel) but no consent management detected \u2014 Install one tag manager (GTM) and load GA4, Google Ads and Meta pixels through it; avoid hard-coding duplicates.; Implement a consent banner (CMP) and Google Consent Mode v2: default `denied`, update on accept; do not fire marketing tags before consent."
@@ -1950,7 +2235,7 @@
         },
         {
           "ruleId": "DOC-NO-README",
-          "ruleIndex": 34,
+          "ruleIndex": 40,
           "level": "warning",
           "message": {
             "text": "Project has no README \u2014 Create README.md: purpose, requirements, install, run, test, configuration, deploy"
@@ -1980,7 +2265,7 @@
         },
         {
           "ruleId": "MOB-AND-NO-UNIT",
-          "ruleIndex": 35,
+          "ruleIndex": 41,
           "level": "warning",
           "message": {
             "text": "Android: no unit tests (src/test) for the app code \u2014 Start with ViewModels/use-cases: JUnit + MockK + Turbine + kotlinx-coroutines-test (runTest, MainDispatcherRule)"
@@ -2010,7 +2295,7 @@
         },
         {
           "ruleId": "MOB-AND-NO-UI",
-          "ruleIndex": 36,
+          "ruleIndex": 42,
           "level": "warning",
           "message": {
             "text": "Android: no instrumented/UI tests (src/androidTest) \u2014 Add Compose UI tests (createComposeRule + testTag) or Espresso for Views for the 3-5 key journeys; run on Gradle Managed Devices in CI"
@@ -2040,7 +2325,7 @@
         },
         {
           "ruleId": "SEO-NO-SITEMAP",
-          "ruleIndex": 37,
+          "ruleIndex": 43,
           "level": "warning",
           "message": {
             "text": "No sitemap.xml (or generator) found \u2014 Generate sitemap.xml automatically (next-sitemap, @astrojs/sitemap, Laravel Sitemap, django.contrib.sitemaps) and submit it in Search Console"
@@ -2069,8 +2354,38 @@
           }
         },
         {
+          "ruleId": "STD-CI-GAPS",
+          "ruleIndex": 44,
+          "level": "warning",
+          "message": {
+            "text": "CI does not appear to run: tests, lint \u2014 Add the missing steps and make them required checks"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "STD-CI-GAPS:.github/workflows/deploy.yml:985ac124a0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".github/workflows/deploy.yml"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-002",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "DB-FK-MISMATCH",
-          "ruleIndex": 38,
+          "ruleIndex": 45,
           "level": "warning",
           "message": {
             "text": "Invalid foreign key definition \u2014 Make the parent column PRIMARY KEY or UNIQUE and reference it by name."
@@ -2100,7 +2415,7 @@
         },
         {
           "ruleId": "SQL-NO-PK",
-          "ruleIndex": 39,
+          "ruleIndex": 46,
           "level": "warning",
           "message": {
             "text": "Table `users` has no PRIMARY KEY \u2014 Rebuild the table with a primary key (SQLite needs create-copy-rename)."
@@ -2121,7 +2436,7 @@
             }
           ],
           "properties": {
-            "id": "COD-002",
+            "id": "COD-003",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [
@@ -2132,7 +2447,7 @@
         },
         {
           "ruleId": "SQL-MONEY-FLOAT",
-          "ruleIndex": 40,
+          "ruleIndex": 47,
           "level": "warning",
           "message": {
             "text": "Money column `users.balance` uses REAL \u2014 Store integer cents or use a decimal TEXT/NUMERIC with app-side Decimal."
@@ -2164,7 +2479,7 @@
         },
         {
           "ruleId": "SQL-MONEY-FLOAT",
-          "ruleIndex": 40,
+          "ruleIndex": 47,
           "level": "warning",
           "message": {
             "text": "Money column `orders.total` uses REAL \u2014 Store integer cents or use a decimal TEXT/NUMERIC with app-side Decimal."
@@ -2196,7 +2511,7 @@
         },
         {
           "ruleId": "DB-FILE-PERMS",
-          "ruleIndex": 41,
+          "ruleIndex": 48,
           "level": "warning",
           "message": {
             "text": "SQLite file is world-accessible (0o644) \u2014 chmod 600 vulnerable-demo/db/app.db"
@@ -2217,7 +2532,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-033",
+            "id": "SEC-039",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -2230,7 +2545,7 @@
         },
         {
           "ruleId": "BUG-PHP-LOOSE-AUTH",
-          "ruleIndex": 42,
+          "ruleIndex": 49,
           "level": "warning",
           "message": {
             "text": "Loose comparison in auth/token check \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
@@ -2265,7 +2580,7 @@
         },
         {
           "ruleId": "OPEN-REDIRECT",
-          "ruleIndex": 43,
+          "ruleIndex": 50,
           "level": "warning",
           "message": {
             "text": "Redirect to user-controlled URL \u2014 Redirect only to relative paths or to an allowlist of hosts.; Reject URLs with a scheme/host you do not own; beware `//evil.com` and `\\\\evil.com`."
@@ -2286,7 +2601,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-034",
+            "id": "SEC-040",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -2299,7 +2614,7 @@
         },
         {
           "ruleId": "CRY-RANDOM",
-          "ruleIndex": 44,
+          "ruleIndex": 51,
           "level": "warning",
           "message": {
             "text": "Non-cryptographic RNG for secrets \u2014 Use the CSPRNG: `crypto.randomBytes`, `secrets.token_urlsafe`, `random_bytes`, `SecureRandom`, `crypto/rand`.; Use \u2265 128 bits for tokens, hash them at rest, set expiry and single use."
@@ -2320,7 +2635,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-035",
+            "id": "SEC-041",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -2333,7 +2648,7 @@
         },
         {
           "ruleId": "BUG-JS-FOREACH-ASYNC",
-          "ruleIndex": 45,
+          "ruleIndex": 52,
           "level": "warning",
           "message": {
             "text": "async callback in forEach (not awaited) \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
@@ -2365,7 +2680,7 @@
         },
         {
           "ruleId": "SOL-BLOCK-RANDOM",
-          "ruleIndex": 46,
+          "ruleIndex": 53,
           "level": "warning",
           "message": {
             "text": "Solidity randomness from block data \u2014 Use the CSPRNG: `crypto.randomBytes`, `secrets.token_urlsafe`, `random_bytes`, `SecureRandom`, `crypto/rand`.; Use \u2265 128 bits for tokens, hash them at rest, set expiry and single use."
@@ -2386,7 +2701,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-036",
+            "id": "SEC-042",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -2397,7 +2712,7 @@
         },
         {
           "ruleId": "SQL-NO-PK",
-          "ruleIndex": 39,
+          "ruleIndex": 46,
           "level": "warning",
           "message": {
             "text": "Table `users` has no PRIMARY KEY \u2014 Add a primary key to `users` (surrogate `id` or natural unique key) in a new migration."
@@ -2418,7 +2733,7 @@
             }
           ],
           "properties": {
-            "id": "COD-003",
+            "id": "COD-004",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [
@@ -2429,7 +2744,7 @@
         },
         {
           "ruleId": "SQL-MONEY-FLOAT",
-          "ruleIndex": 40,
+          "ruleIndex": 47,
           "level": "warning",
           "message": {
             "text": "Money column `users.price` uses FLOAT \u2014 Use DECIMAL(12,2) (or integer cents)."
@@ -2461,7 +2776,7 @@
         },
         {
           "ruleId": "SQL-PWD-SHORT",
-          "ruleIndex": 47,
+          "ruleIndex": 54,
           "level": "warning",
           "message": {
             "text": "Password column `users.password` too short for a modern hash (32) \u2014 Widen to VARCHAR(255) and store argon2id/bcrypt hashes."
@@ -2482,7 +2797,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-037",
+            "id": "SEC-043",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -2495,7 +2810,7 @@
         },
         {
           "ruleId": "SQL-MONEY-FLOAT",
-          "ruleIndex": 40,
+          "ruleIndex": 47,
           "level": "warning",
           "message": {
             "text": "Money column `orders.total` uses FLOAT \u2014 Use DECIMAL(12,2) (or integer cents)."
@@ -2527,7 +2842,7 @@
         },
         {
           "ruleId": "LOG-SECRET",
-          "ruleIndex": 48,
+          "ruleIndex": 55,
           "level": "warning",
           "message": {
             "text": "Secret/password written to logs \u2014 Remove the log or redact (`token=***`).; Add a logging filter that masks known secret keys."
@@ -2548,7 +2863,7 @@
             }
           ],
           "properties": {
-            "id": "SEC-038",
+            "id": "SEC-044",
             "type": "vulnerability",
             "status": "confirmed",
             "cwe": [
@@ -2561,7 +2876,7 @@
         },
         {
           "ruleId": "TST-NO-ASSERT",
-          "ruleIndex": 49,
+          "ruleIndex": 56,
           "level": "warning",
           "message": {
             "text": "Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains no assertions \u2014 Add assertions on observable results"
@@ -2591,7 +2906,7 @@
         },
         {
           "ruleId": "MOB-IOS-NO-A11Y-ID",
-          "ruleIndex": 50,
+          "ruleIndex": 57,
           "level": "warning",
           "message": {
             "text": "iOS: UI tests exist but production code sets no accessibilityIdentifier \u2014 Set `.accessibilityIdentifier(\"login_button\")` in production and query by id"
@@ -2621,7 +2936,7 @@
         },
         {
           "ruleId": "MOB-IOS-SLEEP",
-          "ruleIndex": 51,
+          "ruleIndex": 58,
           "level": "warning",
           "message": {
             "text": "iOS: 1 sleep/asyncAfter calls in tests (flaky) \u2014 Use `element.waitForExistence(timeout:)`, XCTestExpectation/`fulfillment(of:)`, async/await and injected clocks"
@@ -2651,7 +2966,7 @@
         },
         {
           "ruleId": "QA-FE-NO-UNIT",
-          "ruleIndex": 52,
+          "ruleIndex": 59,
           "level": "warning",
           "message": {
             "text": "Front-end has no unit/component test runner (Vitest/Jest/Karma) \u2014 Add Vitest (Vite) or Jest + Testing Library; test components by behavior (role/label/text)"
@@ -2681,7 +2996,7 @@
         },
         {
           "ruleId": "QA-FE-NO-TEST-SCRIPT",
-          "ruleIndex": 53,
+          "ruleIndex": 60,
           "level": "warning",
           "message": {
             "text": "package.json has no working `test` script \u2014 Add \"test\": \"vitest run\" and \"test:e2e\": \"playwright test\""
@@ -2711,7 +3026,7 @@
         },
         {
           "ruleId": "TST-NO-ASSERT",
-          "ruleIndex": 49,
+          "ruleIndex": 56,
           "level": "warning",
           "message": {
             "text": "Test file `tests/test_app.py` defines tests but contains no assertions \u2014 Add assertions on observable results"
@@ -2741,7 +3056,7 @@
         },
         {
           "ruleId": "SEO-NO-DESCRIPTION",
-          "ruleIndex": 54,
+          "ruleIndex": 61,
           "level": "warning",
           "message": {
             "text": "Pages without meta description (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -2771,7 +3086,7 @@
         },
         {
           "ruleId": "SEO-NO-VIEWPORT",
-          "ruleIndex": 55,
+          "ruleIndex": 62,
           "level": "warning",
           "message": {
             "text": "Pages without viewport meta (not mobile-friendly) (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -2801,7 +3116,7 @@
         },
         {
           "ruleId": "A11Y-IMG-ALT",
-          "ruleIndex": 56,
+          "ruleIndex": 63,
           "level": "warning",
           "message": {
             "text": "Image without alt text \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -2831,7 +3146,7 @@
         },
         {
           "ruleId": "A11Y-CLICK-NONINTERACTIVE",
-          "ruleIndex": 57,
+          "ruleIndex": 64,
           "level": "warning",
           "message": {
             "text": "Click handler on a non-interactive element (keyboard/screen-reader inaccessible) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -2861,7 +3176,7 @@
         },
         {
           "ruleId": "QA-SLEEP",
-          "ruleIndex": 58,
+          "ruleIndex": 65,
           "level": "warning",
           "message": {
             "text": "Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) \u2014 Replace sleeps with auto-waiting web-first assertions (`await expect(locator).toBeVisible()`), `waitFor`, or explicit network/route waits.; Locate like a user: getByRole > getByLabel > getByText > getByTestId > CSS (last resort); avoid XPath and deep CSS chains."
@@ -2891,7 +3206,7 @@
         },
         {
           "ruleId": "TST-FOCUSED",
-          "ruleIndex": 59,
+          "ruleIndex": 66,
           "level": "warning",
           "message": {
             "text": "Focused test committed (`.only` / `fit`) - the rest of the suite is silently skipped \u2014 Remove `.only`/`fit`"
@@ -2921,13 +3236,13 @@
         },
         {
           "ruleId": "DOC-COVERAGE-LOW",
-          "ruleIndex": 60,
+          "ruleIndex": 67,
           "level": "note",
           "message": {
             "text": "Public API documentation coverage is 0.0% (target 60%) \u2014 Adopt a rule: new/changed public code must be documented (enforce with pydocstyle/interrogate, eslint-plugin-jsdoc, phpcs, detekt UndocumentedPublicClass, golint/revive exported, SwiftLint missing_docs)"
           },
           "partialFingerprints": {
-            "auditFingerprint/v1": "DOC-COVERAGE-LOW:.:b1d6fe8818"
+            "auditFingerprint/v1": "DOC-COVERAGE-LOW:.:f2390ed072"
           },
           "locations": [
             {
@@ -2942,7 +3257,7 @@
             }
           ],
           "properties": {
-            "id": "COD-004",
+            "id": "COD-005",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -2951,7 +3266,7 @@
         },
         {
           "ruleId": "MOB-IOS-NO-COVERAGE",
-          "ruleIndex": 61,
+          "ruleIndex": 68,
           "level": "note",
           "message": {
             "text": "iOS: code coverage not enabled in scheme/test plan \u2014 Enable 'Gather coverage' and export with xcrun xccov in CI"
@@ -2981,7 +3296,7 @@
         },
         {
           "ruleId": "WEB3-NO-STATIC-ANALYSIS",
-          "ruleIndex": 62,
+          "ruleIndex": 69,
           "level": "note",
           "message": {
             "text": "No Slither/Echidna/Medusa/Certora in CI \u2014 Run `slither .` and fuzzing (forge invariants/Echidna) on every PR; get an external audit before mainnet"
@@ -3011,7 +3326,7 @@
         },
         {
           "ruleId": "DB-FK-OFF",
-          "ruleIndex": 63,
+          "ruleIndex": 70,
           "level": "note",
           "message": {
             "text": "Foreign keys declared but PRAGMA foreign_keys is OFF by default \u2014 Execute `PRAGMA foreign_keys=ON` when opening every connection."
@@ -3032,7 +3347,7 @@
             }
           ],
           "properties": {
-            "id": "COD-005",
+            "id": "COD-006",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3041,7 +3356,7 @@
         },
         {
           "ruleId": "SQL-FK-NO-INDEX",
-          "ruleIndex": 64,
+          "ruleIndex": 71,
           "level": "note",
           "message": {
             "text": "Foreign key `orders.user_id` without index \u2014 CREATE INDEX idx_orders_user_id ON orders(user_id);"
@@ -3071,7 +3386,7 @@
         },
         {
           "ruleId": "DOC-API-UNDOCUMENTED",
-          "ruleIndex": 65,
+          "ruleIndex": 72,
           "level": "note",
           "message": {
             "text": "Public API under-documented in `backend/app.py` (0/12) \u2014 Add doc comments to every public symbol: one-line summary, params/returns/raises (where non-obvious), and a usage example for entry points"
@@ -3092,7 +3407,7 @@
             }
           ],
           "properties": {
-            "id": "COD-006",
+            "id": "COD-007",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3101,7 +3416,7 @@
         },
         {
           "ruleId": "BUG-PY-MUTABLE-DEFAULT",
-          "ruleIndex": 66,
+          "ruleIndex": 73,
           "level": "note",
           "message": {
             "text": "Mutable default argument that is mutated or leaked \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
@@ -3133,7 +3448,7 @@
         },
         {
           "ruleId": "BUG-EMPTY-CATCH",
-          "ruleIndex": 67,
+          "ruleIndex": 74,
           "level": "note",
           "message": {
             "text": "Empty catch/except (swallowed error) \u2014 Catch the narrowest exception; log with context or re-raise.; If intentionally ignored, comment why."
@@ -3154,7 +3469,7 @@
             }
           ],
           "properties": {
-            "id": "COD-007",
+            "id": "COD-008",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [
@@ -3167,7 +3482,7 @@
         },
         {
           "ruleId": "WEB3-FLOATING-PRAGMA",
-          "ruleIndex": 68,
+          "ruleIndex": 75,
           "level": "note",
           "message": {
             "text": "Floating pragma (^0.8.0): deployed bytecode may differ from what was audited \u2014 Pin the exact compiler (e.g. `pragma solidity 0.8.24;`) for deployable contracts"
@@ -3188,7 +3503,7 @@
             }
           ],
           "properties": {
-            "id": "COD-008",
+            "id": "COD-009",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [
@@ -3199,7 +3514,7 @@
         },
         {
           "ruleId": "SQL-FK-NO-INDEX",
-          "ruleIndex": 64,
+          "ruleIndex": 71,
           "level": "note",
           "message": {
             "text": "Foreign key `orders.user_id` without index \u2014 CREATE INDEX idx_orders_user_id ON orders(user_id);"
@@ -3229,7 +3544,7 @@
         },
         {
           "ruleId": "SQL-MYISAM",
-          "ruleIndex": 69,
+          "ruleIndex": 76,
           "level": "note",
           "message": {
             "text": "Table `orders` uses MyISAM \u2014 Convert to InnoDB (`ALTER TABLE t ENGINE=InnoDB`)."
@@ -3250,7 +3565,7 @@
             }
           ],
           "properties": {
-            "id": "COD-009",
+            "id": "COD-010",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3259,7 +3574,7 @@
         },
         {
           "ruleId": "MOB-IOS-CONTINUE-AFTER-FAILURE",
-          "ruleIndex": 70,
+          "ruleIndex": 77,
           "level": "note",
           "message": {
             "text": "iOS: 1 UI test file(s) do not set continueAfterFailure = false \u2014 In setUp: `continueAfterFailure = false`"
@@ -3289,7 +3604,7 @@
         },
         {
           "ruleId": "DEP-NO-LOCKFILE",
-          "ruleIndex": 71,
+          "ruleIndex": 78,
           "level": "note",
           "message": {
             "text": "`package.json` has no lockfile \u2014 Commit the lockfile (npm i / composer install / bundle install)"
@@ -3324,7 +3639,7 @@
         },
         {
           "ruleId": "SEO-NO-CANONICAL",
-          "ruleIndex": 72,
+          "ruleIndex": 79,
           "level": "note",
           "message": {
             "text": "Pages without canonical link (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3354,7 +3669,7 @@
         },
         {
           "ruleId": "SEO-H1",
-          "ruleIndex": 73,
+          "ruleIndex": 80,
           "level": "note",
           "message": {
             "text": "Pages with zero or multiple <h1> (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3384,7 +3699,7 @@
         },
         {
           "ruleId": "SEO-NO-OG",
-          "ruleIndex": 74,
+          "ruleIndex": 81,
           "level": "note",
           "message": {
             "text": "Pages missing Open Graph title/image (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3414,7 +3729,7 @@
         },
         {
           "ruleId": "SEO-IMG-NO-SIZE",
-          "ruleIndex": 75,
+          "ruleIndex": 82,
           "level": "note",
           "message": {
             "text": "Pages with \u22653 images lacking width/height (layout shift) (1 of 1 HTML pages) \u2014 Targets: LCP < 2.5 s, INP < 200 ms, CLS < 0.1 (field data in Search Console / CrUX).; Images: modern formats (AVIF/WebP), responsive srcset, explicit width/height, `loading=\"lazy\"` below the fold, `fetchpriority=\"high\"` on the LCP image."
@@ -3444,7 +3759,7 @@
         },
         {
           "ruleId": "SEO-RENDER-BLOCKING",
-          "ruleIndex": 76,
+          "ruleIndex": 83,
           "level": "note",
           "message": {
             "text": "Pages with render-blocking <script> (no async/defer) (1 of 1 HTML pages) \u2014 Targets: LCP < 2.5 s, INP < 200 ms, CLS < 0.1 (field data in Search Console / CrUX).; Images: modern formats (AVIF/WebP), responsive srcset, explicit width/height, `loading=\"lazy\"` below the fold, `fetchpriority=\"high\"` on the LCP image."
@@ -3474,7 +3789,7 @@
         },
         {
           "ruleId": "A11Y-HTML-LANG",
-          "ruleIndex": 77,
+          "ruleIndex": 84,
           "level": "note",
           "message": {
             "text": "<html> without lang attribute \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -3504,7 +3819,7 @@
         },
         {
           "ruleId": "DEP-NO-LOCKFILE",
-          "ruleIndex": 71,
+          "ruleIndex": 78,
           "level": "note",
           "message": {
             "text": "`web/package.json` has no lockfile \u2014 Commit the lockfile (npm i / composer install / bundle install)"
@@ -3538,8 +3853,98 @@
           }
         },
         {
+          "ruleId": "AITRACE-AGENT-FILE",
+          "ruleIndex": 85,
+          "level": "note",
+          "message": {
+            "text": "Cursor configuration committed: .cursor \u2014 Stop tracking it: git rm --cached -r <path> and add it to .gitignore (bash cleanup-fixes.sh AI-FILES), after checking it for secrets."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AITRACE-AGENT-FILE:.cursor/rules/style.mdc:b43bda4396"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".cursor/rules/style.mdc"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-011",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "AITRACE-AGENT-FILE",
+          "ruleIndex": 85,
+          "level": "note",
+          "message": {
+            "text": "Claude Code configuration committed: CLAUDE.md \u2014 Stop tracking it: git rm --cached -r <path> and add it to .gitignore (bash cleanup-fixes.sh AI-FILES), after checking it for secrets."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AITRACE-AGENT-FILE:CLAUDE.md:a410330bf8"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "CLAUDE.md"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-012",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "AITRACE-COMMENT",
+          "ruleIndex": 86,
+          "level": "note",
+          "message": {
+            "text": "Comment reveals AI-assisted authoring \u2014 Delete the assistant/generator comment (or replace it with a comment explaining why); keep it only if disclosure is required. bash cleanup-fixes.sh AI-COMMENTS."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AITRACE-COMMENT:backend/utils_ai.py:f1903407ae"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/utils_ai.py"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-013",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "SEO-ROBOTS-NO-SITEMAP",
-          "ruleIndex": 78,
+          "ruleIndex": 87,
           "level": "note",
           "message": {
             "text": "robots.txt does not reference the sitemap \u2014 Add `Sitemap: https://your-domain/sitemap.xml`"
@@ -3569,7 +3974,7 @@
         },
         {
           "ruleId": "SEO-CSR-ONLY",
-          "ruleIndex": 79,
+          "ruleIndex": 88,
           "level": "note",
           "message": {
             "text": "Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell) \u2014 Move to SSR/SSG (Next, Nuxt, Astro, SvelteKit, Remix) or prerender public routes (vite-plugin-ssr, react-snap)"
@@ -3599,7 +4004,7 @@
         },
         {
           "ruleId": "AUTHZ-MASS-ASSIGN",
-          "ruleIndex": 80,
+          "ruleIndex": 89,
           "level": "note",
           "message": {
             "text": "Mass assignment / over-posting \u2014 Use explicit allowlists (`$fillable`, DTO/serializer `fields=[...]`, `permit(:a,:b)`).; Never bind sensitive fields from input; set them server-side."
@@ -3634,7 +4039,7 @@
         },
         {
           "ruleId": "DOS-UNBOUNDED-SIZE",
-          "ruleIndex": 81,
+          "ruleIndex": 90,
           "level": "note",
           "message": {
             "text": "Client-controlled size/limit without cap \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
@@ -3669,7 +4074,7 @@
         },
         {
           "ruleId": "SOL-DELEGATECALL",
-          "ruleIndex": 82,
+          "ruleIndex": 91,
           "level": "note",
           "message": {
             "text": "Solidity delegatecall / selfdestruct / low-level call \u2014 Avoid shelling out: use a library or native API for the job.; If unavoidable, pass an argument array with no shell (`subprocess.run([...], shell=False)`, `execFile`, `ProcessBuilder(list)`)."
@@ -3701,7 +4106,7 @@
         },
         {
           "ruleId": "XSS-FRAMEWORK",
-          "ruleIndex": 83,
+          "ruleIndex": 92,
           "level": "note",
           "message": {
             "text": "Framework raw-HTML escape hatch \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -3735,7 +4140,7 @@
         },
         {
           "ruleId": "CFG-TF",
-          "ruleIndex": 84,
+          "ruleIndex": 93,
           "level": "note",
           "message": {
             "text": "Terraform/cloud over-exposure \u2014 Apply least privilege (no privileged pods, no `0.0.0.0/0` on admin ports, no `Principal: *`).; Pin GitHub Actions to commit SHAs; avoid `pull_request_target` with untrusted checkout; never interpolate `${{ github.event.* }}` into `run:`."
@@ -3771,7 +4176,7 @@
         },
         {
           "ruleId": "SQLI-JAVA",
-          "ruleIndex": 85,
+          "ruleIndex": 94,
           "level": "note",
           "message": {
             "text": "SQL built with concatenation (Java/Kotlin/Android) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
@@ -3805,7 +4210,7 @@
         },
         {
           "ruleId": "DOS-NO-RATELIMIT",
-          "ruleIndex": 86,
+          "ruleIndex": 95,
           "level": "note",
           "message": {
             "text": "Web framework detected (express) but no rate limiting/throttling found anywhere \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints."
@@ -3840,8 +4245,43 @@
           }
         },
         {
+          "ruleId": "MAL-UPLOAD-SCRIPT",
+          "ruleIndex": 96,
+          "level": "note",
+          "message": {
+            "text": "Server-side script stored in an upload/cache/media folder \u2014 Move/delete the script (copy it first), disable script execution in that folder (nginx deny / php_flag engine off) and validate uploads."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MAL-UPLOAD-SCRIPT:web/uploads/shell.php:f31eb63e05"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/uploads/shell.php"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-008",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-434",
+              "CWE-506"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
           "ruleId": "SEC-ENV-PRESENT",
-          "ruleIndex": 87,
+          "ruleIndex": 97,
           "level": "note",
           "message": {
             "text": "Environment file `.env` present - ensure it is git-ignored and not web-served \u2014 Add to .gitignore; keep outside document root"
@@ -3862,7 +4302,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-008",
+            "id": "HOT-009",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [],
@@ -3871,7 +4311,7 @@
         },
         {
           "ruleId": "CFG-DOCKER",
-          "ruleIndex": 88,
+          "ruleIndex": 98,
           "level": "note",
           "message": {
             "text": "Dockerfile weakness \u2014 Add a non-root `USER`; pin base images by version/digest; use multi-stage builds.; Never put secrets in ENV/ARG/layers - use runtime secrets."
@@ -3892,7 +4332,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-009",
+            "id": "HOT-010",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -3907,7 +4347,7 @@
         },
         {
           "ruleId": "CFG-DOCKER-NOUSER",
-          "ruleIndex": 89,
+          "ruleIndex": 99,
           "level": "note",
           "message": {
             "text": "`Dockerfile` never switches to a non-root USER \u2014 Add `RUN adduser ...` and `USER app` before CMD"
@@ -3928,7 +4368,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-010",
+            "id": "HOT-011",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -3941,7 +4381,7 @@
         },
         {
           "ruleId": "CFG-DOCKER",
-          "ruleIndex": 88,
+          "ruleIndex": 98,
           "level": "note",
           "message": {
             "text": "Dockerfile weakness \u2014 Add a non-root `USER`; pin base images by version/digest; use multi-stage builds.; Never put secrets in ENV/ARG/layers - use runtime secrets."
@@ -3962,7 +4402,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-011",
+            "id": "HOT-012",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -3977,7 +4417,7 @@
         },
         {
           "ruleId": "PERF-NPLUS1",
-          "ruleIndex": 90,
+          "ruleIndex": 100,
           "level": "note",
           "message": {
             "text": "Query inside a loop (possible N+1) \u2014 Eager-load/batch: `with('rel')`, `select_related/prefetch_related`, `include`, `JOIN`, or `WHERE id IN (...)`.; Verify with query logging; add an assertion on query count in a test."
@@ -4009,7 +4449,7 @@
         },
         {
           "ruleId": "CFG-DEBUG",
-          "ruleIndex": 91,
+          "ruleIndex": 101,
           "level": "note",
           "message": {
             "text": "Debug mode enabled \u2014 Drive from environment: `DEBUG=False`/`APP_DEBUG=false`/`NODE_ENV=production` in production.; Ensure the dev value is not the default in committed prod config."
@@ -4030,7 +4470,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-012",
+            "id": "HOT-013",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4044,7 +4484,7 @@
         },
         {
           "ruleId": "CFG-CORS",
-          "ruleIndex": 92,
+          "ruleIndex": 102,
           "level": "note",
           "message": {
             "text": "Permissive CORS (*) \u2014 Replace `*` with an explicit allowlist of origins.; Never combine reflected-Origin with `Allow-Credentials: true`."
@@ -4065,7 +4505,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-013",
+            "id": "HOT-014",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4078,8 +4518,38 @@
           }
         },
         {
+          "ruleId": "AITRACE-PLACEHOLDER",
+          "ruleIndex": 103,
+          "level": "note",
+          "message": {
+            "text": "Leftover AI placeholder comment (possible truncated code) \u2014 Compare with git history: restore the missing code or delete the leftover marker, then add a test."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AITRACE-PLACEHOLDER:backend/utils_ai.py:f74a381ae2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/utils_ai.py"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-014",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "MOB-STORAGE",
-          "ruleIndex": 93,
+          "ruleIndex": 104,
           "level": "note",
           "message": {
             "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4100,7 +4570,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-014",
+            "id": "HOT-015",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4113,7 +4583,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-MANIFEST",
-          "ruleIndex": 94,
+          "ruleIndex": 105,
           "level": "note",
           "message": {
             "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4134,7 +4604,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-015",
+            "id": "HOT-016",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4148,7 +4618,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-MANIFEST",
-          "ruleIndex": 94,
+          "ruleIndex": 105,
           "level": "note",
           "message": {
             "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4169,7 +4639,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-016",
+            "id": "HOT-017",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4183,7 +4653,7 @@
         },
         {
           "ruleId": "MOB-WEBVIEW",
-          "ruleIndex": 95,
+          "ruleIndex": 106,
           "level": "note",
           "message": {
             "text": "WebView risk (JS enabled / bridge / file access) \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4204,7 +4674,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-017",
+            "id": "HOT-018",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4218,7 +4688,7 @@
         },
         {
           "ruleId": "MOB-STORAGE",
-          "ruleIndex": 93,
+          "ruleIndex": 104,
           "level": "note",
           "message": {
             "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4239,7 +4709,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-018",
+            "id": "HOT-019",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4252,7 +4722,7 @@
         },
         {
           "ruleId": "QA-FE-NO-A11Y",
-          "ruleIndex": 96,
+          "ruleIndex": 107,
           "level": "note",
           "message": {
             "text": "No automated accessibility testing (axe / jsx-a11y / Lighthouse) \u2014 Add eslint-plugin-jsx-a11y (or vuejs-accessibility) and an axe scan per key page in E2E"
@@ -4273,7 +4743,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-019",
+            "id": "HOT-020",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [],
@@ -4282,7 +4752,7 @@
         },
         {
           "ruleId": "A11Y-INPUT-LABEL",
-          "ruleIndex": 97,
+          "ruleIndex": 108,
           "level": "note",
           "message": {
             "text": "<input> without id/aria-label (cannot have an associated label) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -4312,7 +4782,7 @@
         },
         {
           "ruleId": "DOS-NO-TIMEOUT",
-          "ruleIndex": 98,
+          "ruleIndex": 109,
           "level": "note",
           "message": {
             "text": "Outbound HTTP call without timeout \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
@@ -4333,7 +4803,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-020",
+            "id": "HOT-021",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [

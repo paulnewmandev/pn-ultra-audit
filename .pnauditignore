@@ -5,14 +5,18 @@
 audit.py                    SEC-*,CRY-*,WEB3-*,CMD-*,DESER*,PATH-*,SSRF*,OPEN-*,LOG-*,CFG-*
 engine/rules.py             SEC-*,CRY-*,WEB3-*,CMD-*,DESER*,PATH-*,SSRF*,OPEN-*,LOG-*,CFG-*,XSS-*,SQLI-*
 engine/kb*.py               SEC-*,CRY-*,WEB3-*,CMD-*,DESER*,PATH-*,SSRF*,OPEN-*,LOG-*,CFG-*,XSS-*,SQLI-*,AUTHZ-*,BUG-*,DOS-*
+engine/kb_trace.py          MAL-*,AITRACE-*,CMD-*,SEC-*,CODE-*,DESER*,PATH-*
+engine/malware.py           MAL-*,AITRACE-*,CMD-*,SEC-*,CODE-*,QUA-COMPLEX-FILE
+engine/aitrace.py           MAL-*,AITRACE-*
+engine/cleanfix.py          MAL-*,AITRACE-*
 engine/roadmap.py           CRY-*
 engine/qa.py                WEB3-*
 engine/ftpsrc.py            CFG-*
-scripts/*.py                PATH-*,CMD-*,SSRF*
+scripts/*.py                PATH-*,CMD-*,SSRF*,MAL-*,AITRACE-*,CODE-*
 examples/*                  *
 docs/*                      *
 # Best-effort I/O (missing optional files, unsupported platform features) is swallowed on purpose.
-engine/dashboard.py         BUG-EMPTY-CATCH
+engine/dashboard.py         BUG-EMPTY-CATCH,MAL-MINER
 engine/dbaudit.py           BUG-EMPTY-CATCH,SQLI-PY
 engine/docs.py              BUG-EMPTY-CATCH
 engine/remote.py            BUG-EMPTY-CATCH,DOS-*

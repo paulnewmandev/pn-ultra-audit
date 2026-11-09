@@ -64,7 +64,7 @@ class Smoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             open(os.path.join(d, "schema.sql"), "w").write("CREATE TABLE t (a int);\n")
             out = run(d, "--plan", "--lang", "en").stdout
-            self.assertIn("Auditors: db, security", out)
+            self.assertIn("Auditors: aitrace, db, malware, security", out)
 
     def test_only_flag_and_bad_name(self):
         with tempfile.TemporaryDirectory() as d:
@@ -77,7 +77,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.23", run("--version").stdout)
+        self.assertIn("1.0.24", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")

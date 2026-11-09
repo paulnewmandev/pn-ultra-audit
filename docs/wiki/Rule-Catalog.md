@@ -1,6 +1,6 @@
 # Rule Catalog
 
-110 pattern rules plus engines (docs, QA, SEO, PWA, Vercel, repo, Web3, DB, servers), 77 remediation guides.
+110 pattern rules plus engines (docs, QA, SEO, PWA, Vercel, repo, Web3, DB, servers), 94 remediation guides.
 
 *Precision*: `high` = the pattern is the defect (confirmed); `taint` = flagged when untrusted input is traced to it; `taint_only` = only with traced input; `low` = hotspot to review.
 

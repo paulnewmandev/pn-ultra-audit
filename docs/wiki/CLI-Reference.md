@@ -27,7 +27,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.23 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.24 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -54,7 +54,7 @@ options:
   --run-tests           EXECUTES the project's own test suite (runs target code)
   --test-timeout TEST_TIMEOUT
   --only ONLY           run only these auditors (comma list):
-                        security,quality,docs,tests,qa,seo,repo,vercel,pwa,web3,db,domain
+                        security,quality,docs,tests,qa,seo,repo,malware,aitrace,vercel,pwa,web3,db,domain
   --skip SKIP           skip these auditors (comma list)
   --plan                detect the project type, print which auditors would run, and exit
   --list-auditors       list the auditors and exit

@@ -108,7 +108,7 @@ def debt_rating(r):
     return "A" if r <= .05 else "B" if r <= .10 else "C" if r <= .20 else "D" if r <= .50 else "E"
 
 
-NON_RATING = {"seo", "sem", "privacy"}
+NON_RATING = {"seo", "sem", "privacy", "ai-trace"}
 
 
 def compute(confirmed, ncloc, profile, ledger):

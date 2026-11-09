@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.23"
+VER = "1.0.24"
 R = f'''<div align="center">
 
 <img src="assets/banner.svg" alt="PN-Ultra-Audit - audit everything, ship with confidence" width="100%">
@@ -22,9 +22,9 @@ R = f'''<div align="center">
 [![Read-only target](assets/badges/st-readonly.svg)](#safety--privacy)
 [![PRs welcome](assets/badges/st-prs.svg)](CONTRIBUTING.md)
 
-### One command. Fourteen lenses. Live in your terminal, delivered as a dashboard.
+### One command. Sixteen lenses. Live in your terminal, delivered as a dashboard.
 
-**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
+**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
 
 [**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**Wiki**](docs/wiki/Home.md) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
 
@@ -59,7 +59,7 @@ Most teams stitch together a SAST scanner, a linter, a coverage tool, a Lighthou
 </tr>
 <tr>
 <td width="84" align="center" valign="middle">{icon("key", 52)}</td>
-<td valign="middle"><b>Keys, repos and CI</b><br>Finds secrets and sensitive files in code, git <b>history</b> and CI/CD workflows, tells you exactly how to rotate each key and writes a reviewable <code>repo-fixes.sh</code>.</td>
+<td valign="middle"><b>Keys, repos and CI</b><br>Finds secrets and sensitive files in code, git <b>history</b> and CI/CD workflows, tells you exactly how to rotate each key and writes a reviewable <code>repo-fixes.sh</code>. A dedicated <b>malware &amp; backdoor</b> lens flags webshells, reverse shells, miners and stealers with incident-response steps, and an <b>AI-traces</b> lens helps you deliver a polished project.</td>
 </tr>
 <tr>
 <td width="84" align="center" valign="middle">{icon("git", 52)}</td>
@@ -121,6 +121,10 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-arch.png" alt="Architecture" width="100%"><br><sub><b>Architecture</b> - style, layers, services, hotspots</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-owasp.png" alt="OWASP" width="100%"><br><sub><b>OWASP</b> Top 10 / API / Mobile coverage</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/gal-malware.png" alt="Malware and backdoors" width="100%"><br><sub><b>Malware &amp; backdoors</b> - webshells, reverse shells, miners, stealers, install hooks, with incident-response steps</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-aitrace.png" alt="AI traces" width="100%"><br><sub><b>AI traces</b> - project finish: comments, agent files, git trailers, metadata and how to remove them</sub></td>
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - Now / This sprint / Backlog with effort</sub></td>
@@ -232,6 +236,8 @@ flowchart TB
 | **domain** | **SaaS:** tenant isolation (unscoped queries, RLS/global scope), RBAC/SSO/SCIM, audit log, API-key hashing, export/delete, backups/PITR, per-tenant limits. **Fintech/banking:** float-for-money, idempotency, balance races, unsigned webhooks, PAN/CVV, ledger/reconciliation, MFA/SCA, KMS |
 | **pwa** | manifest + installability, icons/maskable, service worker (registration, strategy, versioned caches, offline fallback, update flow), push, HTTPS, SW security (remote `importScripts`, cached private data, unvalidated messages, leaked VAPID keys); live check with `--url` |
 | **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |
+| **malware** | **webshells** (eval/system on request data, c99/WSO/China Chopper signatures, PHP hidden in images and upload folders), **reverse shells** (`/dev/tcp`, `nc -e`, Python/Node/PHP/Go/PowerShell), decode-and-execute payloads, **miners** (stratum, XMRig, CoinHive), **stealers/exfiltration** (browser + wallet + SSH + cloud stores, webhooks, CI leaking env), **malicious install hooks** and known typosquats, **persistence** (authorized_keys, cron, LD_PRELOAD, auto_prepend, hidden trigger parameters), **Trojan Source** bidi/invisible characters; static and offline, specific signatures only (not a generic `eval` alarm), with **incident-response steps** and a reversible quarantine script |
+| **aitrace** | project finish: comments/docs that reveal AI authoring, **agent & spec files** (CLAUDE.md, AGENTS.md, `.cursor/`, `openspec/`...), git `Co-Authored-By` trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers; tells you how to remove each and writes `cleanup-fixes.sh` (backups, safe by default). It never tries to defeat statistical watermarks |
 | **vercel** | `vercel.json`, Next.js, crons without `CRON_SECRET`, API routes without auth, secret-looking `NEXT_PUBLIC_*`, CVE-2025-29927, headers, source maps; live site; project settings via the read-only API (`--vercel-project`) |
 | **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
@@ -280,7 +286,7 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 | Assistant | What gets installed | Invoke |
 |---|---|---|
-| **Claude Code** | 18 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
+| **Claude Code** | 20 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
 | **Codex** | skills in `.agents/skills/` + `AGENTS.md` block | ask in chat |
 | **Cursor** | `.cursor/rules/pn-ultra-audit.mdc` + `.cursor/commands/pn-audit.md` | `/pn-audit` |
 | **Windsurf** | `.windsurf/rules/` + `.windsurf/workflows/pn-audit.md` | `/pn-audit` |
@@ -413,7 +419,7 @@ python3 audit.py ./my-next-app                          # Vercel project files (
 python3 audit.py --url https://my-app.vercel.app --authorized      # live headers, source maps, exposed /.env
 VERCEL_TOKEN=... python3 audit.py --vercel-project my-app --authorized   # settings + env-var names (never values)
 ```
-Every secret finding comes with **provider-specific rotation steps** and the run writes `repo-fixes.sh` (untrack, ignore, purge history, gitleaks, CI hardening) - reviewable, never executed by the tool. Vercel is serverless (no SSH), so it is audited through its configuration, the live site and the API.
+Every secret finding comes with **provider-specific rotation steps** and the run writes `repo-fixes.sh` (untrack, ignore, purge history, gitleaks, CI hardening) - reviewable, never executed by the tool. Malware findings come with incident-response steps and `cleanup-fixes.sh` (quarantine, never delete); AI traces come with removal guidance and the same script (backups in `.pnua-backup/`). Vercel is serverless (no SSH), so it is audited through its configuration, the live site and the API.
 
 ## Wiki
 
@@ -455,6 +461,6 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 18 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
+<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 20 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
 '''
 open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8").write(R); print("README.md", len(R.splitlines()), "lines")

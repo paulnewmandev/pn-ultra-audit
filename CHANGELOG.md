@@ -3,6 +3,15 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.24] - 2026-11-09
+
+### Added
+- **Malware & backdoors** auditor (`--only malware`): specific, low-noise static indicators for webshells (eval/system on request data, known signatures, PHP hidden in images and upload folders), reverse shells (bash, nc, Python, Node, PHP, Go, Ruby, Perl, PowerShell), decode-and-execute payloads, miners, credential stealers and webhook/CI exfiltration, malicious npm/pip install hooks and known typosquats, persistence (authorized_keys, cron, LD_PRELOAD, auto_prepend, setuid, hidden trigger parameters), polyglot images, EICAR, double extensions, unexpected executables, and **Trojan Source** (bidi) / invisible characters. Each rule has a specific fix and the report carries incident-response steps. Static and offline; not an antivirus. Tests/fixtures/examples are skipped unless `--strictness strict`.
+- **AI traces** auditor (`--only aitrace`, project finish): comments/docs that reveal AI authoring, agent and spec files (CLAUDE.md, AGENTS.md, .cursor/, openspec/, .specify/ ...), git co-author trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers and invisible Unicode. Informational (does not affect ratings) and it reminds users to check disclosure obligations; it never tries to defeat statistical watermarks.
+- `cleanup-fixes.sh` (generated, never executed by the tool): `AI-FILES`, `AI-COMMENTS`, `AI-INVISIBLE`, `AI-META`, `AI-GIT-HISTORY` (needs `PNUA_CONFIRM=yes`) and `MAL-QUARANTINE` (moves confirmed malware to `.pnua-quarantine/` with chmod 000, nothing is deleted). Backups in `.pnua-backup/`.
+- Dashboard: two new sidebar items (Malware & backdoors, AI traces) with verdict card, KPI cards, findings table with a "How to fix" column, step-by-step removal / incident-response cards with copyable commands, and a "what we detect" card; own SVG icons.
+- Skills `audit-malware` and `audit-aitrace` (20 skills), assistant guide updated, remediation guides in English and Spanish.
+
 ## [1.0.23] - 2026-11-09
 
 ### Changed
