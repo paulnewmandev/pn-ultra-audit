@@ -1,0 +1,1 @@
+class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScriptEnabled(true); prefs.edit().putString("token", t).apply(); db.rawQuery("SELECT * FROM u WHERE n='" + name + "'", null) } }

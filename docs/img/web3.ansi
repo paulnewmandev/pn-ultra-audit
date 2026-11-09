@@ -1,0 +1,133 @@
+[1;35m┌──────────────────────────────────────────────────────────────┐[0m
+[1;35m│[0m[1m                   PN-Ultra-Audit  v1.0.13                    [0m[1;35m│[0m
+[1;35m└──────────────────────────────────────────────────────────────┘[0m
+ [90mTarget:     [0m vulnerable-demo
+ [90mMode:       [0m local · read-only
+ [90mProfile:    [0m standard · strictness=strict
+ [90mDetected:   [0m backend, frontend, mobile, database, web, web3, infra  (mobile: Android; frontend: react; web: HTML pages)
+ [90mAuditors:   [0m security · web3  [--only]
+ [90mPhases:     [0m 6
+
+[1m▶ [01/06] Preparing target[0m
+   [32m✓[0m vulnerable-demo [2m(0.0s)[0m
+
+[1m▶ [02/06] Discovering files, languages & architecture[0m
+   [32m✓[0m 22 files · Swift 3, JavaScript 2, Python 2, PHP 1, TypeScript 1, Solidity 1 · architecture: modular monolith, layered (presentation → services → data) [2m(0.0s)[0m
+
+[1m▶ [03/06] Code scan: SQLi · XSS · DoS · secrets · mobile · a11y[0m
+   [34m? REVIEW  [0m [90mCFG-DOCKER          [0m Dockerfile weakness                                            [2mDockerfile:1[0m
+   [34m? REVIEW  [0m [90mCFG-DOCKER          [0m Dockerfile weakness                                            [2mDockerfile:2[0m
+   [34m? REVIEW  [0m [90mCFG-TF              [0m Terraform/cloud over-exposure                                  [2minfra/main.tf:1[0m
+   [1;31m✖ HIGH    [0m [90mSQLI-PHP            [0m SQL built with string concatenation (PHP)                      [2mapp/Http/UserController.php:5[0m
+   [1;31m✖ HIGH    [0m [90mXSS-ECHO-PHP        [0m Request data echoed without encoding (PHP)                     [2mapp/Http/UserController.php:6[0m
+   [1;35m✖ CRITICAL[0m [90mCMD-PHP             [0m Shell command execution (PHP)                                  [2mapp/Http/UserController.php:10[0m
+   [34m? REVIEW  [0m [90mAUTHZ-MASS-ASSIGN   [0m Mass assignment / over-posting                                 [2mapp/Http/UserController.php:8[0m
+   [1;31m✖ HIGH    [0m [90mAUTHZ-IDOR          [0m Object loaded by client-supplied id (check ownership)          [2mapp/Http/UserController.php:7[0m
+   [33m▲ MEDIUM  [0m [90mBUG-PHP-LOOSE-AUTH  [0m Loose comparison in auth/token check                           [2mapp/Http/UserController.php:9[0m
+   [1;31m✖ HIGH    [0m [90mXSS-DOM             [0m Raw HTML sink (innerHTML/document.write)                       [2mfrontend/src/App.jsx:2[0m
+   [34m? REVIEW  [0m [90mXSS-FRAMEWORK       [0m Framework raw-HTML escape hatch                                [2mfrontend/src/App.jsx:5[0m
+   [34m? REVIEW  [0m [90mMOB-STORAGE         [0m Token/password in insecure local storage                       [2mfrontend/src/App.jsx:3[0m
+   [33m▲ MEDIUM  [0m [90mLOG-SECRET          [0m Secret/password written to logs                                [2mfrontend/src/App.jsx:4[0m
+   [33m▲ MEDIUM  [0m [90mA11Y-IMG-ALT        [0m Image without alt text                                         [2mweb/index.html:10[0m
+   [33m▲ MEDIUM  [0m [90mA11Y-CLICK-NONINTERACTIVE[0m Click handler on a non-interactive element (keyboard/screen-re [2mweb/index.html:11[0m
+   [36m● LOW     [0m [90mA11Y-HTML-LANG      [0m <html> without lang attribute                                  [2mweb/index.html:2[0m
+   [34m? REVIEW  [0m [90mA11Y-INPUT-LABEL    [0m <input> without id/aria-label (cannot have an associated label [2mweb/index.html:15[0m
+   [1;31m✖ HIGH    [0m [90mSOL-TX-ORIGIN       [0m Solidity tx.origin authorization                               [2mcontracts/Vault.sol:22[0m
+   [34m? REVIEW  [0m [90mSOL-DELEGATECALL    [0m Solidity delegatecall / selfdestruct / low-level call          [2mcontracts/Vault.sol:14[0m
+   [33m▲ MEDIUM  [0m [90mSOL-BLOCK-RANDOM    [0m Solidity randomness from block data                            [2mcontracts/Vault.sol:24[0m
+   [1;35m✖ CRITICAL[0m [90mSEC-WALLET-PRIVKEY  [0m Wallet private key hard-coded                                  [2mcontracts/.env.example2:1[0m
+   [34m? REVIEW  [0m [90mCFG-CORS            [0m Permissive CORS (*)                                            [2mbackend/server.js:3[0m
+   [1;31m✖ HIGH    [0m [90mSQLI-JS             [0m SQL built with template/concatenation (JS/TS)                  [2mbackend/server.js:5[0m
+   [1;31m✖ HIGH    [0m [90mXSS-REFLECT-JS      [0m User input written straight into HTML response (Node)          [2mbackend/server.js:4[0m
+   [1;31m✖ HIGH    [0m [90mXSS-REFLECT-JS      [0m User input written straight into HTML response (Node)          [2mbackend/server.js:6[0m
+   [1;35m✖ CRITICAL[0m [90mCMD-JS              [0m Shell command execution (Node)                                 [2mbackend/server.js:6[0m
+   [33m▲ MEDIUM  [0m [90mCRY-RANDOM          [0m Non-cryptographic RNG for secrets                              [2mbackend/server.js:9[0m
+   [1;31m✖ HIGH    [0m [90mJWT-HARDCODED       [0m JWT signed with hard-coded secret                              [2mbackend/server.js:7[0m
+   [1;31m✖ HIGH    [0m [90mAUTHZ-IDOR          [0m Object loaded by client-supplied id (check ownership)          [2mbackend/server.js:8[0m
+   [33m▲ MEDIUM  [0m [90mBUG-JS-FOREACH-ASYNC[0m async callback in forEach (not awaited)                        [2mbackend/server.js:10[0m
+   [1;31m✖ HIGH    [0m [90mSEC-DB-URL          [0m Database URL with credentials                                  [2mbackend/app.py:6[0m
+   [1;31m✖ HIGH    [0m [90mSEC-HARDCODED       [0m Hard-coded credential                                          [2mbackend/app.py:5[0m
+   [1;31m✖ HIGH    [0m [90mSQLI-PY             [0m SQL built with string formatting (Python)                      [2mbackend/app.py:12[0m
+   [1;31m✖ HIGH    [0m [90mSQLI-PY             [0m SQL built with string formatting (Python)                      [2mbackend/app.py:19[0m
+   [1;31m✖ HIGH    [0m [90mXSS-REFLECT-PY      [0m User input rendered as HTML without escaping (Python)          [2mbackend/app.py:20[0m
+   [34m? REVIEW  [0m [90mDOS-UNBOUNDED-SIZE  [0m Client-controlled size/limit without cap                       [2mbackend/app.py:47[0m
+   [34m? REVIEW  [0m [90mDOS-NO-TIMEOUT      [0m Outbound HTTP call without timeout                             [2mbackend/app.py:31[0m
+   [1;35m✖ CRITICAL[0m [90mCMD-PY              [0m Shell command execution (Python)                               [2mbackend/app.py:25[0m
+   [1;31m✖ HIGH    [0m [90mPATH-TRAVERSAL      [0m File access with user-controlled path                          [2mbackend/app.py:39[0m
+   [1;31m✖ HIGH    [0m [90mSSRF                [0m Outbound request to user-controlled URL                        [2mbackend/app.py:31[0m
+   [33m▲ MEDIUM  [0m [90mOPEN-REDIRECT       [0m Redirect to user-controlled URL                                [2mbackend/app.py:35[0m
+   [1;35m✖ CRITICAL[0m [90mDESER               [0m Unsafe deserialization                                         [2mbackend/app.py:43[0m
+   [1;31m✖ HIGH    [0m [90mCRY-PWD-HASH        [0m Password hashed with MD5/SHA-1                                 [2mbackend/app.py:51[0m
+   [34m? REVIEW  [0m [90mCFG-DEBUG           [0m Debug mode enabled                                             [2mbackend/app.py:66[0m
+   [36m● LOW     [0m [90mBUG-EMPTY-CATCH     [0m Empty catch/except (swallowed error)                           [2mbackend/app.py:62[0m
+   [36m● LOW     [0m [90mBUG-PY-MUTABLE-DEFAULT[0m Mutable default argument                                       [2mbackend/app.py:53[0m
+   [34m? REVIEW  [0m [90mPERF-NPLUS1         [0m Query inside a loop (possible N+1)                             [2mbackend/app.py:59[0m
+   [1;31m✖ HIGH    [0m [90mMOB-ANDROID-DEBUG   [0m Android: debuggable / cleartext                                [2mile/android/app/src/main/AndroidManifest.xml:2[0m
+   [34m? REVIEW  [0m [90mMOB-ANDROID-MANIFEST[0m Android: backup / exported component                           [2mile/android/app/src/main/AndroidManifest.xml:2[0m
+   [34m? REVIEW  [0m [90mMOB-ANDROID-MANIFEST[0m Android: backup / exported component                           [2mile/android/app/src/main/AndroidManifest.xml:3[0m
+   [34m? REVIEW  [0m [90mSQLI-JAVA           [0m SQL built with concatenation (Java/Kotlin/Android)             [2mmobile/android/app/src/main/Main.kt:1[0m
+   [34m? REVIEW  [0m [90mMOB-WEBVIEW         [0m WebView risk (JS enabled / bridge / file access)               [2mmobile/android/app/src/main/Main.kt:1[0m
+   [34m? REVIEW  [0m [90mMOB-STORAGE         [0m Token/password in insecure local storage                       [2mmobile/android/app/src/main/Main.kt:1[0m
+   [32m✓[0m 35 confirmed · 18 to review [2m(0.0s)[0m
+
+[1m▶ [04/06] Crypto / Web3: Solidity, Solana, dApps[0m
+   [36m● LOW     [0m [90mWEB3-FLOATING-PRAGMA[0m Floating pragma (^0.8.0): deployed bytecode may differ from wh [2mcontracts/Vault.sol:1[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-REENTRANCY     [0m `withdraw()` updates state AFTER an external call (reentrancy) [2mcontracts/Vault.sol:12[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-NO-ACCESS-CONTROL[0m `sweep()` moves value/mints/burns/selfdestructs but has no vis [2mcontracts/Vault.sol:18[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-WEAK-RANDOMNESS[0m `pickWinner()` derives randomness from block data (miner/valid [2mcontracts/Vault.sol:24[0m
+   [1;35m✖ CRITICAL[0m [90mWEB3-UNPROTECTED-INIT[0m `initialize()` can be called by anyone and more than once      [2mcontracts/Vault.sol:26[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-TX-ORIGIN      [0m tx.origin used for authorization (phishing via intermediate co [2mcontracts/Vault.sol:22[0m
+   [36m● LOW     [0m [90mWEB3-NO-STATIC-ANALYSIS[0m No Slither/Echidna/Medusa/Certora in CI                        [2m.:1[0m
+   [32m✓[0m 7 findings · 1 .sol · 1 contracts · - [2m(0.0s)[0m
+
+[1m▶ [05/06] Consolidating, verifying & baseline diff[0m
+   [32m✓[0m 39 confirmed · 19 to review [2m(0.1s)[0m
+
+[1m▶ [06/06] Writing HTML dashboard + MD report (mermaid) + SARIF[0m
+   [32m✓[0m audit-output/web3/run-1/report.html [2m(0.0s)[0m
+
+[1mRESULT[0m
+  [90mQuality Gate[0m  [90mReliability[0m  [90mSecurity[0m  [90mMaintainability[0m  [90mDebt[0m  [90mConfirmed[0m  [90mTo review[0m
+  FAIL          C            E         A                2.7%  39         19       
+
+[1mSEVERITY[0m
+  [90mcritical[0m  [90mhigh[0m  [90mmedium[0m  [90mlow[0m  [90minfo[0m
+  6         23    6       4    0   
+
+[1mSEO / SEM[0m
+  [90mScore[0m  [90mTechnical & crawlability[0m  [90mOn-page[0m  [90mContent[0m  [90mPage experience[0m  [90mStructured data & social[0m  [90mSEM / tracking[0m
+  100    100                       100      100      100              100                       100           
+
+[1mAUDIT READINESS (not a certification)[0m
+  [90mFramework                      [0m  [90mReadiness[0m  [90mPass[0m  [90mGap[0m  [90mManual[0m
+  SOC 2                            9%         1     10   3     
+  ISO/IEC 27001:2022               15%        2     11   2     
+  HIPAA Security Rule              17%        1     5    5     
+  GDPR / ePrivacy                  20%        1     4    5     
+  PCI DSS v4.0                     12%        1     7    2     
+  NIST CSF 2.0                     14%        1     6    3     
+  DORA (EU 2022/2554)              0%         0     6    1     
+  WCAG 2.2 AA (VPAT / EN 301 549)  100%       7     0    1     
+  OWASP ASVS 4.0 (Level 2)         8%         1     12   0     
+  CIS Controls v8 (IG1/IG2)        12%        1     7    1     
+
+[1mPROFESSIONAL LEVEL[0m
+  [90mLevel          [0m  [90mScore [0m  [90mFoundations[0m  [90mSecurity[0m  [90mQuality[0m  [90mDelivery[0m  [90mData[0m  [90mOperations[0m  [90mCraft[0m  [90mExperience[0m
+  2/5 Foundations  42/100  29           6         94       30        50    29          50     100       
+
+[1mTop fixes[0m
+  SEC-001  [critical] Shell command execution (PHP)  [2mapp/Http/UserController.php:10[0m
+  SEC-002  [critical] Shell command execution (Python)  [2mbackend/app.py:25[0m
+  SEC-004  [critical] Shell command execution (Node)  [2mbackend/server.js:6[0m
+  SEC-005  [critical] Wallet private key hard-coded  [2mcontracts/.env.example2:1[0m
+  SEC-003  [critical] Unsafe deserialization  [2mbackend/app.py:43[0m
+  SEC-006  [critical] `initialize()` can be called by anyone and more than once  [2mcontracts/Vault.sol:26[0m
+
+[1mReports[0m
+  report.html      dashboard            audit-output/web3/run-1/report.html
+  REPORT.md        markdown + mermaid   audit-output/web3/run-1/REPORT.md
+  findings.sarif   VS Code / GitHub     audit-output/web3/run-1/findings.sarif
+  findings.json    data                 audit-output/web3/run-1/findings.json
+
+[1;31m✘ Quality Gate FAILED[0m
+[1mAudit complete[0m[2m  (total 0.2s)[0m

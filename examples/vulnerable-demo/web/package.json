@@ -1,0 +1,1 @@
+{"name":"shop-web","dependencies":{"react":"^18.0.0","react-dom":"^18.0.0"},"devDependencies":{"@playwright/test":"^1.40.0"},"scripts":{"test":"echo \"Error: no test specified\" && exit 1"}}

@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Thin launcher so `pn-ultra-audit` works from anywhere after ./install.sh --link
+HERE="$(cd "$(dirname "$(readlink "${BASH_SOURCE[0]}" 2>/dev/null || echo "${BASH_SOURCE[0]}")")/.." && pwd)"
+exec python3 "$HERE/audit.py" "$@"

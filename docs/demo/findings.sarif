@@ -1,0 +1,4424 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "PN-Ultra-Audit",
+          "version": "1.0.13",
+          "rules": [
+            {
+              "id": "DB-PLAINTEXT-PASSWORDS",
+              "name": "crypto",
+              "shortDescription": {
+                "text": "1 of 2 sampled `users.password` values do not look hashed"
+              }
+            },
+            {
+              "id": "CMD-PHP",
+              "name": "cmdi",
+              "shortDescription": {
+                "text": "Shell command execution (PHP)"
+              }
+            },
+            {
+              "id": "CMD-PY",
+              "name": "cmdi",
+              "shortDescription": {
+                "text": "Shell command execution (Python)"
+              }
+            },
+            {
+              "id": "DESER",
+              "name": "deserialization",
+              "shortDescription": {
+                "text": "Unsafe deserialization"
+              }
+            },
+            {
+              "id": "CMD-JS",
+              "name": "cmdi",
+              "shortDescription": {
+                "text": "Shell command execution (Node)"
+              }
+            },
+            {
+              "id": "SEC-WALLET-PRIVKEY",
+              "name": "secrets",
+              "shortDescription": {
+                "text": "Wallet private key hard-coded"
+              }
+            },
+            {
+              "id": "WEB3-UNPROTECTED-INIT",
+              "name": "access-control",
+              "shortDescription": {
+                "text": "`initialize()` can be called by anyone and more than once"
+              }
+            },
+            {
+              "id": "MOB-AND-NO-UNIT",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "Android: no unit tests (src/test) for the app code"
+              }
+            },
+            {
+              "id": "SQLI-PHP",
+              "name": "sqli",
+              "shortDescription": {
+                "text": "SQL built with string concatenation (PHP)"
+              }
+            },
+            {
+              "id": "XSS-ECHO-PHP",
+              "name": "xss",
+              "shortDescription": {
+                "text": "Request data echoed without encoding (PHP)"
+              }
+            },
+            {
+              "id": "AUTHZ-IDOR",
+              "name": "authz",
+              "shortDescription": {
+                "text": "Object loaded by client-supplied id (check ownership)"
+              }
+            },
+            {
+              "id": "SEC-HARDCODED",
+              "name": "secrets",
+              "shortDescription": {
+                "text": "Hard-coded credential"
+              }
+            },
+            {
+              "id": "SEC-DB-URL",
+              "name": "secrets",
+              "shortDescription": {
+                "text": "Database URL with credentials"
+              }
+            },
+            {
+              "id": "SQLI-PY",
+              "name": "sqli",
+              "shortDescription": {
+                "text": "SQL built with string formatting (Python)"
+              }
+            },
+            {
+              "id": "XSS-REFLECT-PY",
+              "name": "xss",
+              "shortDescription": {
+                "text": "User input rendered as HTML without escaping (Python)"
+              }
+            },
+            {
+              "id": "SSRF",
+              "name": "ssrf",
+              "shortDescription": {
+                "text": "Outbound request to user-controlled URL"
+              }
+            },
+            {
+              "id": "PATH-TRAVERSAL",
+              "name": "path",
+              "shortDescription": {
+                "text": "File access with user-controlled path"
+              }
+            },
+            {
+              "id": "CRY-PWD-HASH",
+              "name": "crypto",
+              "shortDescription": {
+                "text": "Password hashed with MD5/SHA-1"
+              }
+            },
+            {
+              "id": "XSS-REFLECT-JS",
+              "name": "xss",
+              "shortDescription": {
+                "text": "User input written straight into HTML response (Node)"
+              }
+            },
+            {
+              "id": "SQLI-JS",
+              "name": "sqli",
+              "shortDescription": {
+                "text": "SQL built with template/concatenation (JS/TS)"
+              }
+            },
+            {
+              "id": "JWT-HARDCODED",
+              "name": "authn",
+              "shortDescription": {
+                "text": "JWT signed with hard-coded secret"
+              }
+            },
+            {
+              "id": "WEB3-REENTRANCY",
+              "name": "reentrancy",
+              "shortDescription": {
+                "text": "`withdraw()` updates state AFTER an external call (reentrancy)"
+              }
+            },
+            {
+              "id": "WEB3-NO-ACCESS-CONTROL",
+              "name": "access-control",
+              "shortDescription": {
+                "text": "`sweep()` moves value/mints/burns/selfdestructs but has no visible access control"
+              }
+            },
+            {
+              "id": "SOL-TX-ORIGIN",
+              "name": "authn",
+              "shortDescription": {
+                "text": "Solidity tx.origin authorization"
+              }
+            },
+            {
+              "id": "WEB3-TX-ORIGIN",
+              "name": "access-control",
+              "shortDescription": {
+                "text": "tx.origin used for authorization (phishing via intermediate contract)"
+              }
+            },
+            {
+              "id": "WEB3-WEAK-RANDOMNESS",
+              "name": "randomness",
+              "shortDescription": {
+                "text": "`pickWinner()` derives randomness from block data (miner/validator-influenced)"
+              }
+            },
+            {
+              "id": "SQL-GRANT-ALL",
+              "name": "authz",
+              "shortDescription": {
+                "text": "Over-broad GRANT"
+              }
+            },
+            {
+              "id": "SQL-PLAIN-PWD",
+              "name": "secrets",
+              "shortDescription": {
+                "text": "Database user password in SQL script"
+              }
+            },
+            {
+              "id": "XSS-DOM",
+              "name": "xss",
+              "shortDescription": {
+                "text": "Raw HTML sink (innerHTML/document.write)"
+              }
+            },
+            {
+              "id": "MOB-ANDROID-DEBUG",
+              "name": "mobile",
+              "shortDescription": {
+                "text": "Android: debuggable / cleartext"
+              }
+            },
+            {
+              "id": "MOB-IOS-PERM-MISSING",
+              "name": "mobile",
+              "shortDescription": {
+                "text": "iOS: code uses a protected API but Info.plist lacks NSLocationWhenInUseUsageDescription (crash + App Store rejection)"
+              }
+            },
+            {
+              "id": "QA-FE-NO-UNIT",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "Front-end has no unit/component test runner (Vitest/Jest/Karma)"
+              }
+            },
+            {
+              "id": "SEO-NO-TITLE",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages without <title> (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "SEO-ROBOTS-BLOCKS-ALL",
+              "name": "seo",
+              "shortDescription": {
+                "text": "robots.txt blocks the whole site (Disallow: /)"
+              }
+            },
+            {
+              "id": "QA-UNAWAITED-EXPECT",
+              "name": "flaky",
+              "shortDescription": {
+                "text": "1 web-first assertion(s) not awaited - they never fail the test"
+              }
+            },
+            {
+              "id": "SEM-NO-CONSENT",
+              "name": "privacy",
+              "shortDescription": {
+                "text": "Tracking tags found (Google Analytics 4, Meta Pixel) but no consent management detected"
+              }
+            },
+            {
+              "id": "DOC-NO-README",
+              "name": "documentation",
+              "shortDescription": {
+                "text": "Project has no README"
+              }
+            },
+            {
+              "id": "DOC-COVERAGE-LOW",
+              "name": "documentation",
+              "shortDescription": {
+                "text": "Public API documentation coverage is 0.0% (target 80%)"
+              }
+            },
+            {
+              "id": "MOB-AND-NO-UI",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "Android: no instrumented/UI tests (src/androidTest)"
+              }
+            },
+            {
+              "id": "SEO-NO-SITEMAP",
+              "name": "seo",
+              "shortDescription": {
+                "text": "No sitemap.xml (or generator) found"
+              }
+            },
+            {
+              "id": "DB-FK-MISMATCH",
+              "name": "database",
+              "shortDescription": {
+                "text": "Invalid foreign key definition"
+              }
+            },
+            {
+              "id": "SQL-NO-PK",
+              "name": "database",
+              "shortDescription": {
+                "text": "Table `users` has no PRIMARY KEY"
+              }
+            },
+            {
+              "id": "SQL-MONEY-FLOAT",
+              "name": "database",
+              "shortDescription": {
+                "text": "Money column `users.balance` uses REAL"
+              }
+            },
+            {
+              "id": "DB-FILE-PERMS",
+              "name": "misconfiguration",
+              "shortDescription": {
+                "text": "SQLite file is world-accessible (0o644)"
+              }
+            },
+            {
+              "id": "BUG-PHP-LOOSE-AUTH",
+              "name": "authn",
+              "shortDescription": {
+                "text": "Loose comparison in auth/token check"
+              }
+            },
+            {
+              "id": "OPEN-REDIRECT",
+              "name": "redirect",
+              "shortDescription": {
+                "text": "Redirect to user-controlled URL"
+              }
+            },
+            {
+              "id": "CRY-RANDOM",
+              "name": "crypto",
+              "shortDescription": {
+                "text": "Non-cryptographic RNG for secrets"
+              }
+            },
+            {
+              "id": "BUG-JS-FOREACH-ASYNC",
+              "name": "async",
+              "shortDescription": {
+                "text": "async callback in forEach (not awaited)"
+              }
+            },
+            {
+              "id": "SOL-BLOCK-RANDOM",
+              "name": "crypto",
+              "shortDescription": {
+                "text": "Solidity randomness from block data"
+              }
+            },
+            {
+              "id": "SQL-PWD-SHORT",
+              "name": "database",
+              "shortDescription": {
+                "text": "Password column `users.password` too short for a modern hash (32)"
+              }
+            },
+            {
+              "id": "LOG-SECRET",
+              "name": "logging",
+              "shortDescription": {
+                "text": "Secret/password written to logs"
+              }
+            },
+            {
+              "id": "TST-NO-ASSERT",
+              "name": "test-quality",
+              "shortDescription": {
+                "text": "Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains no assertions"
+              }
+            },
+            {
+              "id": "MOB-IOS-NO-A11Y-ID",
+              "name": "flaky",
+              "shortDescription": {
+                "text": "iOS: UI tests exist but production code sets no accessibilityIdentifier"
+              }
+            },
+            {
+              "id": "MOB-IOS-SLEEP",
+              "name": "flaky",
+              "shortDescription": {
+                "text": "iOS: 1 sleep/asyncAfter calls in tests (flaky)"
+              }
+            },
+            {
+              "id": "QA-FE-NO-TEST-SCRIPT",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "package.json has no working `test` script"
+              }
+            },
+            {
+              "id": "SEO-NO-DESCRIPTION",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages without meta description (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "SEO-NO-VIEWPORT",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages without viewport meta (not mobile-friendly) (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "A11Y-IMG-ALT",
+              "name": "a11y",
+              "shortDescription": {
+                "text": "Image without alt text"
+              }
+            },
+            {
+              "id": "A11Y-CLICK-NONINTERACTIVE",
+              "name": "a11y",
+              "shortDescription": {
+                "text": "Click handler on a non-interactive element (keyboard/screen-reader inaccessible)"
+              }
+            },
+            {
+              "id": "QA-SLEEP",
+              "name": "flaky",
+              "shortDescription": {
+                "text": "Fixed sleeps in tests: 2 occurrence(s) in 1 file(s)"
+              }
+            },
+            {
+              "id": "TST-FOCUSED",
+              "name": "test-quality",
+              "shortDescription": {
+                "text": "Focused test committed (`.only` / `fit`) - the rest of the suite is silently skipped"
+              }
+            },
+            {
+              "id": "MOB-IOS-NO-COVERAGE",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "iOS: code coverage not enabled in scheme/test plan"
+              }
+            },
+            {
+              "id": "WEB3-NO-STATIC-ANALYSIS",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "No Slither/Echidna/Medusa/Certora in CI"
+              }
+            },
+            {
+              "id": "DB-FK-OFF",
+              "name": "database",
+              "shortDescription": {
+                "text": "Foreign keys declared but PRAGMA foreign_keys is OFF by default"
+              }
+            },
+            {
+              "id": "SQL-FK-NO-INDEX",
+              "name": "database",
+              "shortDescription": {
+                "text": "Foreign key `orders.user_id` without index"
+              }
+            },
+            {
+              "id": "DOC-API-UNDOCUMENTED",
+              "name": "documentation",
+              "shortDescription": {
+                "text": "Public API under-documented in `backend/app.py` (0/12)"
+              }
+            },
+            {
+              "id": "BUG-PY-MUTABLE-DEFAULT",
+              "name": "logic",
+              "shortDescription": {
+                "text": "Mutable default argument"
+              }
+            },
+            {
+              "id": "BUG-EMPTY-CATCH",
+              "name": "error-handling",
+              "shortDescription": {
+                "text": "Empty catch/except (swallowed error)"
+              }
+            },
+            {
+              "id": "WEB3-FLOATING-PRAGMA",
+              "name": "smart-contract",
+              "shortDescription": {
+                "text": "Floating pragma (^0.8.0): deployed bytecode may differ from what was audited"
+              }
+            },
+            {
+              "id": "SQL-MYISAM",
+              "name": "database",
+              "shortDescription": {
+                "text": "Table `orders` uses MyISAM"
+              }
+            },
+            {
+              "id": "MOB-IOS-CONTINUE-AFTER-FAILURE",
+              "name": "flaky",
+              "shortDescription": {
+                "text": "iOS: 1 UI test file(s) do not set continueAfterFailure = false"
+              }
+            },
+            {
+              "id": "DEP-NO-LOCKFILE",
+              "name": "supply-chain",
+              "shortDescription": {
+                "text": "`package.json` has no lockfile"
+              }
+            },
+            {
+              "id": "SEO-NO-CANONICAL",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages without canonical link (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "SEO-H1",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages with zero or multiple <h1> (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "SEO-NO-OG",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages missing Open Graph title/image (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "SEO-IMG-NO-SIZE",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages with \u22653 images lacking width/height (layout shift) (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "SEO-RENDER-BLOCKING",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Pages with render-blocking <script> (no async/defer) (1 of 1 HTML pages)"
+              }
+            },
+            {
+              "id": "A11Y-HTML-LANG",
+              "name": "a11y",
+              "shortDescription": {
+                "text": "<html> without lang attribute"
+              }
+            },
+            {
+              "id": "SEO-ROBOTS-NO-SITEMAP",
+              "name": "seo",
+              "shortDescription": {
+                "text": "robots.txt does not reference the sitemap"
+              }
+            },
+            {
+              "id": "SEO-CSR-ONLY",
+              "name": "seo",
+              "shortDescription": {
+                "text": "Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell)"
+              }
+            },
+            {
+              "id": "AUTHZ-MASS-ASSIGN",
+              "name": "authz",
+              "shortDescription": {
+                "text": "Mass assignment / over-posting"
+              }
+            },
+            {
+              "id": "DOS-UNBOUNDED-SIZE",
+              "name": "resource-exhaustion",
+              "shortDescription": {
+                "text": "Client-controlled size/limit without cap"
+              }
+            },
+            {
+              "id": "SOL-DELEGATECALL",
+              "name": "smart-contract",
+              "shortDescription": {
+                "text": "Solidity delegatecall / selfdestruct / low-level call"
+              }
+            },
+            {
+              "id": "XSS-FRAMEWORK",
+              "name": "xss",
+              "shortDescription": {
+                "text": "Framework raw-HTML escape hatch"
+              }
+            },
+            {
+              "id": "CFG-TF",
+              "name": "misconfiguration",
+              "shortDescription": {
+                "text": "Terraform/cloud over-exposure"
+              }
+            },
+            {
+              "id": "SQLI-JAVA",
+              "name": "sqli",
+              "shortDescription": {
+                "text": "SQL built with concatenation (Java/Kotlin/Android)"
+              }
+            },
+            {
+              "id": "DOS-NO-RATELIMIT",
+              "name": "resource-exhaustion",
+              "shortDescription": {
+                "text": "Web framework detected (express) but no rate limiting/throttling found anywhere"
+              }
+            },
+            {
+              "id": "SEC-ENV-PRESENT",
+              "name": "secrets",
+              "shortDescription": {
+                "text": "Environment file `.env` present - ensure it is git-ignored and not web-served"
+              }
+            },
+            {
+              "id": "CFG-DOCKER",
+              "name": "misconfiguration",
+              "shortDescription": {
+                "text": "Dockerfile weakness"
+              }
+            },
+            {
+              "id": "CFG-DOCKER-NOUSER",
+              "name": "misconfiguration",
+              "shortDescription": {
+                "text": "`Dockerfile` never switches to a non-root USER"
+              }
+            },
+            {
+              "id": "PERF-NPLUS1",
+              "name": "n+1",
+              "shortDescription": {
+                "text": "Query inside a loop (possible N+1)"
+              }
+            },
+            {
+              "id": "CFG-DEBUG",
+              "name": "misconfiguration",
+              "shortDescription": {
+                "text": "Debug mode enabled"
+              }
+            },
+            {
+              "id": "CFG-CORS",
+              "name": "misconfiguration",
+              "shortDescription": {
+                "text": "Permissive CORS (*)"
+              }
+            },
+            {
+              "id": "MOB-STORAGE",
+              "name": "mobile",
+              "shortDescription": {
+                "text": "Token/password in insecure local storage"
+              }
+            },
+            {
+              "id": "MOB-ANDROID-MANIFEST",
+              "name": "mobile",
+              "shortDescription": {
+                "text": "Android: backup / exported component"
+              }
+            },
+            {
+              "id": "MOB-WEBVIEW",
+              "name": "mobile",
+              "shortDescription": {
+                "text": "WebView risk (JS enabled / bridge / file access)"
+              }
+            },
+            {
+              "id": "QA-FE-NO-A11Y",
+              "name": "a11y",
+              "shortDescription": {
+                "text": "No automated accessibility testing (axe / jsx-a11y / Lighthouse)"
+              }
+            },
+            {
+              "id": "A11Y-INPUT-LABEL",
+              "name": "a11y",
+              "shortDescription": {
+                "text": "<input> without id/aria-label (cannot have an associated label)"
+              }
+            },
+            {
+              "id": "DOS-NO-TIMEOUT",
+              "name": "resource-exhaustion",
+              "shortDescription": {
+                "text": "Outbound HTTP call without timeout"
+              }
+            },
+            {
+              "id": "QA-FE-NO-VISUAL",
+              "name": "test-infra",
+              "shortDescription": {
+                "text": "No visual regression testing"
+              }
+            },
+            {
+              "id": "QA-FE-NO-PERF-BUDGET",
+              "name": "performance",
+              "shortDescription": {
+                "text": "No performance budget (Lighthouse CI / size-limit)"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "DB-PLAINTEXT-PASSWORDS",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "1 of 2 sampled `users.password` values do not look hashed \u2014 Hash with argon2id/bcrypt, force password reset, add `hash_version` column."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DB-PLAINTEXT-PASSWORDS:app.db:6621b42627"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-001",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-256"
+            ],
+            "owasp": [
+              "A02:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CMD-PHP",
+          "ruleIndex": 1,
+          "level": "error",
+          "message": {
+            "text": "Shell command execution (PHP) \u2014 Avoid shelling out: use a library or native API for the job.; If unavoidable, pass an argument array with no shell (`subprocess.run([...], shell=False)`, `execFile`, `ProcessBuilder(list)`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CMD-PHP:app/Http/UserController.php:92fa09a337"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/Http/UserController.php"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-002",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-78"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CMD-PY",
+          "ruleIndex": 2,
+          "level": "error",
+          "message": {
+            "text": "Shell command execution (Python) \u2014 Avoid shelling out: use a library or native API for the job.; If unavoidable, pass an argument array with no shell (`subprocess.run([...], shell=False)`, `execFile`, `ProcessBuilder(list)`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CMD-PY:backend/app.py:fa84725707"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 25
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-003",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-78"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "DESER",
+          "ruleIndex": 3,
+          "level": "error",
+          "message": {
+            "text": "Unsafe deserialization \u2014 Use data-only formats (JSON) and validate with a schema.; `yaml.safe_load`, never `yaml.load` without SafeLoader."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DESER:backend/app.py:37108ca4e2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 43
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-004",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-502"
+            ],
+            "owasp": [
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CMD-JS",
+          "ruleIndex": 4,
+          "level": "error",
+          "message": {
+            "text": "Shell command execution (Node) \u2014 Avoid shelling out: use a library or native API for the job.; If unavoidable, pass an argument array with no shell (`subprocess.run([...], shell=False)`, `execFile`, `ProcessBuilder(list)`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CMD-JS:backend/server.js:ead4b2d2e0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-005",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-78"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SEC-WALLET-PRIVKEY",
+          "ruleIndex": 5,
+          "level": "error",
+          "message": {
+            "text": "Wallet private key hard-coded \u2014 ROTATE/REVOKE the secret now - assume it is compromised.; Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEC-WALLET-PRIVKEY:contracts/.env.example2:8d50aed106"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/.env.example2"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-006",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-321",
+              "CWE-798"
+            ],
+            "owasp": [
+              "A02:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "WEB3-UNPROTECTED-INIT",
+          "ruleIndex": 6,
+          "level": "error",
+          "message": {
+            "text": "`initialize()` can be called by anyone and more than once \u2014 Use OpenZeppelin `initializer`; call `_disableInitializers()` in the implementation constructor"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-UNPROTECTED-INIT:contracts/Vault.sol:41522c23da"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 26
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-007",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-665"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "MOB-AND-NO-UNIT",
+          "ruleIndex": 7,
+          "level": "error",
+          "message": {
+            "text": "Android: no unit tests (src/test) for the app code \u2014 Start with ViewModels/use-cases: JUnit + MockK + Turbine + kotlinx-coroutines-test (runTest, MainDispatcherRule)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-AND-NO-UNIT:.:33c850628a"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-001",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQLI-PHP",
+          "ruleIndex": 8,
+          "level": "error",
+          "message": {
+            "text": "SQL built with string concatenation (PHP) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQLI-PHP:app/Http/UserController.php:a09ff712d5"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/Http/UserController.php"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-008",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-89"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "XSS-ECHO-PHP",
+          "ruleIndex": 9,
+          "level": "error",
+          "message": {
+            "text": "Request data echoed without encoding (PHP) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "XSS-ECHO-PHP:app/Http/UserController.php:c28567daef"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/Http/UserController.php"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-009",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-79"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "AUTHZ-IDOR",
+          "ruleIndex": 10,
+          "level": "error",
+          "message": {
+            "text": "Object loaded by client-supplied id (check ownership) \u2014 Scope the lookup through the owner: `$user->orders()->findOrFail($id)` / `Order.objects.get(pk=id, owner=request.user)`.; Or authorize explicitly (`Gate::authorize('view', $order)`, policies, `@PreAuthorize`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AUTHZ-IDOR:app/Http/UserController.php:e846edd31f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/Http/UserController.php"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-010",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-639",
+              "CWE-862"
+            ],
+            "owasp": [
+              "A01:2021",
+              "API1:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "SEC-HARDCODED",
+          "ruleIndex": 11,
+          "level": "error",
+          "message": {
+            "text": "Hard-coded credential \u2014 ROTATE/REVOKE the secret now - assume it is compromised.; Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEC-HARDCODED:backend/app.py:2141a9c32d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-011",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-798"
+            ],
+            "owasp": [
+              "A07:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SEC-DB-URL",
+          "ruleIndex": 12,
+          "level": "error",
+          "message": {
+            "text": "Database URL with credentials \u2014 ROTATE/REVOKE the secret now - assume it is compromised.; Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEC-DB-URL:backend/app.py:1a295aaf51"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-012",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-798"
+            ],
+            "owasp": [
+              "A07:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQLI-PY",
+          "ruleIndex": 13,
+          "level": "error",
+          "message": {
+            "text": "SQL built with string formatting (Python) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQLI-PY:backend/app.py:73bf32561b"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-013",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-89"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQLI-PY",
+          "ruleIndex": 13,
+          "level": "error",
+          "message": {
+            "text": "SQL built with string formatting (Python) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQLI-PY:backend/app.py:bcebac578f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 19
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-014",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-89"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "XSS-REFLECT-PY",
+          "ruleIndex": 14,
+          "level": "error",
+          "message": {
+            "text": "User input rendered as HTML without escaping (Python) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "XSS-REFLECT-PY:backend/app.py:648c18cd56"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 20
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-015",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-79"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SSRF",
+          "ruleIndex": 15,
+          "level": "error",
+          "message": {
+            "text": "Outbound request to user-controlled URL \u2014 Prefer an allowlist of hostnames/schemes.; Resolve DNS yourself, reject private/loopback/link-local ranges, then connect to that validated IP (prevents DNS rebinding)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SSRF:backend/app.py:cdc68379b3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-016",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-918"
+            ],
+            "owasp": [
+              "A10:2021",
+              "API7:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "PATH-TRAVERSAL",
+          "ruleIndex": 16,
+          "level": "error",
+          "message": {
+            "text": "File access with user-controlled path \u2014 Never use the raw name. Map an ID to a stored path, or generate random server-side file names.; Resolve the final path and verify it stays under the base directory (`realpath(base + name).startswith(realpath(base))`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "PATH-TRAVERSAL:backend/app.py:9e10b43433"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 39
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-017",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-22"
+            ],
+            "owasp": [
+              "A01:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CRY-PWD-HASH",
+          "ruleIndex": 17,
+          "level": "error",
+          "message": {
+            "text": "Password hashed with MD5/SHA-1 \u2014 Switch to argon2id (or bcrypt cost \u2265 12 / scrypt) via the framework (`password_hash`, `bcrypt`, `passlib`, Spring `BCryptPasswordEncoder`).; On next successful login, re-hash the password with the new algorithm (transparent migration); keep a `hash_version` column."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CRY-PWD-HASH:backend/app.py:0a539b8442"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 51
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-018",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-327",
+              "CWE-916"
+            ],
+            "owasp": [
+              "A02:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "XSS-REFLECT-JS",
+          "ruleIndex": 18,
+          "level": "error",
+          "message": {
+            "text": "User input written straight into HTML response (Node) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "XSS-REFLECT-JS:backend/server.js:29ca9d4087"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-019",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-79"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQLI-JS",
+          "ruleIndex": 19,
+          "level": "error",
+          "message": {
+            "text": "SQL built with template/concatenation (JS/TS) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQLI-JS:backend/server.js:6b05eef1de"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-020",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-89"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "XSS-REFLECT-JS",
+          "ruleIndex": 18,
+          "level": "error",
+          "message": {
+            "text": "User input written straight into HTML response (Node) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "XSS-REFLECT-JS:backend/server.js:ead4b2d2e0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-021",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-79"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "JWT-HARDCODED",
+          "ruleIndex": 20,
+          "level": "error",
+          "message": {
+            "text": "JWT signed with hard-coded secret \u2014 Load the secret/private key from a secret manager/env; rotate the leaked one.; Pin the algorithm on verify (`algorithms=['HS256']` / `RS256`); never accept `none`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "JWT-HARDCODED:backend/server.js:cd478be180"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-022",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-798",
+              "CWE-347"
+            ],
+            "owasp": [
+              "A07:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "AUTHZ-IDOR",
+          "ruleIndex": 10,
+          "level": "error",
+          "message": {
+            "text": "Object loaded by client-supplied id (check ownership) \u2014 Scope the lookup through the owner: `$user->orders()->findOrFail($id)` / `Order.objects.get(pk=id, owner=request.user)`.; Or authorize explicitly (`Gate::authorize('view', $order)`, policies, `@PreAuthorize`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AUTHZ-IDOR:backend/server.js:37d47078ae"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-023",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-639",
+              "CWE-862"
+            ],
+            "owasp": [
+              "A01:2021",
+              "API1:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "WEB3-REENTRANCY",
+          "ruleIndex": 21,
+          "level": "error",
+          "message": {
+            "text": "`withdraw()` updates state AFTER an external call (reentrancy) \u2014 Checks-Effects-Interactions: update balances before the call, and add OpenZeppelin `nonReentrant`"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-REENTRANCY:contracts/Vault.sol:338b9fba8e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 12
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-024",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-841"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "WEB3-NO-ACCESS-CONTROL",
+          "ruleIndex": 22,
+          "level": "error",
+          "message": {
+            "text": "`sweep()` moves value/mints/burns/selfdestructs but has no visible access control \u2014 Restrict with onlyOwner/onlyRole (OpenZeppelin AccessControl) or verify msg.sender against the caller's own balance/allowance"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-NO-ACCESS-CONTROL:contracts/Vault.sol:cfd65566b5"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 18
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-025",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-284"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SOL-TX-ORIGIN",
+          "ruleIndex": 23,
+          "level": "error",
+          "message": {
+            "text": "Solidity tx.origin authorization \u2014 Load the secret/private key from a secret manager/env; rotate the leaked one.; Pin the algorithm on verify (`algorithms=['HS256']` / `RS256`); never accept `none`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SOL-TX-ORIGIN:contracts/Vault.sol:2806d99c86"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 22
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-026",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-477"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "WEB3-TX-ORIGIN",
+          "ruleIndex": 24,
+          "level": "error",
+          "message": {
+            "text": "tx.origin used for authorization (phishing via intermediate contract) \u2014 Use msg.sender"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-TX-ORIGIN:contracts/Vault.sol:3409146a74"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 22
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-027",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-477"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "WEB3-WEAK-RANDOMNESS",
+          "ruleIndex": 25,
+          "level": "error",
+          "message": {
+            "text": "`pickWinner()` derives randomness from block data (miner/validator-influenced) \u2014 Use Chainlink VRF (or commit-reveal); never block data for value-bearing randomness"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-WEAK-RANDOMNESS:contracts/Vault.sol:1a571abe97"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 24
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-028",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-330"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-GRANT-ALL",
+          "ruleIndex": 26,
+          "level": "error",
+          "message": {
+            "text": "Over-broad GRANT \u2014 Grant only the needed privileges on the needed schema/tables to a dedicated app role."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-GRANT-ALL:db/schema.sql:b9b1b5471a"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-029",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-250"
+            ],
+            "owasp": [
+              "A01:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQL-PLAIN-PWD",
+          "ruleIndex": 27,
+          "level": "error",
+          "message": {
+            "text": "Database user password in SQL script \u2014 Rotate it; create users out-of-band or inject via secret manager."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-PLAIN-PWD:db/schema.sql:6efdda8e4f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-030",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-798"
+            ],
+            "owasp": [
+              "A07:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "XSS-DOM",
+          "ruleIndex": 28,
+          "level": "error",
+          "message": {
+            "text": "Raw HTML sink (innerHTML/document.write) \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "XSS-DOM:frontend/src/App.jsx:bc65f52db9"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "frontend/src/App.jsx"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-031",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-79"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-ANDROID-DEBUG",
+          "ruleIndex": 29,
+          "level": "error",
+          "message": {
+            "text": "Android: debuggable / cleartext \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-ANDROID-DEBUG:mobile/android/app/src/main/AndroidManifest.xml:e1944fc412"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/android/app/src/main/AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-032",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-489",
+              "CWE-319"
+            ],
+            "owasp": [
+              "M8:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-IOS-PERM-MISSING",
+          "ruleIndex": 30,
+          "level": "error",
+          "message": {
+            "text": "iOS: code uses a protected API but Info.plist lacks NSLocationWhenInUseUsageDescription (crash + App Store rejection) \u2014 Android: add `<uses-permission android:name=\"...\"/>` and request it at runtime before use.; iOS: add the matching `NS\u2026UsageDescription` key to Info.plist with a clear, user-facing reason."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-IOS-PERM-MISSING:mobile/ios/App/Info.plist:1700e45ab7"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/ios/App/Info.plist"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-001",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-276"
+            ],
+            "owasp": [
+              "M6:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "QA-FE-NO-UNIT",
+          "ruleIndex": 31,
+          "level": "error",
+          "message": {
+            "text": "Front-end has no unit/component test runner (Vitest/Jest/Karma) \u2014 Add Vitest (Vite) or Jest + Testing Library; test components by behavior (role/label/text)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-FE-NO-UNIT:package.json:b6ec2bfd53"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-002",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-NO-TITLE",
+          "ruleIndex": 32,
+          "level": "error",
+          "message": {
+            "text": "Pages without <title> (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-NO-TITLE:web/index.html:49767019a2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-001",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-ROBOTS-BLOCKS-ALL",
+          "ruleIndex": 33,
+          "level": "error",
+          "message": {
+            "text": "robots.txt blocks the whole site (Disallow: /) \u2014 Remove the blanket Disallow before launch (keep it only on staging via auth, not robots)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-ROBOTS-BLOCKS-ALL:web/public/robots.txt:e9c758d371"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/public/robots.txt"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-002",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "QA-UNAWAITED-EXPECT",
+          "ruleIndex": 34,
+          "level": "error",
+          "message": {
+            "text": "1 web-first assertion(s) not awaited - they never fail the test \u2014 Add `await` before every Playwright web-first expect(...) (enable no-floating-promises + playwright/missing-playwright-await)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-UNAWAITED-EXPECT:web/tests/checkout.spec.ts:9ff6a18767"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/tests/checkout.spec.ts"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-002",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-754"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEM-NO-CONSENT",
+          "ruleIndex": 35,
+          "level": "warning",
+          "message": {
+            "text": "Tracking tags found (Google Analytics 4, Meta Pixel) but no consent management detected \u2014 Install one tag manager (GTM) and load GA4, Google Ads and Meta pixels through it; avoid hard-coding duplicates.; Implement a consent banner (CMP) and Google Consent Mode v2: default `denied`, update on accept; do not fire marketing tags before consent."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEM-NO-CONSENT:web/index.html:76d1bdb647"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEM-001",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": [
+              "A04:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "DOC-NO-README",
+          "ruleIndex": 36,
+          "level": "warning",
+          "message": {
+            "text": "Project has no README \u2014 Create README.md: purpose, requirements, install, run, test, configuration, deploy"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOC-NO-README:.:b4f2500db4"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-001",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DOC-COVERAGE-LOW",
+          "ruleIndex": 37,
+          "level": "warning",
+          "message": {
+            "text": "Public API documentation coverage is 0.0% (target 80%) \u2014 Adopt a rule: new/changed public code must be documented (enforce with pydocstyle/interrogate, eslint-plugin-jsdoc, phpcs, detekt UndocumentedPublicClass, golint/revive exported, SwiftLint missing_docs)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOC-COVERAGE-LOW:.:b1d6fe8818"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-002",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "MOB-AND-NO-UI",
+          "ruleIndex": 38,
+          "level": "warning",
+          "message": {
+            "text": "Android: no instrumented/UI tests (src/androidTest) \u2014 Add Compose UI tests (createComposeRule + testTag) or Espresso for Views for the 3-5 key journeys; run on Gradle Managed Devices in CI"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-AND-NO-UI:.:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-003",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-NO-SITEMAP",
+          "ruleIndex": 39,
+          "level": "warning",
+          "message": {
+            "text": "No sitemap.xml (or generator) found \u2014 Generate sitemap.xml automatically (next-sitemap, @astrojs/sitemap, Laravel Sitemap, django.contrib.sitemaps) and submit it in Search Console"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-NO-SITEMAP:.:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-003",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DB-FK-MISMATCH",
+          "ruleIndex": 40,
+          "level": "warning",
+          "message": {
+            "text": "Invalid foreign key definition \u2014 Make the parent column PRIMARY KEY or UNIQUE and reference it by name."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DB-FK-MISMATCH:app.db:91c5ec4ef6"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-003",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-NO-PK",
+          "ruleIndex": 41,
+          "level": "warning",
+          "message": {
+            "text": "Table `users` has no PRIMARY KEY \u2014 Rebuild the table with a primary key (SQLite needs create-copy-rename)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-NO-PK:app.db:1546ea5867"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-003",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-1007"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-MONEY-FLOAT",
+          "ruleIndex": 42,
+          "level": "warning",
+          "message": {
+            "text": "Money column `users.balance` uses REAL \u2014 Store integer cents or use a decimal TEXT/NUMERIC with app-side Decimal."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-MONEY-FLOAT:app.db:3ebb9a1183"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-004",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-681"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-MONEY-FLOAT",
+          "ruleIndex": 42,
+          "level": "warning",
+          "message": {
+            "text": "Money column `orders.total` uses REAL \u2014 Store integer cents or use a decimal TEXT/NUMERIC with app-side Decimal."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-MONEY-FLOAT:app.db:868080d55f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-005",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-681"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DB-FILE-PERMS",
+          "ruleIndex": 43,
+          "level": "warning",
+          "message": {
+            "text": "SQLite file is world-accessible (0o644) \u2014 chmod 600 vulnerable-demo/db/app.db"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DB-FILE-PERMS:app.db:9376f5a180"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-033",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-732"
+            ],
+            "owasp": [
+              "A05:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "BUG-PHP-LOOSE-AUTH",
+          "ruleIndex": 44,
+          "level": "warning",
+          "message": {
+            "text": "Loose comparison in auth/token check \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "BUG-PHP-LOOSE-AUTH:app/Http/UserController.php:d09e899e00"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/Http/UserController.php"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-006",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-697",
+              "CWE-1025"
+            ],
+            "owasp": [
+              "A07:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "OPEN-REDIRECT",
+          "ruleIndex": 45,
+          "level": "warning",
+          "message": {
+            "text": "Redirect to user-controlled URL \u2014 Redirect only to relative paths or to an allowlist of hosts.; Reject URLs with a scheme/host you do not own; beware `//evil.com` and `\\\\evil.com`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "OPEN-REDIRECT:backend/app.py:bf2a41e2fb"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 35
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-034",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-601"
+            ],
+            "owasp": [
+              "A01:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CRY-RANDOM",
+          "ruleIndex": 46,
+          "level": "warning",
+          "message": {
+            "text": "Non-cryptographic RNG for secrets \u2014 Use the CSPRNG: `crypto.randomBytes`, `secrets.token_urlsafe`, `random_bytes`, `SecureRandom`, `crypto/rand`.; Use \u2265 128 bits for tokens, hash them at rest, set expiry and single use."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CRY-RANDOM:backend/server.js:706ed58883"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 9
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-035",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-338"
+            ],
+            "owasp": [
+              "A02:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "BUG-JS-FOREACH-ASYNC",
+          "ruleIndex": 47,
+          "level": "warning",
+          "message": {
+            "text": "async callback in forEach (not awaited) \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "BUG-JS-FOREACH-ASYNC:backend/server.js:4499e6be92"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-007",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-662"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SOL-BLOCK-RANDOM",
+          "ruleIndex": 48,
+          "level": "warning",
+          "message": {
+            "text": "Solidity randomness from block data \u2014 Use the CSPRNG: `crypto.randomBytes`, `secrets.token_urlsafe`, `random_bytes`, `SecureRandom`, `crypto/rand`.; Use \u2265 128 bits for tokens, hash them at rest, set expiry and single use."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SOL-BLOCK-RANDOM:contracts/Vault.sol:a4d7498e1f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 24
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-036",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-330"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-NO-PK",
+          "ruleIndex": 41,
+          "level": "warning",
+          "message": {
+            "text": "Table `users` has no PRIMARY KEY \u2014 Add a primary key to `users` (surrogate `id` or natural unique key) in a new migration."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-NO-PK:db/schema.sql:198c31435b"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-004",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-1007"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-MONEY-FLOAT",
+          "ruleIndex": 42,
+          "level": "warning",
+          "message": {
+            "text": "Money column `users.price` uses FLOAT \u2014 Use DECIMAL(12,2) (or integer cents)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-MONEY-FLOAT:db/schema.sql:339ab7de4d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-008",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-681"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-PWD-SHORT",
+          "ruleIndex": 49,
+          "level": "warning",
+          "message": {
+            "text": "Password column `users.password` too short for a modern hash (32) \u2014 Widen to VARCHAR(255) and store argon2id/bcrypt hashes."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-PWD-SHORT:db/schema.sql:82e949cb8d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-037",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-257"
+            ],
+            "owasp": [
+              "A02:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQL-MONEY-FLOAT",
+          "ruleIndex": 42,
+          "level": "warning",
+          "message": {
+            "text": "Money column `orders.total` uses FLOAT \u2014 Use DECIMAL(12,2) (or integer cents)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-MONEY-FLOAT:db/schema.sql:55523d9a41"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-009",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-681"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "LOG-SECRET",
+          "ruleIndex": 50,
+          "level": "warning",
+          "message": {
+            "text": "Secret/password written to logs \u2014 Remove the log or redact (`token=***`).; Add a logging filter that masks known secret keys."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "LOG-SECRET:frontend/src/App.jsx:134d75ec20"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "frontend/src/App.jsx"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEC-038",
+            "type": "vulnerability",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-532"
+            ],
+            "owasp": [
+              "A09:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "TST-NO-ASSERT",
+          "ruleIndex": 51,
+          "level": "warning",
+          "message": {
+            "text": "Test file `mobile/ios/AppUITests/LoginUITests.swift` defines tests but contains no assertions \u2014 Add assertions on observable results"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "TST-NO-ASSERT:mobile/ios/AppUITests/LoginUITests.swift:5518153ed0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/ios/AppUITests/LoginUITests.swift"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-004",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "MOB-IOS-NO-A11Y-ID",
+          "ruleIndex": 52,
+          "level": "warning",
+          "message": {
+            "text": "iOS: UI tests exist but production code sets no accessibilityIdentifier \u2014 Set `.accessibilityIdentifier(\"login_button\")` in production and query by id"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-IOS-NO-A11Y-ID:mobile/ios/AppUITests/LoginUITests.swift:89b006d837"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/ios/AppUITests/LoginUITests.swift"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-005",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "MOB-IOS-SLEEP",
+          "ruleIndex": 53,
+          "level": "warning",
+          "message": {
+            "text": "iOS: 1 sleep/asyncAfter calls in tests (flaky) \u2014 Use `element.waitForExistence(timeout:)`, XCTestExpectation/`fulfillment(of:)`, async/await and injected clocks"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-IOS-SLEEP:mobile/ios/AppUITests/LoginUITests.swift:45f0eca026"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/ios/AppUITests/LoginUITests.swift"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-006",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "QA-FE-NO-TEST-SCRIPT",
+          "ruleIndex": 54,
+          "level": "warning",
+          "message": {
+            "text": "package.json has no working `test` script \u2014 Add \"test\": \"vitest run\" and \"test:e2e\": \"playwright test\""
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-FE-NO-TEST-SCRIPT:package.json:0ba7ecde53"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-007",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "TST-NO-ASSERT",
+          "ruleIndex": 51,
+          "level": "warning",
+          "message": {
+            "text": "Test file `tests/test_app.py` defines tests but contains no assertions \u2014 Add assertions on observable results"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "TST-NO-ASSERT:tests/test_app.py:5518153ed0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "tests/test_app.py"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-008",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-NO-DESCRIPTION",
+          "ruleIndex": 55,
+          "level": "warning",
+          "message": {
+            "text": "Pages without meta description (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-NO-DESCRIPTION:web/index.html:49767019a2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-004",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-NO-VIEWPORT",
+          "ruleIndex": 56,
+          "level": "warning",
+          "message": {
+            "text": "Pages without viewport meta (not mobile-friendly) (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-NO-VIEWPORT:web/index.html:49767019a2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-005",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "A11Y-IMG-ALT",
+          "ruleIndex": 57,
+          "level": "warning",
+          "message": {
+            "text": "Image without alt text \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "A11Y-IMG-ALT:web/index.html:487dead330"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 10
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "A11-001",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "A11Y-CLICK-NONINTERACTIVE",
+          "ruleIndex": 58,
+          "level": "warning",
+          "message": {
+            "text": "Click handler on a non-interactive element (keyboard/screen-reader inaccessible) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "A11Y-CLICK-NONINTERACTIVE:web/index.html:ac07ae2429"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 11
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "A11-002",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "QA-SLEEP",
+          "ruleIndex": 59,
+          "level": "warning",
+          "message": {
+            "text": "Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) \u2014 Replace sleeps with auto-waiting web-first assertions (`await expect(locator).toBeVisible()`), `waitFor`, or explicit network/route waits.; Locate like a user: getByRole > getByLabel > getByText > getByTestId > CSS (last resort); avoid XPath and deep CSS chains."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-SLEEP:web/tests/checkout.spec.ts:7331732f3f"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/tests/checkout.spec.ts"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-009",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "TST-FOCUSED",
+          "ruleIndex": 60,
+          "level": "warning",
+          "message": {
+            "text": "Focused test committed (`.only` / `fit`) - the rest of the suite is silently skipped \u2014 Remove `.only`/`fit`"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "TST-FOCUSED:web/tests/checkout.spec.ts:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/tests/checkout.spec.ts"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-010",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "MOB-IOS-NO-COVERAGE",
+          "ruleIndex": 61,
+          "level": "note",
+          "message": {
+            "text": "iOS: code coverage not enabled in scheme/test plan \u2014 Enable 'Gather coverage' and export with xcrun xccov in CI"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-IOS-NO-COVERAGE:.:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-010",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "WEB3-NO-STATIC-ANALYSIS",
+          "ruleIndex": 62,
+          "level": "note",
+          "message": {
+            "text": "No Slither/Echidna/Medusa/Certora in CI \u2014 Run `slither .` and fuzzing (forge invariants/Echidna) on every PR; get an external audit before mainnet"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-NO-STATIC-ANALYSIS:.:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-011",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DB-FK-OFF",
+          "ruleIndex": 63,
+          "level": "note",
+          "message": {
+            "text": "Foreign keys declared but PRAGMA foreign_keys is OFF by default \u2014 Execute `PRAGMA foreign_keys=ON` when opening every connection."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DB-FK-OFF:app.db:2566dcb896"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-005",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-FK-NO-INDEX",
+          "ruleIndex": 64,
+          "level": "note",
+          "message": {
+            "text": "Foreign key `orders.user_id` without index \u2014 CREATE INDEX idx_orders_user_id ON orders(user_id);"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-FK-NO-INDEX:app.db:05ac3c5553"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "PER-001",
+            "type": "performance",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DOC-API-UNDOCUMENTED",
+          "ruleIndex": 65,
+          "level": "note",
+          "message": {
+            "text": "Public API under-documented in `backend/app.py` (0/12) \u2014 Add doc comments to every public symbol: one-line summary, params/returns/raises (where non-obvious), and a usage example for entry points"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOC-API-UNDOCUMENTED:backend/app.py:eb9b1b75c1"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-006",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "BUG-PY-MUTABLE-DEFAULT",
+          "ruleIndex": 66,
+          "level": "note",
+          "message": {
+            "text": "Mutable default argument \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "BUG-PY-MUTABLE-DEFAULT:backend/app.py:1e984e258d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 53
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-011",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-665"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "BUG-EMPTY-CATCH",
+          "ruleIndex": 67,
+          "level": "note",
+          "message": {
+            "text": "Empty catch/except (swallowed error) \u2014 Catch the narrowest exception; log with context or re-raise.; If intentionally ignored, comment why."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "BUG-EMPTY-CATCH:backend/app.py:dccbbd5654"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 62
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-007",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-390"
+            ],
+            "owasp": [
+              "A09:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "WEB3-FLOATING-PRAGMA",
+          "ruleIndex": 68,
+          "level": "note",
+          "message": {
+            "text": "Floating pragma (^0.8.0): deployed bytecode may differ from what was audited \u2014 Pin the exact compiler (e.g. `pragma solidity 0.8.24;`) for deployable contracts"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "WEB3-FLOATING-PRAGMA:contracts/Vault.sol:5adb135c5b"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-008",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-1104"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-FK-NO-INDEX",
+          "ruleIndex": 64,
+          "level": "note",
+          "message": {
+            "text": "Foreign key `orders.user_id` without index \u2014 CREATE INDEX idx_orders_user_id ON orders(user_id);"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-FK-NO-INDEX:db/schema.sql:d9805e0175"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "PER-002",
+            "type": "performance",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SQL-MYISAM",
+          "ruleIndex": 69,
+          "level": "note",
+          "message": {
+            "text": "Table `orders` uses MyISAM \u2014 Convert to InnoDB (`ALTER TABLE t ENGINE=InnoDB`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQL-MYISAM:db/schema.sql:7af38bfab0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-009",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "MOB-IOS-CONTINUE-AFTER-FAILURE",
+          "ruleIndex": 70,
+          "level": "note",
+          "message": {
+            "text": "iOS: 1 UI test file(s) do not set continueAfterFailure = false \u2014 In setUp: `continueAfterFailure = false`"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-IOS-CONTINUE-AFTER-FAILURE:mobile/ios/AppUITests/LoginUITests.swift:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/ios/AppUITests/LoginUITests.swift"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "TST-012",
+            "type": "test_gap",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DEP-NO-LOCKFILE",
+          "ruleIndex": 71,
+          "level": "note",
+          "message": {
+            "text": "`package.json` has no lockfile \u2014 Commit the lockfile (npm i / composer install / bundle install)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DEP-NO-LOCKFILE:package.json:30c172a245"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "DEP-001",
+            "type": "dependency",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-1104"
+            ],
+            "owasp": [
+              "A06:2021",
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SEO-NO-CANONICAL",
+          "ruleIndex": 72,
+          "level": "note",
+          "message": {
+            "text": "Pages without canonical link (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-NO-CANONICAL:web/index.html:49767019a2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-006",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-H1",
+          "ruleIndex": 73,
+          "level": "note",
+          "message": {
+            "text": "Pages with zero or multiple <h1> (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-H1:web/index.html:4de827276d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-007",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-NO-OG",
+          "ruleIndex": 74,
+          "level": "note",
+          "message": {
+            "text": "Pages missing Open Graph title/image (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-NO-OG:web/index.html:49767019a2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-008",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-IMG-NO-SIZE",
+          "ruleIndex": 75,
+          "level": "note",
+          "message": {
+            "text": "Pages with \u22653 images lacking width/height (layout shift) (1 of 1 HTML pages) \u2014 Targets: LCP < 2.5 s, INP < 200 ms, CLS < 0.1 (field data in Search Console / CrUX).; Images: modern formats (AVIF/WebP), responsive srcset, explicit width/height, `loading=\"lazy\"` below the fold, `fetchpriority=\"high\"` on the LCP image."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-IMG-NO-SIZE:web/index.html:aeff0c3c88"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-009",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-RENDER-BLOCKING",
+          "ruleIndex": 76,
+          "level": "note",
+          "message": {
+            "text": "Pages with render-blocking <script> (no async/defer) (1 of 1 HTML pages) \u2014 Targets: LCP < 2.5 s, INP < 200 ms, CLS < 0.1 (field data in Search Console / CrUX).; Images: modern formats (AVIF/WebP), responsive srcset, explicit width/height, `loading=\"lazy\"` below the fold, `fetchpriority=\"high\"` on the LCP image."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-RENDER-BLOCKING:web/index.html:e93e9d6c1b"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-010",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "A11Y-HTML-LANG",
+          "ruleIndex": 77,
+          "level": "note",
+          "message": {
+            "text": "<html> without lang attribute \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "A11Y-HTML-LANG:web/index.html:82a1e9f803"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "A11-003",
+            "type": "bug",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DEP-NO-LOCKFILE",
+          "ruleIndex": 71,
+          "level": "note",
+          "message": {
+            "text": "`web/package.json` has no lockfile \u2014 Commit the lockfile (npm i / composer install / bundle install)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DEP-NO-LOCKFILE:web/package.json:30c172a245"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "DEP-002",
+            "type": "dependency",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-1104"
+            ],
+            "owasp": [
+              "A06:2021",
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SEO-ROBOTS-NO-SITEMAP",
+          "ruleIndex": 78,
+          "level": "note",
+          "message": {
+            "text": "robots.txt does not reference the sitemap \u2014 Add `Sitemap: https://your-domain/sitemap.xml`"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-ROBOTS-NO-SITEMAP:web/public/robots.txt:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/public/robots.txt"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-011",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-CSR-ONLY",
+          "ruleIndex": 79,
+          "level": "note",
+          "message": {
+            "text": "Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell) \u2014 Move to SSR/SSG (Next, Nuxt, Astro, SvelteKit, Remix) or prerender public routes (vite-plugin-ssr, react-snap)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEO-CSR-ONLY:.:aab0e984c7"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "SEO-012",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "AUTHZ-MASS-ASSIGN",
+          "ruleIndex": 80,
+          "level": "note",
+          "message": {
+            "text": "Mass assignment / over-posting \u2014 Use explicit allowlists (`$fillable`, DTO/serializer `fields=[...]`, `permit(:a,:b)`).; Never bind sensitive fields from input; set them server-side."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "AUTHZ-MASS-ASSIGN:app/Http/UserController.php:0326837d7a"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app/Http/UserController.php"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-001",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-915"
+            ],
+            "owasp": [
+              "A01:2021",
+              "API3:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "DOS-UNBOUNDED-SIZE",
+          "ruleIndex": 81,
+          "level": "note",
+          "message": {
+            "text": "Client-controlled size/limit without cap \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOS-UNBOUNDED-SIZE:backend/app.py:22a56cf40d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 47
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-002",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-770"
+            ],
+            "owasp": [
+              "A04:2021",
+              "API4:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "SOL-DELEGATECALL",
+          "ruleIndex": 82,
+          "level": "note",
+          "message": {
+            "text": "Solidity delegatecall / selfdestruct / low-level call \u2014 Avoid shelling out: use a library or native API for the job.; If unavoidable, pass an argument array with no shell (`subprocess.run([...], shell=False)`, `execFile`, `ProcessBuilder(list)`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SOL-DELEGATECALL:contracts/Vault.sol:70cda55901"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "contracts/Vault.sol"
+                },
+                "region": {
+                  "startLine": 14
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-003",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-829"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "XSS-FRAMEWORK",
+          "ruleIndex": 83,
+          "level": "note",
+          "message": {
+            "text": "Framework raw-HTML escape hatch \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "XSS-FRAMEWORK:frontend/src/App.jsx:90f206e6db"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "frontend/src/App.jsx"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-004",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-79"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CFG-TF",
+          "ruleIndex": 84,
+          "level": "note",
+          "message": {
+            "text": "Terraform/cloud over-exposure \u2014 Apply least privilege (no privileged pods, no `0.0.0.0/0` on admin ports, no `Principal: *`).; Pin GitHub Actions to commit SHAs; avoid `pull_request_target` with untrusted checkout; never interpolate `${{ github.event.* }}` into `run:`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CFG-TF:infra/main.tf:83742c66de"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "infra/main.tf"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-005",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-284",
+              "CWE-732"
+            ],
+            "owasp": [
+              "A05:2021",
+              "A01:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "SQLI-JAVA",
+          "ruleIndex": 85,
+          "level": "note",
+          "message": {
+            "text": "SQL built with concatenation (Java/Kotlin/Android) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SQLI-JAVA:mobile/android/app/src/main/Main.kt:6f925d3698"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/android/app/src/main/Main.kt"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-006",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-89"
+            ],
+            "owasp": [
+              "A03:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "DOS-NO-RATELIMIT",
+          "ruleIndex": 86,
+          "level": "note",
+          "message": {
+            "text": "Web framework detected (express) but no rate limiting/throttling found anywhere \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOS-NO-RATELIMIT:package.json:d9396f1604"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-007",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-770",
+              "CWE-307"
+            ],
+            "owasp": [
+              "A04:2021",
+              "API4:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "SEC-ENV-PRESENT",
+          "ruleIndex": 87,
+          "level": "note",
+          "message": {
+            "text": "Environment file `.env` present - ensure it is git-ignored and not web-served \u2014 Add to .gitignore; keep outside document root"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "SEC-ENV-PRESENT:.env:1e28f853e3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": ".env"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-008",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "CFG-DOCKER",
+          "ruleIndex": 88,
+          "level": "note",
+          "message": {
+            "text": "Dockerfile weakness \u2014 Add a non-root `USER`; pin base images by version/digest; use multi-stage builds.; Never put secrets in ENV/ARG/layers - use runtime secrets."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CFG-DOCKER:Dockerfile:8944f03e27"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-009",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-250",
+              "CWE-829"
+            ],
+            "owasp": [
+              "A05:2021",
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CFG-DOCKER-NOUSER",
+          "ruleIndex": 89,
+          "level": "note",
+          "message": {
+            "text": "`Dockerfile` never switches to a non-root USER \u2014 Add `RUN adduser ...` and `USER app` before CMD"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CFG-DOCKER-NOUSER:Dockerfile:00fdcc5ac2"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-010",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-250"
+            ],
+            "owasp": [
+              "A05:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CFG-DOCKER",
+          "ruleIndex": 88,
+          "level": "note",
+          "message": {
+            "text": "Dockerfile weakness \u2014 Add a non-root `USER`; pin base images by version/digest; use multi-stage builds.; Never put secrets in ENV/ARG/layers - use runtime secrets."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CFG-DOCKER:Dockerfile:c11cf6d0ec"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "Dockerfile"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-011",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-250",
+              "CWE-829"
+            ],
+            "owasp": [
+              "A05:2021",
+              "A08:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "PERF-NPLUS1",
+          "ruleIndex": 90,
+          "level": "note",
+          "message": {
+            "text": "Query inside a loop (possible N+1) \u2014 Eager-load/batch: `with('rel')`, `select_related/prefetch_related`, `include`, `JOIN`, or `WHERE id IN (...)`.; Verify with query logging; add an assertion on query count in a test."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "PERF-NPLUS1:backend/app.py:49aac4f9fc"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 59
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "PER-003",
+            "type": "performance",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-1073"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "CFG-DEBUG",
+          "ruleIndex": 91,
+          "level": "note",
+          "message": {
+            "text": "Debug mode enabled \u2014 Drive from environment: `DEBUG=False`/`APP_DEBUG=false`/`NODE_ENV=production` in production.; Ensure the dev value is not the default in committed prod config."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CFG-DEBUG:backend/app.py:eb4adba42a"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 66
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-012",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-489",
+              "CWE-209"
+            ],
+            "owasp": [
+              "A05:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "CFG-CORS",
+          "ruleIndex": 92,
+          "level": "note",
+          "message": {
+            "text": "Permissive CORS (*) \u2014 Replace `*` with an explicit allowlist of origins.; Never combine reflected-Origin with `Allow-Credentials: true`."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "CFG-CORS:backend/server.js:a72ee2c768"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/server.js"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-013",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-942"
+            ],
+            "owasp": [
+              "A05:2021",
+              "API8:2023"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-STORAGE",
+          "ruleIndex": 93,
+          "level": "note",
+          "message": {
+            "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-STORAGE:frontend/src/App.jsx:86e56423f4"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "frontend/src/App.jsx"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-014",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-312"
+            ],
+            "owasp": [
+              "M9:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-ANDROID-MANIFEST",
+          "ruleIndex": 94,
+          "level": "note",
+          "message": {
+            "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-ANDROID-MANIFEST:mobile/android/app/src/main/AndroidManifest.xml:e1944fc412"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/android/app/src/main/AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-015",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-200",
+              "CWE-926"
+            ],
+            "owasp": [
+              "M8:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-ANDROID-MANIFEST",
+          "ruleIndex": 94,
+          "level": "note",
+          "message": {
+            "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-ANDROID-MANIFEST:mobile/android/app/src/main/AndroidManifest.xml:784dfb123a"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/android/app/src/main/AndroidManifest.xml"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-016",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-200",
+              "CWE-926"
+            ],
+            "owasp": [
+              "M8:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-WEBVIEW",
+          "ruleIndex": 95,
+          "level": "note",
+          "message": {
+            "text": "WebView risk (JS enabled / bridge / file access) \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-WEBVIEW:mobile/android/app/src/main/Main.kt:6f925d3698"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/android/app/src/main/Main.kt"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-017",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-749",
+              "CWE-79"
+            ],
+            "owasp": [
+              "M4:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "MOB-STORAGE",
+          "ruleIndex": 93,
+          "level": "note",
+          "message": {
+            "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "MOB-STORAGE:mobile/android/app/src/main/Main.kt:6f925d3698"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mobile/android/app/src/main/Main.kt"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-018",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-312"
+            ],
+            "owasp": [
+              "M9:2024"
+            ]
+          }
+        },
+        {
+          "ruleId": "QA-FE-NO-A11Y",
+          "ruleIndex": 96,
+          "level": "note",
+          "message": {
+            "text": "No automated accessibility testing (axe / jsx-a11y / Lighthouse) \u2014 Add eslint-plugin-jsx-a11y (or vuejs-accessibility) and an axe scan per key page in E2E"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-FE-NO-A11Y:package.json:5eb45d3dde"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-019",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "A11Y-INPUT-LABEL",
+          "ruleIndex": 97,
+          "level": "note",
+          "message": {
+            "text": "<input> without id/aria-label (cannot have an associated label) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "A11Y-INPUT-LABEL:web/index.html:1760ad1cca"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/index.html"
+                },
+                "region": {
+                  "startLine": 15
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "A11-004",
+            "type": "bug",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DOS-NO-TIMEOUT",
+          "ruleIndex": 98,
+          "level": "note",
+          "message": {
+            "text": "Outbound HTTP call without timeout \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOS-NO-TIMEOUT:backend/app.py:cdc68379b3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/app.py"
+                },
+                "region": {
+                  "startLine": 31
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-020",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-400"
+            ],
+            "owasp": [
+              "A04:2021"
+            ]
+          }
+        },
+        {
+          "ruleId": "QA-FE-NO-VISUAL",
+          "ruleIndex": 99,
+          "level": "note",
+          "message": {
+            "text": "No visual regression testing \u2014 Start with Playwright toHaveScreenshot on 5 key pages (mask dynamic regions, fixed viewport)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-FE-NO-VISUAL:package.json:0aa549c939"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-021",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "QA-FE-NO-PERF-BUDGET",
+          "ruleIndex": 100,
+          "level": "note",
+          "message": {
+            "text": "No performance budget (Lighthouse CI / size-limit) \u2014 Add @lhci/cli assertions (LCP<2.5s, INP<200ms, CLS<0.1) and size-limit; fail PRs on regressions"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "QA-FE-NO-PERF-BUDGET:package.json:da39a3ee5e"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "package.json"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-022",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        }
+      ]
+    }
+  ]
+}

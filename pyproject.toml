@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pn-ultra-audit"
+version = "1.0.13"
+description = "One read-only command to audit code, tests, docs, databases, servers, SEO, crypto, SaaS/fintech and audit-readiness - live in the terminal, delivered as a dashboard."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "GPL-3.0-only" }
+keywords = ["audit", "security", "sast", "code-quality", "compliance", "soc2", "iso27001", "seo", "fintech", "web3", "devsecops"]
+dependencies = []
+
+[project.scripts]
+pn-ultra-audit = "audit:main"
+
+[tool.setuptools]
+py-modules = ["audit"]
+packages = ["engine"]

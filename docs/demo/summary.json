@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-08",
+  "counts": {
+    "critical": 7,
+    "high": 31,
+    "medium": 31,
+    "low": 19,
+    "info": 1
+  },
+  "confirmed": 89,
+  "gate": "FAIL",
+  "ratings": {
+    "reliability": "D",
+    "security": "E",
+    "maintainability": "D"
+  }
+}

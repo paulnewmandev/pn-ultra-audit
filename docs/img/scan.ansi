@@ -1,0 +1,146 @@
+[1;35m┌──────────────────────────────────────────────────────────────┐[0m
+[1;35m│[0m[1m                   PN-Ultra-Audit  v1.0.13                    [0m[1;35m│[0m
+[1;35m└──────────────────────────────────────────────────────────────┘[0m
+ [90mTarget:     [0m vulnerable-demo
+ [90mMode:       [0m local · read-only
+ [90mProfile:    [0m standard · strictness=strict
+ [90mDetected:   [0m backend, frontend, mobile, database, web, web3, infra  (mobile: Android; frontend: react; web: HTML pages)
+ [90mAuditors:   [0m db · docs · qa · quality · security · seo · tests · web3  [auto]
+ [90mPhases:     [0m 12
+
+[1m▶ [01/12] Preparing target[0m
+   [32m✓[0m vulnerable-demo [2m(0.0s)[0m
+
+[1m▶ [02/12] Discovering files, languages & architecture[0m
+   [32m✓[0m 22 files · Swift 3, JavaScript 2, Python 2, PHP 1, TypeScript 1, Solidity 1 · architecture: modular monolith, layered (presentation → services → data) [2m(0.0s)[0m
+
+[1m▶ [03/12] Code scan: SQLi · XSS · DoS · secrets · mobile · a11y[0m
+   [1;31m✖ HIGH    [0m [90mSQLI-PHP            [0m SQL built with string concatenation (PHP)                      [2mapp/Http/UserController.php:5[0m
+   [1;31m✖ HIGH    [0m [90mXSS-ECHO-PHP        [0m Request data echoed without encoding (PHP)                     [2mapp/Http/UserController.php:6[0m
+   [1;35m✖ CRITICAL[0m [90mCMD-PHP             [0m Shell command execution (PHP)                                  [2mapp/Http/UserController.php:10[0m
+   [1;31m✖ HIGH    [0m [90mAUTHZ-IDOR          [0m Object loaded by client-supplied id (check ownership)          [2mapp/Http/UserController.php:7[0m
+   [33m▲ MEDIUM  [0m [90mBUG-PHP-LOOSE-AUTH  [0m Loose comparison in auth/token check                           [2mapp/Http/UserController.php:9[0m
+   [1;31m✖ HIGH    [0m [90mXSS-DOM             [0m Raw HTML sink (innerHTML/document.write)                       [2mfrontend/src/App.jsx:2[0m
+   [33m▲ MEDIUM  [0m [90mLOG-SECRET          [0m Secret/password written to logs                                [2mfrontend/src/App.jsx:4[0m
+   [33m▲ MEDIUM  [0m [90mA11Y-IMG-ALT        [0m Image without alt text                                         [2mweb/index.html:10[0m
+   [33m▲ MEDIUM  [0m [90mA11Y-CLICK-NONINTERACTIVE[0m Click handler on a non-interactive element (keyboard/screen-re [2mweb/index.html:11[0m
+   [1;31m✖ HIGH    [0m [90mSOL-TX-ORIGIN       [0m Solidity tx.origin authorization                               [2mcontracts/Vault.sol:22[0m
+   [33m▲ MEDIUM  [0m [90mSOL-BLOCK-RANDOM    [0m Solidity randomness from block data                            [2mcontracts/Vault.sol:24[0m
+   [1;35m✖ CRITICAL[0m [90mSEC-WALLET-PRIVKEY  [0m Wallet private key hard-coded                                  [2mcontracts/.env.example2:1[0m
+   [1;31m✖ HIGH    [0m [90mSQLI-JS             [0m SQL built with template/concatenation (JS/TS)                  [2mbackend/server.js:5[0m
+   [1;31m✖ HIGH    [0m [90mXSS-REFLECT-JS      [0m User input written straight into HTML response (Node)          [2mbackend/server.js:4[0m
+   [2m… 18 more (use --verbose to stream every finding)[0m
+   [32m✓[0m 35 confirmed · 18 to review [2m(0.0s)[0m
+
+[1m▶ [04/12] Project checks, duplication & quality[0m
+   [32m✓[0m 5 findings · duplication 0.0% [2m(0.0s)[0m
+
+[1m▶ [05/12] Documentation, standards & architecture (strict)[0m
+   [33m▲ MEDIUM  [0m [90mDOC-NO-README       [0m Project has no README                                          [2m.:1[0m
+   [33m▲ MEDIUM  [0m [90mDOC-COVERAGE-LOW    [0m Public API documentation coverage is 0.0% (target 80%)         [2m.:1[0m
+   [32m✓[0m 3 findings · docstrings 0.0% [2m(0.0s)[0m
+
+[1m▶ [06/12] Test analysis[0m
+   [33m▲ MEDIUM  [0m [90mTST-NO-ASSERT       [0m Test file `tests/test_app.py` defines tests but contains no as [2mtests/test_app.py:1[0m
+   [33m▲ MEDIUM  [0m [90mTST-NO-ASSERT       [0m Test file `mobile/ios/AppUITests/LoginUITests.swift` defines t [2mmobile/ios/AppUITests/LoginUITests.swift:1[0m
+   [33m▲ MEDIUM  [0m [90mTST-FOCUSED         [0m Focused test committed (`.only` / `fit`) - the rest of the sui [2mweb/tests/checkout.spec.ts:8[0m
+   [32m✓[0m 3 test files · 4 cases · ratio 0.173 [2m(0.0s)[0m
+
+[1m▶ [07/12] QA: front-end & mobile (Android · iOS · Flutter · RN)[0m
+   [1;31m✖ HIGH    [0m [90mQA-FE-NO-UNIT       [0m Front-end has no unit/component test runner (Vitest/Jest/Karma [2mpackage.json:1[0m
+   [33m▲ MEDIUM  [0m [90mQA-FE-NO-TEST-SCRIPT[0m package.json has no working `test` script                      [2mpackage.json:1[0m
+   [33m▲ MEDIUM  [0m [90mQA-SLEEP            [0m Fixed sleeps in tests: 2 occurrence(s) in 1 file(s)            [2mweb/tests/checkout.spec.ts:4[0m
+   [1;31m✖ HIGH    [0m [90mQA-UNAWAITED-EXPECT [0m 1 web-first assertion(s) not awaited - they never fail the tes [2mweb/tests/checkout.spec.ts:6[0m
+   [1;31m✖ HIGH    [0m [90mMOB-AND-NO-UNIT     [0m Android: no unit tests (src/test) for the app code             [2m.:1[0m
+   [33m▲ MEDIUM  [0m [90mMOB-AND-NO-UI       [0m Android: no instrumented/UI tests (src/androidTest)            [2m.:1[0m
+   [33m▲ MEDIUM  [0m [90mMOB-IOS-SLEEP       [0m iOS: 1 sleep/asyncAfter calls in tests (flaky)                 [2mmobile/ios/AppUITests/LoginUITests.swift:3[0m
+   [33m▲ MEDIUM  [0m [90mMOB-IOS-NO-A11Y-ID  [0m iOS: UI tests exist but production code sets no accessibilityI [2mmobile/ios/AppUITests/LoginUITests.swift:1[0m
+   [1;31m✖ HIGH    [0m [90mMOB-IOS-PERM-MISSING[0m iOS: code uses a protected API but Info.plist lacks NSLocation [2mmobile/ios/App/Info.plist:1[0m
+   [32m✓[0m 14 findings · mobile: android, ios · front-end [2m(0.0s)[0m
+
+[1m▶ [08/12] Static SEO / SEM (templates & tracking)[0m
+   [1;31m✖ HIGH    [0m [90mSEO-ROBOTS-BLOCKS-ALL[0m robots.txt blocks the whole site (Disallow: /)                 [2mweb/public/robots.txt:1[0m
+   [33m▲ MEDIUM  [0m [90mSEO-NO-SITEMAP      [0m No sitemap.xml (or generator) found                            [2m.:1[0m
+   [1;31m✖ HIGH    [0m [90mSEO-NO-TITLE        [0m Pages without <title> (1 of 1 HTML pages)                      [2mweb/index.html:1[0m
+   [33m▲ MEDIUM  [0m [90mSEO-NO-DESCRIPTION  [0m Pages without meta description (1 of 1 HTML pages)             [2mweb/index.html:1[0m
+   [33m▲ MEDIUM  [0m [90mSEO-NO-VIEWPORT     [0m Pages without viewport meta (not mobile-friendly) (1 of 1 HTML [2mweb/index.html:1[0m
+   [33m▲ MEDIUM  [0m [90mSEM-NO-CONSENT      [0m Tracking tags found (Google Analytics 4, Meta Pixel) but no co [2mweb/index.html:1[0m
+   [32m✓[0m 13 findings · trackers: Google Analytics 4, Meta Pixel [2m(0.0s)[0m
+
+[1m▶ [09/12] Crypto / Web3: Solidity, Solana, dApps[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-REENTRANCY     [0m `withdraw()` updates state AFTER an external call (reentrancy) [2mcontracts/Vault.sol:12[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-NO-ACCESS-CONTROL[0m `sweep()` moves value/mints/burns/selfdestructs but has no vis [2mcontracts/Vault.sol:18[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-WEAK-RANDOMNESS[0m `pickWinner()` derives randomness from block data (miner/valid [2mcontracts/Vault.sol:24[0m
+   [1;35m✖ CRITICAL[0m [90mWEB3-UNPROTECTED-INIT[0m `initialize()` can be called by anyone and more than once      [2mcontracts/Vault.sol:26[0m
+   [1;31m✖ HIGH    [0m [90mWEB3-TX-ORIGIN      [0m tx.origin used for authorization (phishing via intermediate co [2mcontracts/Vault.sol:22[0m
+   [32m✓[0m 7 findings · 1 .sol · 1 contracts · - [2m(0.0s)[0m
+
+[1m▶ [10/12] Databases (static SQL + live)[0m
+   [33m▲ MEDIUM  [0m [90mSQL-NO-PK           [0m Table `users` has no PRIMARY KEY                               [2mdb/schema.sql:1[0m
+   [33m▲ MEDIUM  [0m [90mSQL-MONEY-FLOAT     [0m Money column `users.price` uses FLOAT                          [2mdb/schema.sql:1[0m
+   [33m▲ MEDIUM  [0m [90mSQL-PWD-SHORT       [0m Password column `users.password` too short for a modern hash ( [2mdb/schema.sql:1[0m
+   [33m▲ MEDIUM  [0m [90mSQL-MONEY-FLOAT     [0m Money column `orders.total` uses FLOAT                         [2mdb/schema.sql:2[0m
+   [1;31m✖ HIGH    [0m [90mSQL-GRANT-ALL       [0m Over-broad GRANT                                               [2mdb/schema.sql:3[0m
+   [1;31m✖ HIGH    [0m [90mSQL-PLAIN-PWD       [0m Database user password in SQL script                           [2mdb/schema.sql:4[0m
+   [33m▲ MEDIUM  [0m [90mDB-FK-MISMATCH      [0m Invalid foreign key definition                                 [2mapp.db:1[0m
+   [33m▲ MEDIUM  [0m [90mSQL-NO-PK           [0m Table `users` has no PRIMARY KEY                               [2mapp.db:1[0m
+   [1;35m✖ CRITICAL[0m [90mDB-PLAINTEXT-PASSWORDS[0m 1 of 2 sampled `users.password` values do not look hashed      [2mapp.db:1[0m
+   [33m▲ MEDIUM  [0m [90mSQL-MONEY-FLOAT     [0m Money column `users.balance` uses REAL                         [2mapp.db:1[0m
+   [33m▲ MEDIUM  [0m [90mSQL-MONEY-FLOAT     [0m Money column `orders.total` uses REAL                          [2mapp.db:1[0m
+   [33m▲ MEDIUM  [0m [90mDB-FILE-PERMS       [0m SQLite file is world-accessible (0o644)                        [2mapp.db:1[0m
+   [32m✓[0m 1 .sql · 1 connections · app.db: 2 tables [2m(0.0s)[0m
+
+[1m▶ [11/12] Consolidating, verifying & baseline diff[0m
+   [32m✓[0m 89 confirmed · 25 to review [2m(0.1s)[0m
+
+[1m▶ [12/12] Writing HTML dashboard + MD report (mermaid) + SARIF[0m
+   [32m✓[0m audit-output/demo/run-1/report.html [2m(0.0s)[0m
+
+[32m✓ [0mExported to docs  (index.html, REPORT.md, findings.sarif, findings.json, summary.json, metrics.json, report.pdf)
+[1mRESULT[0m
+  [90mQuality Gate[0m  [90mReliability[0m  [90mSecurity[0m  [90mMaintainability[0m  [90mDebt [0m  [90mConfirmed[0m  [90mTo review[0m
+  FAIL          D            E         D                26.8%  89         25       
+
+[1mSEVERITY[0m
+  [90mcritical[0m  [90mhigh[0m  [90mmedium[0m  [90mlow[0m  [90minfo[0m
+  7         31    31      19   1   
+
+[1mSEO / SEM[0m
+  [90mScore[0m  [90mTechnical & crawlability[0m  [90mOn-page[0m  [90mContent[0m  [90mPage experience[0m  [90mStructured data & social[0m  [90mSEM / tracking[0m
+  93     86                        86       100      93               98                        96            
+
+[1mAUDIT READINESS (not a certification)[0m
+  [90mFramework                      [0m  [90mReadiness[0m  [90mPass[0m  [90mGap[0m  [90mManual[0m
+  SOC 2                            0%         0     11   3     
+  ISO/IEC 27001:2022               15%        2     11   2     
+  HIPAA Security Rule              17%        1     5    5     
+  GDPR / ePrivacy                  0%         0     5    5     
+  PCI DSS v4.0                     12%        1     7    2     
+  NIST CSF 2.0                     14%        1     6    3     
+  DORA (EU 2022/2554)              0%         0     6    1     
+  WCAG 2.2 AA (VPAT / EN 301 549)  43%        3     4    1     
+  OWASP ASVS 4.0 (Level 2)         8%         1     12   0     
+  CIS Controls v8 (IG1/IG2)        12%        1     7    1     
+
+[32m✓ [0mEvidence pack: audit-pack  (16 files)
+
+[1mPROFESSIONAL LEVEL[0m
+  [90mLevel              [0m  [90mScore [0m  [90mFoundations[0m  [90mSecurity[0m  [90mQuality[0m  [90mDelivery[0m  [90mData[0m  [90mOperations[0m  [90mCraft[0m  [90mExperience[0m
+  1/5 Getting started  28/100  29           6         82       30        17    29          50     0         
+
+[1mTop fixes[0m
+  SEC-002  [critical] Shell command execution (PHP)  [2mapp/Http/UserController.php:10[0m
+  SEC-003  [critical] Shell command execution (Python)  [2mbackend/app.py:25[0m
+  SEC-005  [critical] Shell command execution (Node)  [2mbackend/server.js:6[0m
+  SEC-006  [critical] Wallet private key hard-coded  [2mcontracts/.env.example2:1[0m
+  SEC-004  [critical] Unsafe deserialization  [2mbackend/app.py:43[0m
+  SEC-007  [critical] `initialize()` can be called by anyone and more than once  [2mcontracts/Vault.sol:26[0m
+
+[1mReports[0m
+  report.html      dashboard            audit-output/demo/run-1/report.html
+  REPORT.md        markdown + mermaid   audit-output/demo/run-1/REPORT.md
+  findings.sarif   VS Code / GitHub     audit-output/demo/run-1/findings.sarif
+  findings.json    data                 audit-output/demo/run-1/findings.json
+
+[1;31m✘ Quality Gate FAILED[0m
+[1mAudit complete[0m[2m  (total 1.9s)[0m

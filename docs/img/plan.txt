@@ -1,0 +1,19 @@
+PN-Ultra-Audit 1.0.13 - audit plan
+  Detected: backend, frontend, mobile, database, web, web3, infra
+    mobile    Android, iOS
+    frontend  react, react-dom, HTML/JS/CSS
+    web       HTML pages
+    backend   web/API framework
+    database  1 .sql
+    web3      1 .sol
+    infra     Docker, Terraform
+  Auditors: db, docs, qa, quality, security, seo, tests, web3
+  Skipped  : domain
+  (adjust with --only a,b / --skip a,b)
+
+PN-Ultra-Audit 1.0.13 - audit plan
+  Detected: backend
+    backend   web/API framework
+  Auditors: docs, quality, security, tests
+  Skipped  : db, domain, qa, seo, web3
+  (adjust with --only a,b / --skip a,b)
