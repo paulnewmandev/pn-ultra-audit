@@ -27,7 +27,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.18 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.19 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -179,8 +179,9 @@ Report:
                         source code embedded in report.html for the read-only code viewer: auto (all text
                         files within the budget, files with findings first) | findings (only files with
                         findings) | none. Secrets are masked; .env/keys/state files are never embedded
-  --embed-budget MB     size budget for embedded source (default 5 MB; files with findings are always
-                        included up to 2x)
+  --embed-budget MB     size budget for source embedded in report.html (default 5 MB). Files over it are NOT
+                        dropped: they go to sources/chunk-*.js next to the report and load on demand in the
+                        viewer
 
 Token saving (for AI assistants and quick looks):
   --brief               print only a ~40-line summary (gate, ratings, counts, top findings, next commands)

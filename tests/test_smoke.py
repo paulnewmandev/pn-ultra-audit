@@ -77,7 +77,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.18", run("--version").stdout)
+        self.assertIn("1.0.19", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")
@@ -351,6 +351,30 @@ class Smoke(unittest.TestCase):
             tp = os.path.join(o, "r", "run-1", "tv.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
             res = dict(kv.split("=", 1) for kv in self._dom_title(chrome, tp, "v=overview").split(";"))
             self.assertEqual(res, {"open": "true", "lines": "true", "bps": "true", "err": "true", "msg": "true"})
+
+    def test_any_file_is_viewable_encodings_binary_and_over_budget(self):
+        """Any extension opens as text: UTF-16/latin-1 decode, binary -> hex preview, over-budget files lazy-load from sources/ (in a real browser)."""
+        with tempfile.TemporaryDirectory() as o:
+            d = os.path.join(o, "p"); os.makedirs(os.path.join(d, "app"))
+            open(os.path.join(d, "app", "main.py"), "w").write("print('hi')\n")
+            open(os.path.join(d, "app", "u16.txt"), "wb").write("hola ñ\nlínea\n".encode("utf-16"))
+            open(os.path.join(d, "app", "lat.txt"), "wb").write("caf\xe9\n".encode("latin-1"))
+            open(os.path.join(d, "app", "blob.bin"), "wb").write(bytes(range(256)) * 8)
+            open(os.path.join(d, "app", "x.weird"), "w").write("any extension\n")
+            open(os.path.join(d, "app", "big.log"), "w").write("".join(f"line {i} lorem ipsum\n" for i in range(20000)))
+            run(d, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en", "--embed-budget", "0.01")
+            rd = os.path.join(o, "r", "run-1"); src = json.load(open(os.path.join(rd, "sources.json"), encoding="utf-8"))
+            self.assertIn("hola ñ", src["app/u16.txt"]["t"]); self.assertIn("café", src["app/lat.txt"]["t"])
+            self.assertEqual(src["app/blob.bin"].get("hx"), 1); self.assertIn("00000000", src["app/blob.bin"]["t"])
+            self.assertIn("any extension", src["app/x.weird"]["t"])
+            self.assertEqual(src["app/big.log"]["x"], "lazy"); self.assertNotIn("t", src["app/big.log"])
+            self.assertTrue(os.path.exists(os.path.join(rd, src["app/big.log"]["c"])))
+            chrome = self._chrome()
+            if not chrome: return
+            h = open(os.path.join(rd, "report.html"), encoding="utf-8").read()
+            js = """<script>setTimeout(function(){viewerOpen('app/big.log',1)},400);setTimeout(function(){var v=document.getElementById('viewer');document.title='RESULT|lazy='+(v.querySelectorAll('.cl').length>50)},1500);</script>"""
+            tp = os.path.join(rd, "tv.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
+            self.assertEqual(self._dom_title(chrome, tp, "v=overview"), "lazy=true")
 
     def test_report_has_static_fallback(self):
         """The HTML must show content even when scripts are blocked or fail (no header-only reports)."""

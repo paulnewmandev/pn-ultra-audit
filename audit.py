@@ -19,7 +19,7 @@ from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.18"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.19"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -244,7 +244,7 @@ def main(argv=None):
     g.add_argument("--vercel-team", metavar="TEAM_ID", help="team id/slug that owns the project"); g.add_argument("--vercel-token-env", default="VERCEL_TOKEN", help="env var holding the Vercel token (never pass tokens on the command line)")
     g = ap.add_argument_group("Report")
     g.add_argument("--embed-source", default="auto", choices=["auto", "findings", "none"], help="source code embedded in report.html for the read-only code viewer: auto (all text files within the budget, files with findings first) | findings (only files with findings) | none. Secrets are masked; .env/keys/state files are never embedded")
-    g.add_argument("--embed-budget", type=float, default=5.0, metavar="MB", help="size budget for embedded source (default 5 MB; files with findings are always included up to 2x)")
+    g.add_argument("--embed-budget", type=float, default=5.0, metavar="MB", help="size budget for source embedded in report.html (default 5 MB). Files over it are NOT dropped: they go to sources/chunk-*.js next to the report and load on demand in the viewer")
     ap.add_argument("--authorized", action="store_true", help="REQUIRED for --ssh / --aws-rds / remote DBs / --url: you own or are allowed to assess them")
     ap.add_argument("--fail-on", choices=SEV, help="exit 1 if a NEW confirmed finding is at/above this severity (CI)")
     g = ap.add_argument_group("Token saving (for AI assistants and quick looks)")
@@ -687,11 +687,25 @@ def main(argv=None):
                 meta["notes"].append(N("Se generó server-fixes.sh (revísalo antes; la herramienta nunca lo ejecuta): `sudo bash server-fixes.sh list`.", "server-fixes.sh was generated (review it first; the tool never runs it): `sudo bash server-fixes.sh list`."))
         except Exception as ex_: meta["notes"].append(f"server-fixes.sh not generated: {str(ex_)[:60]}")
     try:
-        src_ = sourcesmod.collect(scan_root, files, findings, a.embed_source, int(a.embed_budget * 1_000_000), lambda l: mask_secret_line(scrub(l))) if (files and scan_root and a.embed_source != "none") else {}
+        side_ = {}
+        src_ = sourcesmod.collect(scan_root, files, findings, a.embed_source, int(a.embed_budget * 1_000_000), lambda l: mask_secret_line(scrub(l)), side=side_) if (files and scan_root and a.embed_source != "none") else {}
+        if side_:   # over-budget files: lazy-loaded sidecar chunks (work from file://), not embedded in report.html
+            os.makedirs(os.path.join(run_dir, "sources"), exist_ok=True); chunk, size, n_ = {}, 0, 0
+            def _flush():
+                nonlocal chunk, size, n_
+                if not chunk: return
+                fn_ = f"sources/chunk-{n_}.js"
+                with open(os.path.join(run_dir, fn_), "w", encoding="utf-8") as fh_: fh_.write("(window.__SC=window.__SC||{})[" + json.dumps(fn_) + "]=" + json.dumps(chunk, ensure_ascii=False).replace("</", "<\\/") + ";")
+                for k_ in chunk: src_[k_]["c"] = fn_
+                chunk, size, n_ = {}, 0, n_ + 1
+            for k_, v_ in side_.items():
+                chunk[k_] = v_; size += len(v_["t"])
+                if size > 1_000_000: _flush()
+            _flush()
     except Exception as ex_: src_ = {}; meta["notes"].append(f"source viewer data not embedded: {str(ex_)[:60]}")
     if src_:
         json.dump(src_, open(os.path.join(run_dir, "sources.json"), "w", encoding="utf-8"), ensure_ascii=False)
-        metrics["sources"] = dict(files=sum(1 for v in src_.values() if v.get("t") is not None), omitted=sum(1 for v in src_.values() if v.get("t") is None), bytes=sum(len(v.get("t") or "") for v in src_.values()))
+        metrics["sources"] = dict(files=sum(1 for v in src_.values() if v.get("t") is not None or v.get("c")), omitted=sum(1 for v in src_.values() if v.get("t") is None and not v.get("c")), bytes=sum(len(v.get("t") or "") for v in src_.values()))
     for k, v in (("findings.json", findings), ("metrics.json", metrics), ("run-metadata.json", meta), ("owasp-matrix.json", owasp_matrix(findings))):
         json.dump(v, open(os.path.join(run_dir, k), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
     json.dump([{"unit": u["unit"], "pass": u["pass_"], "state": u["state"], "note": u.get("note", "")} for u in ledger], open(os.path.join(run_dir, "coverage-ledger.json"), "w", encoding="utf-8"), indent=2)

@@ -3,6 +3,12 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.19] - 2026-11-09
+
+### Fixed
+- Code viewer: files no longer show "not embedded to keep the report small". Files over the inline budget are written to `sources/chunk-*.js` next to `report.html` and lazy-loaded when opened (works from `file://`); keep that folder with the report.
+- Any extension opens as text: UTF-16 (BOM or NUL-interleaved) and legacy 8-bit (latin-1/cp1252) files are decoded; real binaries show a hex preview of their first 2 KB; per-file limit raised from 300 KB to 2 MB, line cap from 1500 to 4000 chars. Sensitive files (.env, keys, Terraform state) are still never embedded.
+
 ## [1.0.18] - 2026-11-09
 
 ### Changed
