@@ -20,11 +20,13 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,en,es,zh}] [--profile {quic
                       [--remote-path REMOTE_PATH] [--remote-root REMOTE_ROOT] [--url URL]
                       [--crawl-max CRAWL_MAX] [--psi] [--psi-key PSI_KEY] [--keywords KEYWORDS]
                       [--kw-lang KW_LANG] [--kw-country KW_COUNTRY] [--gsc-csv GSC_CSV]
-                      [--competitor COMPETITOR] [--authorized] [--fail-on {critical,high,medium,low,info}]
-                      [--color {auto,always,never}] [--verbose] [--quiet] [--version]
+                      [--competitor COMPETITOR] [--vercel-project NAME] [--vercel-team TEAM_ID]
+                      [--vercel-token-env VERCEL_TOKEN_ENV] [--authorized]
+                      [--fail-on {critical,high,medium,low,info}] [--color {auto,always,never}] [--verbose]
+                      [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.15 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.16 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -51,7 +53,7 @@ options:
   --run-tests           EXECUTES the project's own test suite (runs target code)
   --test-timeout TEST_TIMEOUT
   --only ONLY           run only these auditors (comma list):
-                        security,quality,docs,tests,qa,seo,pwa,web3,db,domain
+                        security,quality,docs,tests,qa,seo,repo,vercel,pwa,web3,db,domain
   --skip SKIP           skip these auditors (comma list)
   --plan                detect the project type, print which auditors would run, and exit
   --list-auditors       list the auditors and exit
@@ -161,6 +163,15 @@ SEO / SEM (web):
   --gsc-csv GSC_CSV     Search Console performance export (Queries.csv / Pages.csv)
   --competitor COMPETITOR
                         competitor URL to compare on-page basics (repeatable, max 8)
+
+Vercel (serverless platform: audited through project config, the live site and the read-only API):
+  --vercel-project NAME
+                        audit project settings and env-var metadata via the Vercel API (read-only; token
+                        from env VERCEL_TOKEN; needs --authorized)
+  --vercel-team TEAM_ID
+                        team id/slug that owns the project
+  --vercel-token-env VERCEL_TOKEN_ENV
+                        env var holding the Vercel token (never pass tokens on the command line)
 ```
 
 ## Auditors
@@ -173,6 +184,8 @@ SEO / SEM (web):
 | `tests` | Test inventory, untested modules, assertion-free/focused/skipped tests |
 | `qa` | Front-end QA (Playwright/Cypress/axe/visual) and mobile QA (Android/iOS/Flutter/RN) |
 | `seo` | SEO + SEM readiness: metadata, robots, sitemap, tracking, consent |
+| `repo` | Repository hygiene: sensitive files and keys in git (and history), CI/CD workflow security, SECURITY.md / CODEOWNERS / dependabot / secret scanning |
+| `vercel` | Vercel: vercel.json, next.config, crons, API routes, public env vars, headers, CVEs; live site and project settings (API) |
 | `pwa` | Progressive Web Apps: manifest, installability, service worker, offline, push, update flow |
 | `web3` | Smart contracts (Solidity/Anchor) and dApp patterns |
 | `db` | SQL/migrations static checks and live DB connections (--db) |

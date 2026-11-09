@@ -275,6 +275,10 @@ from .kb_qa import KB_QA
 KB.update(KB_QA)
 from .kb_pwa import KB_PWA
 KB.update(KB_PWA)
+from .kb_repo import KB_REPO
+KB.update(KB_REPO)
+from .kb_vercel import KB_VERCEL
+KB.update(KB_VERCEL)
 
 from .kb_seo import KB_SEO
 KB.update(KB_SEO)

@@ -12,13 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import vercel as vercelmod, repo as repomod, repofix, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
+from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.15"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.16"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -91,12 +92,25 @@ def scrub(t):
     return t
 
 
+_SECRET_LINE = None
+
+
+def mask_secret_line(line):
+    """Context lines are shown around OTHER findings: never let a secret literal in a neighbouring line reach the report."""
+    global _SECRET_LINE
+    if _SECRET_LINE is None:
+        pats = [r.pattern.pattern.replace("(?i)", "") for r in _ALL_RULES if r.family in ("secrets", "jwt") and r.exts is None]
+        pats += [r"\b[\w.-]*(secret|passw(or)?d|passwd|token|api[_-]?key|private[_-]?key|access[_-]?key|vapid)[\w.-]*\s*[:=]\s*[\"'`][^\"'`\s]{12,}[\"'`]", r"-----BEGIN [A-Z ]*PRIVATE KEY-----"]
+        _SECRET_LINE = re.compile("|".join(f"(?:{p})" for p in pats), re.I)
+    return "[line hidden: it contains a secret]" if line and _SECRET_LINE.search(line) else line
+
+
 def attach_snippets(findings, root, cap=2500, ctx=5):
     """Embed a few source lines around each finding (secrets are never expanded)."""
     n = 0; cache = {}
     for f in findings:
         if n >= cap: break
-        if f["family"] in ("secrets", "jwt") or not root: continue
+        if f["family"] in ("secrets", "jwt") or f.get("category") == "secrets" or f["rule"].startswith(("PWA-VAPID", "VERCEL-SECRET", "VERCEL-PUBLIC-SECRET", "VERCEL-ENV", "REPO-", "HIST-")) or not root: continue
         rel = f["location"]["file"]; ab = os.path.join(root, rel)
         if rel.startswith(("ssh://", "aws:", "http")) or not os.path.isfile(ab): continue
         if ab not in cache:
@@ -106,7 +120,7 @@ def attach_snippets(findings, root, cap=2500, ctx=5):
         if not Ls: continue
         ln = f["location"]["line"]; s = max(1, ln - ctx); e = min(len(Ls), ln + ctx)
         if ln > len(Ls): continue
-        f["snippet"] = dict(start=s, lines=[scrub(x[:220]) for x in Ls[s - 1:e]], focus=ln); n += 1
+        f["snippet"] = dict(start=s, lines=[mask_secret_line(scrub(x[:220])) for x in Ls[s - 1:e]], focus=ln); n += 1
 
 
 def owasp_matrix(findings):
@@ -171,6 +185,12 @@ def tunnel_url(url, port):
     return urlunparse(u._replace(netloc=(f"{u.username}" + (f":{u.password}" if u.password else "") + "@" if u.username else "") + f"127.0.0.1:{port}"))
 
 
+def add_repo_auditor(plan, only, skip, root):
+    """Repository hygiene runs on every git project unless the user chose auditors explicitly."""
+    if not only and "repo" not in (skip or []) and root and os.path.exists(os.path.join(root, ".git")): plan = set(plan) | {"repo"}
+    return plan
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="pn-ultra-audit", description=f"{NAME} {VERSION} - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.")
     ap.add_argument("path", nargs="?", help="project directory (default .; omit when auditing only a remote server / URL)")
@@ -219,6 +239,9 @@ def main(argv=None):
     g.add_argument("--psi", action="store_true", help="Google PageSpeed Insights for --url (sends the URL to Google)"); g.add_argument("--psi-key")
     g.add_argument("--keywords", help="comma-separated seeds: keyword ideas from public autocomplete (no API key)"); g.add_argument("--kw-lang", default="en"); g.add_argument("--kw-country", default="us")
     g.add_argument("--gsc-csv", action="append", default=[], help="Search Console performance export (Queries.csv / Pages.csv)"); g.add_argument("--competitor", action="append", default=[], help="competitor URL to compare on-page basics (repeatable, max 8)")
+    g = ap.add_argument_group("Vercel (serverless platform: audited through project config, the live site and the read-only API)")
+    g.add_argument("--vercel-project", metavar="NAME", help="audit project settings and env-var metadata via the Vercel API (read-only; token from env VERCEL_TOKEN; needs --authorized)")
+    g.add_argument("--vercel-team", metavar="TEAM_ID", help="team id/slug that owns the project"); g.add_argument("--vercel-token-env", default="VERCEL_TOKEN", help="env var holding the Vercel token (never pass tokens on the command line)")
     ap.add_argument("--authorized", action="store_true", help="REQUIRED for --ssh / --aws-rds / remote DBs / --url: you own or are allowed to assess them")
     ap.add_argument("--fail-on", choices=SEV, help="exit 1 if a NEW confirmed finding is at/above this severity (CI)")
     ap.add_argument("--color", default="auto", choices=["auto", "always", "never"]); ap.add_argument("--verbose", action="store_true", help="stream every finding (incl. low and to-review)"); ap.add_argument("--quiet", action="store_true"); ap.add_argument("--version", action="version", version=f"{NAME} {VERSION}")
@@ -255,7 +278,7 @@ def main(argv=None):
     if a.no_qa: skip.append("qa")
 
     remote_db = [d for d in a.db if "://" in d]
-    if (a.ssh or a.sftp or a.ftp or a.aws_rds or remote_db or a.url or a.competitor) and not a.authorized:
+    if (a.ssh or a.sftp or a.ftp or a.aws_rds or remote_db or a.url or a.competitor or a.vercel_project) and not a.authorized:
         print("ERROR: SSH / AWS / remote databases / --url / --competitor need --authorized (you own these systems or have permission to assess them).\n       Everything is read-only; remote commands are listed in engine/remote.py (REMOTE_SCRIPT).", file=sys.stderr); return 2
     if a.via_ssh and not a.ssh: print("ERROR: --via-ssh needs --ssh", file=sys.stderr); return 2
     if a.remote_path and not (a.ssh or a.sftp): print("ERROR: --remote-path needs --ssh or --sftp", file=sys.stderr); return 2
@@ -283,7 +306,7 @@ def main(argv=None):
     try:
         if local_root:
             pre = scanner.discover(local_root, a.exclude)
-            detected = detect.detect(pre[0], deps_of(pre[0])); plan = detect.resolve_plan(detected, only, skip)
+            detected = detect.detect(pre[0], deps_of(pre[0])); plan = detect.resolve_plan(detected, only, skip); plan = add_repo_auditor(plan, only, skip, local_root)
         else:
             plan = set(only) if only else set(ALL_AUD); plan -= set(skip)
     except ValueError as e:
@@ -321,12 +344,15 @@ def main(argv=None):
             if "qa" in plan: stages.append(("qa", N("QA front-end y móvil (Android · iOS · Flutter · RN)", "QA: front-end & mobile (Android · iOS · Flutter · RN)")))
             if "seo" in plan: stages.append(("seo_static", N("SEO / SEM estático (plantillas y tracking)", "Static SEO / SEM (templates & tracking)")))
             if "domain" in plan: stages.append(("domain", N("Dominio: SaaS / Fintech / Banca (aislamiento, dinero, idempotencia, webhooks)", "Domain deep-dive: SaaS / Fintech / Banking (isolation, money, idempotency, webhooks)")))
+            if "vercel" in plan: stages.append(("vercel", N("Vercel: vercel.json, Next.js, crons, variables y rutas API", "Vercel: vercel.json, Next.js, crons, env vars & API routes")))
+            if "repo" in plan: stages.append(("repo", N("Higiene del repositorio: claves, historial y CI/CD", "Repository hygiene: keys, history & CI/CD")))
             if "pwa" in plan: stages.append(("pwa", N("PWA: manifest, service worker, offline e instalación", "PWA: manifest, service worker, offline & installability")))
             if "web3" in plan: stages.append(("web3", N("Cripto / Web3: contratos Solidity, Solana, dApps", "Crypto / Web3: Solidity, Solana, dApps")))
             if a.history: stages.append(("history", N("Historial Git: secretos ya eliminados", "Git history: secrets committed then removed")))
         if "db" in plan or a.db: stages.append(("db", N("Bases de datos (SQL estático + conexiones)", "Databases (static SQL + live)")))
         if a.aws_rds: stages.append(("aws", N("AWS RDS (configuración)", "AWS RDS (configuration)")))
         if a.url: stages.append(("crawl", N("SEO en vivo: rastreo del sitio", "Live SEO: site crawl")))
+        if a.vercel_project: stages.append(("vercel_api", N("Vercel API: ajustes del proyecto y variables (solo lectura)", "Vercel API: project settings & env vars (read-only)")))
         if a.url: stages.append(("pwa_live", N("PWA en vivo: manifest, iconos y service worker", "Live PWA: manifest, icons & service worker")))
         if a.url and a.psi: stages.append(("psi", "PageSpeed Insights"))
         if a.keywords or a.gsc_csv or a.competitor: stages.append(("seo_data", N("Datos SEO gratuitos: keywords · Search Console · competidores", "Free SEO data: keywords · Search Console · competitors")))
@@ -404,7 +430,7 @@ def main(argv=None):
         files, tracked, skipped = (pre if (pre and scan_root == local_root) else scanner.discover(scan_root, a.exclude)); ok_files = files
         if detected is None:
             detected = detect.detect(files, deps_of(files))
-            try: plan = detect.resolve_plan(detected, only, skip)
+            try: plan = detect.resolve_plan(detected, only, skip); plan = add_repo_auditor(plan, only, skip, local_root)
             except ValueError as e: print("ERROR: " + str(e), file=sys.stderr); return 2
             if a.db: plan.add("db")
             if a.url or a.keywords or a.gsc_csv or a.competitor: plan.add("seo")
@@ -455,6 +481,18 @@ def main(argv=None):
         sf, sinfo = seo.static_seo(scan_root, files, S); raw += sf; stream(sf); metrics["seo"] = dict(sinfo)
         ui.done((f"{len(sf)} " + N("hallazgos", "findings") + f" · trackers: {', '.join(t['name'] for t in sinfo.get('trackers', [])) or '-'}") if sinfo.get("is_web") else N("no es un proyecto web (sin plantillas/HTML)", "not a web project (no templates/HTML)"))
         L("static SEO / SEM", "audit-seo", "covered" if sinfo.get("is_web") else "out_of_scope", "templates, robots, sitemap, metadata, tracking/consent")
+        begin("vercel")
+        try: vf_, vinfo = vercelmod.analyze(scan_root, files, a.strictness)
+        except Exception as ex_: vf_, vinfo = [], {"error": str(ex_)[:80]}
+        raw += vf_; stream(vf_); metrics["vercel"] = vinfo
+        ui.done((f"{len(vf_)} " + N("hallazgos", "findings") + f" · {', '.join(vinfo.get('detected', []))}") if vinfo.get("detected") else N("no es un proyecto Vercel (sin vercel.json ni .vercel)", "not a Vercel project (no vercel.json or .vercel)"))
+        L("Vercel project configuration", "audit-vercel", "covered" if vinfo.get("detected") else "out_of_scope", "vercel.json, next.config, crons, API routes, public env vars, headers, Next.js CVEs")
+        begin("repo")
+        try: rf_, rinfo = repomod.analyze(scan_root, files, a.strictness)
+        except Exception as ex_: rf_, rinfo = [], {"error": str(ex_)[:80]}
+        raw += rf_; stream(rf_); metrics["repo"] = rinfo
+        ui.done((f"{len(rf_)} " + N("hallazgos", "findings") + f" · {rinfo.get('tracked', '-')} " + N("archivos versionados", "tracked files") + f" · {rinfo.get('workflows', 0)} workflows") if not rinfo.get("error") else rinfo["error"], warn=bool(rinfo.get("error")))
+        L("repository hygiene (keys, history, CI/CD)", "audit-security", "covered" if not rinfo.get("error") else "blocked", "sensitive files in git/history, remote credentials, workflow security, SECURITY.md/CODEOWNERS/dependabot/secret scanning")
         begin("pwa")
         pf, pinfo = pwa.analyze(scan_root, detect.product_files(files), a.strictness); raw += pf; stream(pf); metrics["pwa"] = pinfo
         ui.done((f"{len(pf)} " + N("hallazgos", "findings") + f" · PWA score {pinfo.get('score')}" if pinfo.get("score") is not None else f"{len(pf)} " + N("hallazgos", "findings")) if pinfo else N("no es una PWA (sin manifest ni service worker)", "not a PWA (no manifest or service worker)"))
@@ -513,9 +551,21 @@ def main(argv=None):
         cf, cinfo = seo.crawl(a.url, a.crawl_max, ui_note=ui.note)
         raw += cf; stream(cf); crawl_pages = cinfo.get("pages", []); metrics.setdefault("seo", {})["crawl"] = cinfo
         ui.done(f"{cinfo.get('crawled', 0)} " + N("páginas", "pages") + f" · {len(cf)} " + N("hallazgos", "findings") + f" · sitemap {cinfo.get('sitemap_urls', 0)} URLs"); L("live SEO crawl", "audit-seo", "covered", a.url)
+        if a.vercel_project:
+            begin("vercel_api"); tok_ = os.environ.get(a.vercel_token_env, "")
+            if not tok_: vaf, vainfo = [], {"error": f"{a.vercel_token_env} is not set"}
+            else:
+                try: vaf, vainfo = vercelmod.api_audit(a.vercel_project, tok_, a.vercel_team)
+                except Exception as ex_: vaf, vainfo = [], {"error": str(ex_)[:80]}
+            raw += vaf; stream(vaf); metrics.setdefault("vercel", {})["api"] = vainfo
+            ui.done((f"{len(vaf)} " + N("hallazgos", "findings") + f" · {vainfo.get('env_vars', 0)} env vars") if not vainfo.get("error") else vainfo["error"], warn=bool(vainfo.get("error")))
+            L("Vercel API (project settings + env var metadata)", "audit-vercel", "covered" if not vainfo.get("error") else "blocked", vainfo.get("error", "settings and variable names/types only; values never read"))
         begin("pwa_live")
         try: lf, linfo = pwa.live(a.url, seo._get)
         except Exception as ex: lf, linfo = [], {"error": str(ex)[:80]}
+        try: vlf, vlinfo = vercelmod.live(a.url, seo._get)
+        except Exception as ex_: vlf, vlinfo = [], {"error": str(ex_)[:80]}
+        lf = lf + vlf; metrics.setdefault("vercel", {})["live"] = vlinfo
         raw += lf; stream(lf); metrics.setdefault("pwa", {})["live"] = linfo
         ui.done(f"{len(lf)} " + N("hallazgos", "findings") + (f" · manifest {linfo.get('manifest_url', '-')}" if linfo.get("manifest_url") else ""), warn=bool(linfo.get("error"))); L("live PWA check", "audit-pwa", "covered" if not linfo.get("error") else "blocked", linfo.get("error", "manifest, icons, service worker, headers"))
         if a.psi:
@@ -556,6 +606,8 @@ def main(argv=None):
         if r.startswith(("SRV-", "RDS-", "HIST-", "SEO-LIVE", "SEO-PSI", "SEO-GSC", "GITLEAKS", "SEMGREP", "NPM-", "PIP-", "COMPOSER", "TST-FAILING", "DB-", "SEO-TITLE", "SEO-H1", "SEO-NO-OG", "SEO-NO-CANONICAL", "SEO-IMG", "SEO-NO-JSONLD", "SEO-NO-VIEWPORT")) and not r.startswith(("SEO-NO-OG-X",)): return "explicit" if not r.startswith("SEO-") else "seo"
         if f.get("seo_cat") or f["category"] in ("seo", "sem", "privacy") or r.startswith(("SEO-", "SEM-")): return "seo"
         if r.startswith(("FIN-", "SAAS-")) or fam in ("domain-fin", "domain-saas"): return "domain"
+        if r.startswith("VERCEL-") or fam.startswith("vercel-"): return "vercel"
+        if r.startswith("REPO-") or fam.startswith("repo-"): return "repo"
         if r.startswith("PWA-") or fam.startswith("pwa-"): return "pwa"
         if r.startswith("WEB3-") or fam == "web3": return "web3"
         if r.startswith(("QA-", "MOB-AND-", "MOB-IOS-", "MOB-FL-", "MOB-RN-", "A11Y-")): return "qa"
@@ -569,6 +621,9 @@ def main(argv=None):
     for k in sorted(ALL_AUD - plan): L(f"auditor: {k}", "pn-ultra-audit", "out_of_scope", N("no aplica a este tipo de proyecto o fue omitido (--skip/--only)", "not applicable to this project type or skipped (--skip/--only)"))
     findings = to_schema(raw, a.lang); findings, n_supp = suppress.apply(findings, scan_root)
     if n_supp: metrics["suppressed"] = n_supp; L("suppressions", "pn-ultra-audit", "covered", N(f"{n_supp} hallazgos suprimidos por .pnauditignore / `pn-audit: ignore`", f"{n_supp} finding(s) suppressed by .pnauditignore / `pn-audit: ignore`"))
+    for f_ in findings:
+        pb_ = secrets_playbook.for_rule(f_["rule"], a.lang)
+        if pb_: f_["fix_steps"] = list(pb_[2]) + list(f_.get("fix_steps") or []); f_["rotate"] = dict(provider=pb_[0], url=pb_[1])
     attach_snippets(findings, scan_root)
     try:
         if files:
@@ -609,6 +664,13 @@ def main(argv=None):
     ref, dirty, branch = git_info(scan_root if tmp_git else local_root) if (tmp_git or (local_root and not tmp_remote)) else ("remote", False, "")
     meta = dict(repo=label, profile=a.profile, strictness=a.strictness, scope_paths=[disp(a.path) if a.path else (a.remote_path or a.url or ".")], source_ref=ref, branch=branch, dirty=dirty, date=str(datetime.date.today()), generated_at=t_start.isoformat(timespec="seconds"),
                 mode="ssh" if a.ssh else "local", tool=f"{NAME} {VERSION}", level=a.level, notes=notes, run_status="complete", run=int(os.path.basename(run_dir).split("-")[1]), lang=a.lang)
+    if metrics.get("repo") and not metrics["repo"].get("error"):
+        try:
+            rfx = repofix.build(findings, label, meta["date"])
+            if rfx:
+                with open(os.path.join(run_dir, "repo-fixes.sh"), "w", encoding="utf-8") as fh_: fh_.write(rfx)
+                meta["notes"].append(N("Se generó repo-fixes.sh (limpieza guiada del repositorio; la herramienta nunca lo ejecuta): `bash repo-fixes.sh list`.", "repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`."))
+        except Exception as ex_: meta["notes"].append(f"repo-fixes.sh not generated: {str(ex_)[:60]}")
     if metrics.get("server"):
         try:
             cl_ = metrics["server"].get("cloud") or {}
@@ -660,7 +722,7 @@ def main(argv=None):
         for f in sorted(new_conf, key=lambda f: (RANK[f["severity"]], f["effort_min"]))[:6]: print(f"  {f['id']:<8} [{f['severity']:<8}] {f['title'][:70]}  {ui.c('dim', f['location']['file'] + ':' + str(f['location']['line']))}")
         print()
         print(ui.c("bold", N("Informes", "Reports")))
-        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + ((("server-fixes.sh", "server fix script"),) if os.path.exists(os.path.join(run_dir, "server-fixes.sh")) else ()): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
+        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + tuple((fn_, d_) for fn_, d_ in (("server-fixes.sh", "server fix script"), ("repo-fixes.sh", "repo fix script")) if os.path.exists(os.path.join(run_dir, fn_))): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
         print()
     ui.verdict(comp["gate_pass"], f"Quality Gate {'PASSED' if comp['gate_pass'] else 'FAILED'}")
     ui.finish(N("Auditoría completa", "Audit complete"))

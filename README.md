@@ -4,18 +4,18 @@
 
 <br>
 
-[![Version](https://img.shields.io/badge/version-1.0.15-8b5cf6?style=for-the-badge)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.16-8b5cf6?style=for-the-badge)](CHANGELOG.md)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-22d3ee?style=for-the-badge)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.9%2B-3b82f6?style=for-the-badge)](#install)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-34d399?style=for-the-badge)](#install)
 [![Read-only](https://img.shields.io/badge/target-read--only-f59e0b?style=for-the-badge)](#safety--privacy)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-ec4899?style=for-the-badge)](CONTRIBUTING.md)
 
-### One command. Twelve lenses. Live in your terminal, delivered as a dashboard.
+### One command. Fourteen lenses. Live in your terminal, delivered as a dashboard.
 
-**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
+**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
 
-[**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
+[**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**Wiki**](docs/wiki/Home.md) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
 
 </div>
 
@@ -189,6 +189,8 @@ flowchart TB
 | **db** | `.sql`/T-SQL/PL-SQL; live SQLite, PostgreSQL, MySQL/MariaDB, SQL Server, Redis, MongoDB (read-only); AWS RDS; `--db-sample` plaintext-password check (aggregates only) |
 | **domain** | **SaaS:** tenant isolation (unscoped queries, RLS/global scope), RBAC/SSO/SCIM, audit log, API-key hashing, export/delete, backups/PITR, per-tenant limits. **Fintech/banking:** float-for-money, idempotency, balance races, unsigned webhooks, PAN/CVV, ledger/reconciliation, MFA/SCA, KMS |
 | **pwa** | manifest + installability, icons/maskable, service worker (registration, strategy, versioned caches, offline fallback, update flow), push, HTTPS, SW security (remote `importScripts`, cached private data, unvalidated messages, leaked VAPID keys); live check with `--url` |
+| **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |
+| **vercel** | `vercel.json`, Next.js, crons without `CRON_SECRET`, API routes without auth, secret-looking `NEXT_PUBLIC_*`, CVE-2025-29927, headers, source maps; live site; project settings via the read-only API (`--vercel-project`) |
 | **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
 ### Languages, databases and platforms
@@ -232,7 +234,7 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 | Assistant | What gets installed | Invoke |
 |---|---|---|
-| **Claude Code** | 16 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
+| **Claude Code** | 18 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
 | **Codex** | skills in `.agents/skills/` + `AGENTS.md` block | ask in chat |
 | **Cursor** | `.cursor/rules/pn-ultra-audit.mdc` + `.cursor/commands/pn-audit.md` | `/pn-audit` |
 | **Windsurf** | `.windsurf/rules/` + `.windsurf/workflows/pn-audit.md` | `/pn-audit` |
@@ -346,6 +348,21 @@ One read-only script runs over SSH (key/agent auth) and reports in four layers:
 
 Detected automatically from a manifest, a service worker or PWA tooling (Workbox, vite-plugin-pwa, next-pwa, Angular). It checks installability (manifest fields, 192/512 + maskable icons, `start_url`/scope, display), the service worker (registration scope, strategy, versioned caches + cleanup, offline fallback, `skipWaiting`, update flow), push (permission on load, leaked VAPID keys) and its security (remote `importScripts`, caching private API responses, unvalidated `message` events). Add `--url https://site --authorized` for a live check of the deployed manifest, icons and `sw.js` headers. Strict mode adds rich-install fields, install prompt, navigation preload and cache bounds.
 
+## Repository hygiene and Vercel
+
+```bash
+python3 audit.py .                                      # git projects: keys in files and history, CI/CD, repo metadata (automatic)
+python3 audit.py . --history                            # also scan recent commits for secrets
+python3 audit.py ./my-next-app                          # Vercel project files (vercel.json, next.config, crons, API routes, NEXT_PUBLIC_*)
+python3 audit.py --url https://my-app.vercel.app --authorized      # live headers, source maps, exposed /.env
+VERCEL_TOKEN=... python3 audit.py --vercel-project my-app --authorized   # settings + env-var names (never values)
+```
+Every secret finding comes with **provider-specific rotation steps** and the run writes `repo-fixes.sh` (untrack, ignore, purge history, gitleaks, CI hardening) - reviewable, never executed by the tool. Vercel is serverless (no SSH), so it is audited through its configuration, the live site and the API.
+
+## Wiki
+
+Task-oriented guides live in [`docs/wiki/`](docs/wiki/Home.md) (getting started, reading the report, strictness, servers/VPS, Vercel, PWA, leaked keys, CI, suppressions, languages, FAQ, contributing, plus generated CLI/auditor/rule references). Publish them to the GitHub Wiki with `bash scripts/publish_wiki.sh --push`.
+
 ## Reports like a security firm
 
 The **Executive report** view (and the PDF) opens with a cover, overall risk level, key risks, scope & methodology, findings, remediation roadmap and the **repository tree** with findings per folder. If your project has a **logo and brand colors** (manifest `theme_color`, CSS variables, Tailwind, SCSS, Android `colors.xml`, Flutter, iOS asset catalog) they are detected and used for the cover and the dashboard accents. Every table is the same component (search, sortable columns, page size, centered pagination) and every `file:line` is a link that opens your editor (VS Code, Cursor, Windsurf, Zed, VSCodium - set the project folder once with the folder button; Alt+click copies the path). Findings you accept can be silenced with a `.pnauditignore` file or an inline `pn-audit: ignore=RULE` comment, and the count is always reported.
@@ -361,7 +378,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.15
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.16
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -382,4 +399,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 72 remediation guides · 16 skills · 14 compliance frameworks · 7 AI assistants · v1.0.15</sub></div>
+<div align="center"><sub>110 rules · 77 remediation guides · 18 skills · 14 compliance frameworks · 7 AI assistants · v1.0.16</sub></div>

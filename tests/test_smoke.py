@@ -1,5 +1,5 @@
 """Smoke tests: detection, plan selection, key rules on the intentionally vulnerable demo, report generation. Run: python3 -m unittest -v"""
-import json, os, subprocess, sys, tempfile, unittest
+import json, os, re, shutil, subprocess, sys, tempfile, unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEMO = os.path.join(ROOT, "examples", "vulnerable-demo")
@@ -58,7 +58,7 @@ class Smoke(unittest.TestCase):
             open(os.path.join(d, "app.py"), "w").write("from flask import Flask\napp = Flask(__name__)\n")
             open(os.path.join(d, "requirements.txt"), "w").write("flask\n")
             out = run(d, "--plan", "--lang", "en").stdout
-            self.assertIn("Detected: backend", out); self.assertIn("Skipped  : db, domain, pwa, qa, seo, web3", out)
+            self.assertIn("Detected: backend", out); self.assertIn("Skipped  : db, domain, pwa, qa, repo, seo, vercel, web3", out)
 
     def test_plan_db_only(self):
         with tempfile.TemporaryDirectory() as d:
@@ -77,7 +77,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.15", run("--version").stdout)
+        self.assertIn("1.0.16", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")
@@ -188,6 +188,102 @@ class Smoke(unittest.TestCase):
             blob = h.split('<script id="data" type="application/json">', 1)[1].split("</script>", 1)[0]
             json.loads(blob)  # must be valid JSON even when evidence contains <!-- or </script>
             for marker in ("reportView", "repoView", "DT.table(", "security:IC(", "aiPrompt(", "id=\"aip\""): self.assertIn(marker, h)
+
+    def test_vercel_static_api_and_live(self):
+        from engine import vercel
+        d = os.path.join(ROOT, "examples", "vercel-demo")
+        files = []
+        for dp, dn, fn in os.walk(d):
+            for f in fn:
+                ab = os.path.join(dp, f); files.append((os.path.relpath(ab, d).replace(os.sep, "/"), ab, f.rsplit(".", 1)[-1], os.path.getsize(ab)))
+        F, info = vercel.analyze(d, files, "standard")
+        rules = {f["rule"] for f in F}
+        for r in ("VERCEL-PUBLIC-SOURCE", "VERCEL-SECRET-IN-CONFIG", "VERCEL-CRON-UNPROTECTED", "VERCEL-PUBLIC-SECRET", "VERCEL-NEXT-VULNERABLE", "VERCEL-SOURCEMAPS", "VERCEL-API-NO-AUTH"): self.assertIn(r, rules)
+        self.assertFalse(any("ANON_KEY" in f["title"] for f in F))  # public anon keys are fine
+        self.assertTrue(vercel.secret_like_public("NEXT_PUBLIC_STRIPE_SECRET_KEY")); self.assertFalse(vercel.secret_like_public("NEXT_PUBLIC_SUPABASE_ANON_KEY")); self.assertFalse(vercel.secret_like_public("DATABASE_URL"))
+        self.assertTrue(vercel._next_vulnerable("14.1.0")); self.assertFalse(vercel._next_vulnerable("14.2.25")); self.assertFalse(vercel._next_vulnerable("15.2.3")); self.assertTrue(vercel._next_vulnerable("13.5.0"))
+        def fake(url, hdr):
+            if "/env" in url: return 200, {"envs": [{"key": "DATABASE_PASSWORD", "type": "plain", "target": ["production", "preview", "development"]}, {"key": "NEXT_PUBLIC_API_SECRET", "type": "plain", "target": ["production"]}, {"key": "SITE", "type": "plain", "target": ["production"]}]}
+            return 200, {"name": "app", "nodeVersion": "18.x", "publicSource": True, "gitForkProtection": False, "ssoProtection": None}
+        FA, ia = vercel.api_audit("app", "tok", None, fetch=fake)
+        ra = {f["rule"] for f in FA}
+        for r in ("VERCEL-API-NO-DEPLOY-PROTECTION", "VERCEL-API-PUBLIC-SOURCE", "VERCEL-API-FORK-PROTECTION", "VERCEL-API-PLAIN-SECRETS", "VERCEL-API-PUBLIC-ENV-SECRET", "VERCEL-API-NODE-EOL"): self.assertIn(r, ra)
+        self.assertNotIn("tok", json.dumps(FA))  # the token never appears in findings
+        self.assertEqual(vercel.api_audit("app", "tok", None, fetch=lambda u, h: (401, {"error": {"message": "bad token"}}))[1]["error"][:15], "Vercel API HTTP")
+        page = b'<script src="/_next/static/chunks/main-abc.js"></script>'
+        def get(u):
+            if u.endswith(".js.map"): return dict(status=200, headers={}, body=b'{"version":3,"mappings":"AAAA"}')
+            if u.endswith("/.env"): return dict(status=200, headers={}, body=b"API_KEY=abc123456")
+            if u.endswith("/.git/HEAD"): return dict(status=404, headers={}, body=b"")
+            return dict(status=200, headers={"server": "Vercel", "x-vercel-id": "iad1::abc", "x-powered-by": "Next.js"}, body=page)
+        FL, il = vercel.live("https://x.vercel.app", get)
+        rl = {f["rule"] for f in FL}
+        self.assertTrue(il["on_vercel"]); self.assertIn("VERCEL-LIVE-SOURCEMAPS", rl); self.assertIn("VERCEL-LIVE-EXPOSED-FILE", rl); self.assertIn("VERCEL-LIVE-HEADERS", rl)
+        self.assertEqual(vercel.live("https://x.com", lambda u: dict(status=200, headers={"server": "nginx"}, body=b""))[0], [])
+
+    def test_repo_hygiene_and_rotation_guide(self):
+        from engine import repo, repofix, secrets_playbook
+        with tempfile.TemporaryDirectory() as d:
+            def git(*a): subprocess.run(["git"] + list(a), cwd=d, check=True, capture_output=True)
+            git("init", "-q"); git("config", "user.email", "t@t.t"); git("config", "user.name", "t")
+            os.makedirs(os.path.join(d, ".github", "workflows"))
+            open(os.path.join(d, "id_rsa"), "w").write("-----BEGIN OPENSSH PRIVATE KEY-----\nabc\n-----END OPENSSH PRIVATE KEY-----\n")
+            open(os.path.join(d, "terraform.tfstate"), "w").write("{}")
+            open(os.path.join(d, ".github", "workflows", "ci.yml"), "w").write("on: pull_request_target\njobs:\n  b:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}\n      - run: echo \"${{ github.event.pull_request.title }}\"\n      - run: curl -s https://x.sh | bash\n")
+            git("add", "-A"); git("commit", "-qm", "a")
+            open(os.path.join(d, "dump.sql"), "w").write("x" * 60000); git("add", "-A"); git("commit", "-qm", "b"); git("rm", "-q", "dump.sql"); git("commit", "-qm", "c")
+            files = [(".github/workflows/ci.yml", os.path.join(d, ".github/workflows/ci.yml"), "yml", 300)]
+            F, info = repo.analyze(d, files, "standard")
+            rules = {f["rule"] for f in F}
+            for r in ("REPO-PRIVATE-KEY-FILE", "REPO-TFSTATE", "REPO-HIST-SENSITIVE", "REPO-GHA-PWN-REQUEST", "REPO-GHA-INJECTION", "REPO-CI-CURL-BASH", "REPO-GHA-NO-PERMISSIONS"): self.assertIn(r, rules)
+            self.assertNotIn("abc", json.dumps(F))  # key contents never copied
+            script = repofix.build([dict(rule=f["rule"], status=f["status"], location={"file": f["file"]}) for f in F], "demo", "2026-01-01")
+            self.assertEqual(subprocess.run(["bash", "-n"], input=script, capture_output=True, text=True).returncode, 0)
+            self.assertIn("PNUA_CONFIRM", script)
+        self.assertEqual(secrets_playbook.for_rule("SEC-AWS-KEY", "en")[0], "AWS"); self.assertEqual(secrets_playbook.for_rule("SEC-STRIPE-KEY", "es")[0], "Stripe"); self.assertIsNone(secrets_playbook.for_rule("DOC-COVERAGE-LOW"))
+
+    def _chrome(self):
+        for c in ("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome", "google-chrome", "chromium", "chromium-browser", "chrome"):
+            if os.path.exists(c) or shutil.which(c): return c
+        return None
+
+    def _dom_title(self, chrome, html_path, frag):
+        r = subprocess.run([chrome, "--headless=new", "--disable-gpu", "--no-sandbox", "--virtual-time-budget=5000", "--window-size=1400,1000", "--dump-dom", "file://" + html_path + "#" + frag], capture_output=True, text=True, timeout=120)
+        m = re.search(r"<title>RESULT\|([^<]*)</title>", r.stdout)
+        return m.group(1) if m else r.stdout[-300:]
+
+    def test_datatable_pagination_layout_and_tree_controls(self):
+        """Real-browser layout test: the pager is one centered row of compact buttons (never stretched), and the tree can expand/collapse all."""
+        chrome = self._chrome()
+        if not chrome: self.skipTest("Chrome/Chromium not available")
+        with tempfile.TemporaryDirectory() as o:
+            run(DEMO, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en")
+            rp = os.path.join(o, "r", "run-1", "report.html"); h = open(rp, encoding="utf-8").read()
+            js = """<script>setTimeout(function(){var out=[],f=document.querySelector('.dtf'),b=[].slice.call(f.querySelectorAll('button.dtp'));
+            var rows=new Set(b.map(function(x){return Math.round(x.getBoundingClientRect().top)}));
+            out.push('rows='+rows.size);out.push('maxw='+Math.max.apply(null,b.map(function(x){return Math.round(x.getBoundingClientRect().width)})));
+            var pr=f.querySelector('.dtf-pages').getBoundingClientRect(),fr=f.getBoundingClientRect();out.push('off='+Math.abs(Math.round((pr.left+pr.width/2)-(fr.left+fr.width/2))));
+            f.querySelector('button.dtp[aria-label=Next]').click();out.push('cur='+document.querySelector('.dtf [aria-current=page]').textContent);
+            var z=document.querySelector('select.dt-size');z.value='10';z.dispatchEvent(new Event('change'));out.push('after10='+document.querySelector('.dtf-info').textContent);
+            document.title='RESULT|'+out.join(';');},700);</script>"""
+            tp = os.path.join(o, "r", "run-1", "t1.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
+            res = dict(kv.split("=", 1) for kv in self._dom_title(chrome, tp, "v=issues").split(";"))
+            self.assertEqual(res["rows"], "1"); self.assertLess(int(res["maxw"]), 80); self.assertLessEqual(int(res["off"]), 2); self.assertEqual(res["cur"], "2"); self.assertTrue(res["after10"].startswith("1–10"))
+            js2 = """<script>setTimeout(function(){var o=[],all=document.querySelectorAll('#tree details').length;document.getElementById('tc').click();var closed=document.querySelectorAll('#tree details[open]').length;
+            document.getElementById('tx').click();var open=document.querySelectorAll('#tree details[open]').length;o.push('all='+all);o.push('closed='+closed);o.push('open='+open);document.title='RESULT|'+o.join(';');},700);</script>"""
+            tp2 = os.path.join(o, "r", "run-1", "t2.html"); open(tp2, "w", encoding="utf-8").write(h.replace("</body>", js2 + "</body>"))
+            r2 = dict(kv.split("=", 1) for kv in self._dom_title(chrome, tp2, "v=repo").split(";"))
+            self.assertGreater(int(r2["all"]), 0); self.assertEqual(r2["closed"], "0"); self.assertEqual(r2["open"], r2["all"])
+
+    def test_secret_values_never_reach_snippets(self):
+        """No secret literal may be copied into findings.json / report.html (snippets are skipped for secret findings)."""
+        with tempfile.TemporaryDirectory() as o:
+            d = os.path.join(o, "p"); os.makedirs(os.path.join(d, "src"))
+            open(os.path.join(d, "src", "main.js"), "w").write("const VAPID_PRIVATE_KEY = \"abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH\";\nconst k = 'AKIAABCDEFGHIJKLMNOP';\nNotification.requestPermission();\nnavigator.serviceWorker.register('/sw.js');\n")
+            open(os.path.join(d, "manifest.webmanifest"), "w").write('{"name":"x"}')
+            run(d, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en")
+            blob = open(os.path.join(o, "r", "run-1", "findings.json"), encoding="utf-8").read() + open(os.path.join(o, "r", "run-1", "report.html"), encoding="utf-8").read()
+            self.assertNotIn("abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGH", blob); self.assertNotIn("AKIAABCDEFGHIJKLMNOP", blob)
 
     def test_report_has_static_fallback(self):
         """The HTML must show content even when scripts are blocked or fail (no header-only reports)."""

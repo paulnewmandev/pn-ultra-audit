@@ -1,0 +1,6 @@
+{
+  "public": true,
+  "env": { "STRIPE_SECRET_KEY": "sk_live_demo_not_real_123456", "SITE_NAME": "demo" },
+  "crons": [{ "path": "/api/cron", "schedule": "0 * * * *" }],
+  "redirects": [{ "source": "/go/:path*", "destination": "https://partner.example.com/:path*" }]
+}

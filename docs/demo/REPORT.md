@@ -1,8 +1,8 @@
 # Audit report — vulnerable-demo
 
 - **Scope:** standard · vulnerable-demo
-- **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-08
-- **Tool:** PN-Ultra-Audit 1.0.15
+- **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
+- **Tool:** PN-Ultra-Audit 1.0.16
 
 ## Contents
 
@@ -21,7 +21,7 @@
 | Security ≥ B | ❌ | E |
 | Maintainability ≤ 10% debt | ❌ | 26.8% |
 | 0 secrets in source | ❌ | 4 |
-| Executed coverage units all covered | ✅ | 7/7 |
+| Executed coverage units all covered | ✅ | 8/8 |
 
 ### Ratings
 
@@ -136,7 +136,7 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Now critical/high
-    Smart contract / crypto security x5 :crit, t1, 2026-11-08, 1d
+    Smart contract / crypto security x5 :crit, t1, 2026-11-09, 1d
     Hard-coded secret / credential x4 :crit, t2, after t1, 1d
     OS Command Injection x3 :crit, t3, after t2, 1d
     Weak password hashing x2 :crit, t4, after t3, 1d
@@ -337,11 +337,13 @@ function withdraw(uint amt) external nonReentrant {
 
 **Steps:**
 
-1. ROTATE/REVOKE the secret now - assume it is compromised.
-2. Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime.
-3. Remove from code; purge history if the repo is shared (`git filter-repo` / BFG) and force-rotate collaborators' clones.
-4. Add `.env*` to `.gitignore`, commit only `.env.example` with placeholders.
-5. Install a pre-commit/CI secret scanner (gitleaks, trufflehog).
+1. Wallet: treat it as stolen - create a new wallet and move all funds/approvals NOW (revoke token approvals on the old address); never reuse the seed phrase.
+2. RPC/provider keys (Infura/Alchemy/QuickNode): regenerate in the provider dashboard and add domain/IP allow-lists.
+3. ROTATE/REVOKE the secret now - assume it is compromised.
+4. Move it to env vars / secret manager (Vault, AWS SM, GCP SM, Doppler, GitHub Secrets); read at runtime.
+5. Remove from code; purge history if the repo is shared (`git filter-repo` / BFG) and force-rotate collaborators' clones.
+6. Add `.env*` to `.gitignore`, commit only `.env.example` with placeholders.
+7. Install a pre-commit/CI secret scanner (gitleaks, trufflehog).
 
 **Vulnerable code/config:**
 ```
@@ -759,9 +761,11 @@ $request->user()->orders()->findOrFail($request->id)
 
 **Steps:**
 
-1. Load the secret/private key from a secret manager/env; rotate the leaked one.
-2. Pin the algorithm on verify (`algorithms=['HS256']` / `RS256`); never accept `none`.
-3. Always verify signature, `exp`, `iss`, `aud`; keep short TTL + refresh rotation.
+1. JWT: generate a new signing secret/key pair, deploy it, and invalidate sessions (all tokens signed with the old secret are forgeable).
+2. Use asymmetric keys (RS256/ES256) or a KMS and load the key from the environment.
+3. Load the secret/private key from a secret manager/env; rotate the leaked one.
+4. Pin the algorithm on verify (`algorithms=['HS256']` / `RS256`); never accept `none`.
+5. Always verify signature, `exp`, `iss`, `aud`; keep short TTL + refresh rotation.
 
 **Vulnerable code/config:**
 ```
@@ -2822,6 +2826,8 @@ url = request.args.get("url")
 | test-suite analysis (static) | audit-quality | covered | file-name matching; coverage % not measured unless --run-tests |
 | QA front-end + mobile (static) | audit-qa,audit-mobile-qa | covered | mobile=android, ios |
 | static SEO / SEM | audit-seo | covered | templates, robots, sitemap, metadata, tracking/consent |
+| Vercel project configuration | audit-vercel | out_of_scope | vercel.json, next.config, crons, API routes, public env vars, headers, Next.js CVEs |
+| repository hygiene (keys, history, CI/CD) | audit-security | covered | sensitive files in git/history, remote credentials, workflow security, SECURITY.md/CODEOWNERS/dependabot/secre |
 | PWA: manifest / service worker / offline | audit-pwa | out_of_scope | manifest, installability, service worker, caching, push, update flow |
 | crypto / web3 heuristics | audit-security | covered | Solidity, Anchor/Solana, dApp patterns |
 | live database app.db | audit-security | covered | 2 tables |
@@ -2832,13 +2838,15 @@ url = request.args.get("url")
 | manual-style review (auth flows, business logic, IDOR beyond lookups) | audit-security | deferred | use the Claude skills (/audit) on top of this CLI baseline |
 | auditor: domain | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
 | auditor: pwa | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
+| auditor: repo | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
+| auditor: vercel | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
 
 ### Metrics
 
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.15 |
+| tool_version | 1.0.16 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
@@ -3099,3 +3107,5 @@ xychart-beta
 ## Limits & assumptions
 
 This report covers only what is listed under “Coverage”. No findings does not prove absence of defects: automatic rules are heuristics (regex + nearby variable tracking), not full data-flow analysis. “To review” items depend on context or on facts outside the repository. Verify each fix with its test before deploying.
+
+- repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`.

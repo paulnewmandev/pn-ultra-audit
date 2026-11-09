@@ -8,6 +8,8 @@ AUDITORS = {
     "tests": "Test inventory, untested modules, assertion-free/focused/skipped tests",
     "qa": "Front-end QA (Playwright/Cypress/axe/visual) and mobile QA (Android/iOS/Flutter/RN)",
     "seo": "SEO + SEM readiness: metadata, robots, sitemap, tracking, consent",
+    "repo": "Repository hygiene: sensitive files and keys in git (and history), CI/CD workflow security, SECURITY.md / CODEOWNERS / dependabot / secret scanning",
+    "vercel": "Vercel: vercel.json, next.config, crons, API routes, public env vars, headers, CVEs; live site and project settings (API)",
     "pwa": "Progressive Web Apps: manifest, installability, service worker, offline, push, update flow",
     "web3": "Smart contracts (Solidity/Anchor) and dApp patterns",
     "db": "SQL/migrations static checks and live DB connections (--db)",
@@ -90,9 +92,12 @@ def detect(files, deps_text=""):
         from . import pwa as _pwa
         pe = _pwa.detect(files, deps_text)
         if pe: ev["pwa"] = pe
+        from . import vercel as _vc
+        ve = _vc.detect(files, deps_text)
+        if ve: ev["vercel"] = ve
     except Exception: pass
     code = sum(exts.get(e, 0) for e in ("py", "js", "jsx", "ts", "tsx", "php", "java", "kt", "go", "rb", "cs", "rs", "swift", "dart", "c", "cpp", "scala", "ex", "lua", "sol", "vue", "svelte"))
-    kinds = [k for k in ("backend", "frontend", "mobile", "database", "web", "pwa", "web3", "infra") if k in ev]
+    kinds = [k for k in ("backend", "frontend", "mobile", "database", "web", "pwa", "vercel", "web3", "infra") if k in ev]
     if not [k for k in kinds if k not in ("infra",)] and code: kinds.insert(0, "library/cli")
     if not kinds: kinds = ["unknown"]
     return dict(kinds=kinds, evidence=ev, code_files=code)
@@ -107,6 +112,7 @@ def default_plan(d):
     if "web" in k or ("frontend" in k and "backend" not in k and d["evidence"].get("web")): plan.add("seo")
     if "web" in k: plan.add("seo")
     if "web3" in k: plan.add("web3")
+    if "vercel" in k: plan.add("vercel")
     if "pwa" in k: plan.update({"pwa", "qa"} if "frontend" in k or "web" in k else {"pwa"})
     if "database" in k: plan.add("db")
     return plan

@@ -27,3 +27,14 @@ engine/kb_qa.py             FIN-*,SAAS-*
 engine/dbaudit.py           PERF-NPLUS1
 engine/dashboard.py         PERF-NPLUS1
 engine/*.py                 PERF-NPLUS1
+# Fake keys are test fixtures; the new detection modules and playbooks contain the patterns they detect.
+tests/test_smoke.py         SEC-*,CRY-*,CFG-*,SQLI-*
+engine/remote_extra.py      SEC-*,CRY-*,CFG-*,DOS-*,AUTHZ-*
+engine/remote.py            SEC-*,CRY-*,CFG-*
+engine/repo.py              SEC-*,CRY-*,CFG-*,DOS-*
+engine/repofix.py           SEC-*,CRY-*,CFG-*
+engine/vercel.py            SEC-*,CRY-*,CFG-*,SSRF*,DOS-*,AUTHZ-*
+engine/secrets_playbook.py  SEC-*,CRY-*
+engine/pwa.py               SEC-*,CRY-*,CFG-*,DOS-*
+engine/serverfix.py         SEC-*,CRY-*,CFG-*,CMD-*
+engine/brand.py             SEC-*,CRY-*

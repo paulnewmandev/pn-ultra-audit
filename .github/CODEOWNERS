@@ -1,0 +1,5 @@
+# Review required for security-sensitive paths
+*                     @paulnewmandev
+/engine/rules.py      @paulnewmandev
+/engine/remote*.py    @paulnewmandev
+/.github/             @paulnewmandev
