@@ -10,8 +10,8 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--test-timeout TEST_TIMEOUT] [--only ONLY] [--skip SKIP] [--plan] [--list-auditors]
                       [--no-docs] [--no-qa] [--domain DOMAIN] [--compliance LIST|all] [--evidence-pack DIR]
                       [--level {beginner,pro}] [--scaffold] [--write] [--update-db] [--db-eco LIST]
-                      [--db-source LIST] [--db-status] [--offline] [--triage] [--show ID] [--kb QUERY]
-                      [--run DIR] [--mcp] [--verify-corpus] [--install-agent TOOL[,TOOL]]
+                      [--db-source LIST] [--db-status] [--online] [--offline] [--triage] [--show ID]
+                      [--kb QUERY] [--run DIR] [--mcp] [--verify-corpus] [--install-agent TOOL[,TOOL]]
                       [--agent-scope {project,user}] [--agent-dir AGENT_DIR] [--force] [--ftp URL]
                       [--ftp-pass-env FTP_PASS_ENV] [--ftp-allow-plain] [--sftp USER@HOST]
                       [--git-host GIT_HOST] [--git URL] [--branch BRANCH] [--depth DEPTH]
@@ -28,7 +28,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.30 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.31 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -101,8 +101,11 @@ Fix retrieval (offline; token-saving for humans and AI assistants):
   --db-source LIST      with --update-db: sources to sync: osv,kev,eol,nvd (default osv,kev,eol; add nvd for
                         runtime/server CVEs - slow without NVD_API_KEY)
   --db-status           show what the local vulnerability database contains and how old it is
-  --offline             no network: skip the live advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date);
-                        cached data and an offline end-of-life table are still used. Also: PNUA_OFFLINE=1
+  --online              allow read-only LIVE advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date) when
+                        no local vulnerability database exists; only package names and versions are sent.
+                        Default: no network at all (use --update-db once, then audit offline)
+  --offline             never use the network (this is already the default; it also overrides --online /
+                        PNUA_ONLINE=1). Also: PNUA_OFFLINE=1
   --triage              print the triage worklist of the latest run: every finding that needs a human/AI
                         decision, grouped by rule with ONE protocol (what to check, when it is real, when it
                         is a false positive, how to suppress it) - read this before fixing or reporting

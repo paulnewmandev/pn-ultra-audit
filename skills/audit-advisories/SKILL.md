@@ -1,6 +1,6 @@
 ---
 name: audit-advisories
-description: Version-aware vulnerability auditor. Detects the language runtimes (PHP, Node.js, Python, Ruby, Go, Java, .NET), frameworks (Laravel, Symfony, Django, Rails, Spring Boot, React, Angular, Next.js, Nuxt, WordPress...) and every locked dependency with its exact version, and checks them against a local text vulnerability database (OSV.dev, CISA KEV, NVD, endoflife.date) or live sources: known CVEs for that version, malicious packages, end-of-life status and recently exploited bugs of the stack. Read-only; only package names and versions ever leave the machine, and nothing when the local database is used.
+description: Version-aware vulnerability auditor. Detects the language runtimes (PHP, Node.js, Python, Ruby, Go, Java, .NET), frameworks (Laravel, Symfony, Django, Rails, Spring Boot, React, Angular, Next.js, Nuxt, WordPress...) and every locked dependency with its exact version, and checks them against a local text vulnerability database (OSV.dev, CISA KEV, NVD, endoflife.date) or live sources: known CVEs for that version, malicious packages, end-of-life status and recently exploited bugs of the stack. Read-only; nothing leaves the machine by default; with `--online` only package names and versions do.
 ---
 
 # audit-advisories
@@ -8,7 +8,7 @@ description: Version-aware vulnerability auditor. Detects the language runtimes 
 Goal: tell the user which of THEIR versions are vulnerable or unsupported and exactly how to fix each one. Never run or install the vulnerable package.
 
 ## 0. Prepare the database (recommended)
-`python3 <suite>/audit.py --update-db` builds the local database (`~/.cache/pn-ultra-audit/db`, plain-text JSONL: OSV advisories per ecosystem incl. malicious-package reports, CISA KEV, endoflife.date). `--db-status` shows what it holds and how old it is; refresh weekly. Without it the audit queries the public APIs live; `--offline` forbids network.
+`python3 <suite>/audit.py --update-db` builds the local database (`~/.cache/pn-ultra-audit/db`, plain-text JSONL: OSV advisories per ecosystem incl. malicious-package reports, CISA KEV, endoflife.date). `--db-status` shows what it holds and how old it is; refresh weekly. Without it the audit uses a small built-in end-of-life table; `--online` allows live lookups of the public APIs (only package names and versions are sent); `--offline` forbids the network (the default).
 
 ## 1. Baseline
 `python3 <suite>/audit.py <path> --only advisories --brief`. Read `DEP-VULN` (locked version matches an advisory), `MAL-MALICIOUS-PACKAGE` (known malicious package: treat as an incident), `RUNTIME-EOL`, `RUNTIME-VULN` and `ADV-KEV-RECENT` (recently exploited bugs of a product you use).

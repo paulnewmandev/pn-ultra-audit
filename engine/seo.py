@@ -104,7 +104,7 @@ def static_seo(root, files, S):
     deps = ""
     for r in rels:
         if os.path.basename(r) == "package.json" and r.count("/") <= 2:
-            try: deps += open(ab[r], errors="ignore").read(200_000)
+            try: deps += open(ab[r], errors="ignore", encoding="utf-8").read(200_000)
             except OSError: pass
     is_web = bool(html_pages) or bool(re.search(r'"(next|nuxt|react-dom|vue|svelte|astro|@angular/core|gatsby|remix)"', deps)) or any(e in ("php", "twig", "blade") for _, _, e, _ in files[:400]) and any(r.endswith(".blade.php") or "views/" in r for r in rels)
     if not is_web: return out, {}
@@ -117,7 +117,7 @@ def static_seo(root, files, S):
     else:
         for r in rels:
             if r.endswith("robots.txt"):
-                t = open(ab[r], errors="ignore").read(20000)
+                t = open(ab[r], errors="ignore", encoding="utf-8").read(20000)
                 if re.search(r"(?mi)^User-agent:\s*\*\s*\n(?:\s*#.*\n)*\s*Disallow:\s*/\s*$", t): out.append(_f("SEO-ROBOTS-BLOCKS-ALL", "robots.txt blocks the whole site (Disallow: /)", "seo-technical", "bug", "high", "seo", r, 1, "Disallow: /", "Remove the blanket Disallow before launch (keep it only on staging via auth, not robots)", 5, seo_cat="technical"))
                 if not re.search(r"(?mi)^Sitemap:", t): out.append(_f("SEO-ROBOTS-NO-SITEMAP", "robots.txt does not reference the sitemap", "seo-technical", "code_smell", "info", "seo", r, 1, "", "Add `Sitemap: https://your-domain/sitemap.xml`", 2, seo_cat="technical"))
                 if re.search(r"(?mi)^Disallow:\s*/(css|js|assets|static|_next)", t): out.append(_f("SEO-ROBOTS-BLOCKS-ASSETS", "robots.txt blocks CSS/JS assets (Google needs them to render)", "seo-technical", "code_smell", "medium", "seo", r, 1, "", "Allow CSS/JS/images", 5, seo_cat="technical"))
@@ -127,7 +127,7 @@ def static_seo(root, files, S):
     # templates
     tit_missing, desc_missing, canon_missing, h1_bad, og_missing, ld_any, imgs_ns, noindex, blocking, viewport_missing = [], [], [], [], [], False, [], [], [], []
     for r, a in html_pages[:300]:
-        try: t = open(a, errors="ignore").read(300_000)
+        try: t = open(a, errors="ignore", encoding="utf-8").read(300_000)
         except OSError: continue
         if "<html" not in t.lower() and "<head" not in t.lower(): continue
         p = analyze_html(t)
@@ -162,7 +162,7 @@ def static_seo(root, files, S):
     # template-level checks across all templates
     noopen = badanchor = 0
     for r, a in tpl[:600]:
-        try: t = open(a, errors="ignore").read(200_000)
+        try: t = open(a, errors="ignore", encoding="utf-8").read(200_000)
         except OSError: continue
         noopen += len(re.findall(r"""<a\b[^>]*target\s*=\s*["']_blank["'](?![^>]*\brel\s*=\s*["'][^"']*(noopener|noreferrer))[^>]*>""", t))
         badanchor += len(re.findall(r"""<a\b[^>]*href\s*=\s*["'](#|javascript:[^"']*)["']""", t))
@@ -174,14 +174,14 @@ def static_seo(root, files, S):
         nometa = []
         for r in pages[:200]:
             d = os.path.dirname(r); lay = [x for x in rels if x == d + "/layout.tsx" or x == d + "/layout.ts" or x == d + "/layout.jsx"]
-            t = open(ab[r], errors="ignore").read(100_000) + "".join(open(ab[x], errors="ignore").read(50_000) for x in lay)
+            t = open(ab[r], errors="ignore", encoding="utf-8").read(100_000) + "".join(open(ab[x], errors="ignore", encoding="utf-8").read(50_000) for x in lay)
             if not re.search(r"export\s+(const\s+metadata|(async\s+)?function\s+generateMetadata)|<title>|next-seo", t): nometa.append(r)
         root_layout = [r for r in rels if re.match(r"^(?:src/)?app/layout\.(tsx|jsx|ts|js)$", r)]
-        has_root_meta = any(re.search(r"export\s+const\s+metadata|generateMetadata", open(ab[r], errors="ignore").read(60_000)) for r in root_layout)
+        has_root_meta = any(re.search(r"export\s+const\s+metadata|generateMetadata", open(ab[r], errors="ignore", encoding="utf-8").read(60_000)) for r in root_layout)
         if nometa and not has_root_meta: out.append(_f("SEO-NEXT-NO-METADATA", f"{len(nometa)} Next.js pages export no metadata/generateMetadata", "seo-onpage", "code_smell", "medium", "seo", nometa[0], 1, ", ".join(nometa[:8]), "Export `metadata` (title, description, openGraph, alternates.canonical) from each page/layout", 8 * len(nometa), seo_cat="onpage"))
     # i18n
     locs = {m.group(1) for r in rels for m in [re.match(r"^(?:src/)?(?:locales?|i18n|messages|lang)/([a-z]{2}(?:[-_][A-Za-z]{2})?)[./]", r)] if m}
-    if len(locs) >= 2 and not re.search(r"hreflang", " ".join(open(ab[r], errors="ignore").read(40_000) for r, _ in tpl[:300])): out.append(_f("SEO-NO-HREFLANG", f"{len(locs)} locales found but no hreflang annotations", "seo-technical", "security_hotspot", None, "seo", G, 1, ", ".join(sorted(locs)), "Add <link rel=alternate hreflang> (and x-default) or alternates.languages in Next metadata", 60, status="needs_validation", priority="medium", why="hreflang may be emitted by the framework/i18n plugin at build time", seo_cat="technical"))
+    if len(locs) >= 2 and not re.search(r"hreflang", " ".join(open(ab[r], errors="ignore", encoding="utf-8").read(40_000) for r, _ in tpl[:300])): out.append(_f("SEO-NO-HREFLANG", f"{len(locs)} locales found but no hreflang annotations", "seo-technical", "security_hotspot", None, "seo", G, 1, ", ".join(sorted(locs)), "Add <link rel=alternate hreflang> (and x-default) or alternates.languages in Next metadata", 60, status="needs_validation", priority="medium", why="hreflang may be emitted by the framework/i18n plugin at build time", seo_cat="technical"))
     # heavy images in repo
     # files list excludes images; scan directly
     heavy = []
@@ -200,11 +200,11 @@ def static_seo(root, files, S):
     # SEM / tracking
     alltext = {}
     for r, a in tpl[:800]:
-        try: alltext[r] = open(a, errors="ignore").read(200_000)
+        try: alltext[r] = open(a, errors="ignore", encoding="utf-8").read(200_000)
         except OSError: pass
     for r, a, e, _ in files:
         if e in ("js", "ts", "mjs") and re.search(r"(analytics|gtm|gtag|pixel|tracking|consent)", r, re.I) and r not in alltext:
-            try: alltext[r] = open(a, errors="ignore").read(100_000)
+            try: alltext[r] = open(a, errors="ignore", encoding="utf-8").read(100_000)
             except OSError: pass
     blob = "\n".join(alltext.values()) + deps
     found = [(n, next((r for r, t in alltext.items() if re.search(rx, t)), None)) for n, rx in TRACKERS if re.search(rx, blob)]

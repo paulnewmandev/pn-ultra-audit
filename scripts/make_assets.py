@@ -81,7 +81,7 @@ W("banner.svg", f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 52
 
 # ───────── badges with the real logos of each technology (Simple Icons, CC0 data; trademarks of their owners, used to identify supported tech)
 import json
-LOGOS = json.load(open(os.path.join(A, "logos", "logos.json"))) if os.path.exists(os.path.join(A, "logos", "logos.json")) else {}
+LOGOS = json.load(open(os.path.join(A, "logos", "logos.json"), encoding="utf-8")) if os.path.exists(os.path.join(A, "logos", "logos.json")) else {}
 sys_path = os.path.join(ROOT, "scripts"); import importlib.util as _iu
 _sp = _iu.spec_from_file_location("fetch_logos", os.path.join(sys_path, "fetch_logos.py")); _fl = _iu.module_from_spec(_sp); _sp.loader.exec_module(_fl)
 SLUG = _fl.SLUGS

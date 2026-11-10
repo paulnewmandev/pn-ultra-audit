@@ -19,7 +19,7 @@ from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.30"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.31"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -171,7 +171,7 @@ def export_bundle(run_dir, dest, pdf=False):
     dest = os.path.abspath(dest); os.makedirs(dest, exist_ok=True); out = []
     for src, dst in (("report.html", "index.html"), ("REPORT.md", "REPORT.md"), ("findings.sarif", "findings.sarif"), ("findings.json", "findings.json"), ("summary.json", "summary.json"), ("metrics.json", "metrics.json")):
         if os.path.exists(os.path.join(run_dir, src)): shutil.copy2(os.path.join(run_dir, src), os.path.join(dest, dst)); out.append(dst)
-    open(os.path.join(dest, ".nojekyll"), "w").close()
+    open(os.path.join(dest, ".nojekyll"), "w", encoding="utf-8").close()
     res = dict(dir=dest, files=out)
     if pdf:
         ch = find_chrome()
@@ -192,7 +192,33 @@ def add_repo_auditor(plan, only, skip, root):
     return plan
 
 
+def _rmtree(p):
+    """rmtree that also removes read-only files (Windows .git objects)."""
+    import stat
+    def _w(fn, path, exc):
+        try: os.chmod(path, stat.S_IWRITE); fn(path)
+        except OSError: pass
+    try: shutil.rmtree(p, onerror=_w)
+    except OSError: pass
+
+
+def _console():
+    """Cross-platform console: never crash on a legacy code page (Windows cp1252, LC_ALL=C); enable ANSI on Windows 10+."""
+    for st in (sys.stdout, sys.stderr):
+        try: st.reconfigure(encoding="utf-8", errors="replace")
+        except Exception: pass
+    if os.name == "nt":
+        try:
+            import ctypes
+            k = ctypes.windll.kernel32
+            for h in (-11, -12):
+                hd = k.GetStdHandle(h); m = ctypes.c_uint32()
+                if k.GetConsoleMode(hd, ctypes.byref(m)): k.SetConsoleMode(hd, m.value | 0x0004)
+        except Exception: pass
+
+
 def main(argv=None):
+    _console()
     ap = argparse.ArgumentParser(prog="pn-ultra-audit", description=f"{NAME} {VERSION} - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.")
     ap.add_argument("path", nargs="?", help="project directory (default .; omit when auditing only a remote server / URL)")
     ap.add_argument("--out", help="output base dir (default ./audit-output/<name>)"); ap.add_argument("--lang", default="auto", choices=["auto"] + sorted(i18n.available()), help="report/UI language: auto (system language, Spanish by default) | es | en | zh ... (any pack in engine/locales/). report language (default es)")
@@ -218,7 +244,8 @@ def main(argv=None):
     g.add_argument("--db-eco", metavar="LIST", help="with --update-db: OSV ecosystems to sync (default: npm,PyPI,Packagist,Go,RubyGems,crates.io,Maven,NuGet,Pub,Hex,'GitHub Actions'; any OSV ecosystem works, e.g. Debian,Ubuntu,Alpine)")
     g.add_argument("--db-source", metavar="LIST", help="with --update-db: sources to sync: osv,kev,eol,nvd (default osv,kev,eol; add nvd for runtime/server CVEs - slow without NVD_API_KEY)")
     g.add_argument("--db-status", action="store_true", help="show what the local vulnerability database contains and how old it is")
-    g.add_argument("--offline", action="store_true", help="no network: skip the live advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date); cached data and an offline end-of-life table are still used. Also: PNUA_OFFLINE=1")
+    g.add_argument("--online", action="store_true", help="allow read-only LIVE advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date) when no local vulnerability database exists; only package names and versions are sent. Default: no network at all (use --update-db once, then audit offline)")
+    g.add_argument("--offline", action="store_true", help="never use the network (this is already the default; it also overrides --online / PNUA_ONLINE=1). Also: PNUA_OFFLINE=1")
     g.add_argument("--triage", action="store_true", help="print the triage worklist of the latest run: every finding that needs a human/AI decision, grouped by rule with ONE protocol (what to check, when it is real, when it is a false positive, how to suppress it) - read this before fixing or reporting suspicions")
     g.add_argument("--show", metavar="ID", help="print a compact fix card for one finding (e.g. SEC-001) from the latest run (see --run)")
     g.add_argument("--kb", metavar="QUERY", help="search the offline remediation knowledge base (e.g. --kb \"sql injection php\")")
@@ -313,6 +340,7 @@ def main(argv=None):
     if a.via_ssh and not a.ssh: print("ERROR: --via-ssh needs --ssh", file=sys.stderr); return 2
     if a.remote_path and not (a.ssh or a.sftp): print("ERROR: --remote-path needs --ssh or --sftp", file=sys.stderr); return 2
     if a.sftp and not a.remote_path: print("ERROR: --sftp needs --remote-path", file=sys.stderr); return 2
+    if getattr(a, "online", False): os.environ["PNUA_ONLINE"] = "1"
     if getattr(a, "offline", False): os.environ["PNUA_OFFLINE"] = "1"
     local_root = os.path.abspath(a.path) if a.path else (os.getcwd() if not (a.ssh or a.url or a.keywords or a.gsc_csv or a.git or a.ftp or a.sftp) else None)
     if local_root and not os.path.isdir(local_root): print(f"ERROR: not a directory: {local_root}", file=sys.stderr); return 2
@@ -331,7 +359,7 @@ def main(argv=None):
         t = ""
         for rel, ab, e, sz in detect.product_files(fl):
             if os.path.basename(rel) in ("package.json", "composer.json", "requirements.txt", "pyproject.toml", "pom.xml", "build.gradle", "build.gradle.kts", "go.mod", "Cargo.toml", "Gemfile", "pubspec.yaml", "Pipfile") and rel.count("/") <= 3:
-                try: t += re.sub(r"(?m)^keywords\s*=.*$", "", open(ab, errors="ignore").read(60_000))  # package keywords are not dependencies
+                try: t += re.sub(r"(?m)^keywords\s*=.*$", "", open(ab, errors="ignore", encoding="utf-8").read(60_000))  # package keywords are not dependencies
                 except OSError: pass
         return t
     try:
@@ -385,7 +413,7 @@ def main(argv=None):
             if "domain" in plan: stages.append(("domain", N("Dominio: SaaS / Fintech / Banca (aislamiento, dinero, idempotencia, webhooks)", "Domain deep-dive: SaaS / Fintech / Banking (isolation, money, idempotency, webhooks)")))
             if "vercel" in plan: stages.append(("vercel", N("Vercel: vercel.json, Next.js, crons, variables y rutas API", "Vercel: vercel.json, Next.js, crons, env vars & API routes")))
             if "malware" in plan: stages.append(("malware", N("Malware y backdoors: webshells, reverse shells, mineros, stealers, hooks de instalación", "Malware & backdoors: webshells, reverse shells, miners, stealers, install hooks")))
-            if "advisories" in plan: stages.append(("advisories", N("Avisos por versión (en vivo): runtime, framework y dependencias · OSV · CISA KEV · NVD", "Version advisories (live): runtime, framework & dependencies · OSV · CISA KEV · NVD")))
+            if "advisories" in plan: stages.append(("advisories", N("Avisos por versión: runtime, framework y dependencias (base local · --online para consulta en vivo)", "Version advisories: runtime, framework & dependencies (local database · --online for live lookups)")))
             if "hardcode" in plan: stages.append(("hardcode", N("Hardcode y TODOs: pendientes, valores atados al entorno y credenciales", "Hardcode & TODOs: unfinished work, environment-bound values & credentials")))
             if "aitrace" in plan: stages.append(("aitrace", N("Rastros de IA: comentarios, archivos de agentes, trailers de git y metadatos", "AI traces: comments, agent files, git trailers & metadata")))
             if "repo" in plan: stages.append(("repo", N("Higiene del repositorio: claves, historial y CI/CD", "Repository hygiene: keys, history & CI/CD")))
@@ -448,7 +476,7 @@ def main(argv=None):
     if a.ssh and a.remote_path:
         begin("pull"); tmp_remote = tempfile.mkdtemp(prefix="pnua-remote-")
         n, size, skipped, err = remote.pull_tree(ssh, a.remote_path, tmp_remote)
-        if err: ui.done(err, warn=True); notes.append(err); shutil.rmtree(tmp_remote, ignore_errors=True); tmp_remote = None
+        if err: ui.done(err, warn=True); notes.append(err); _rmtree(tmp_remote); tmp_remote = None
         else: scan_root = tmp_remote; ui.done(f"{n} files, {size / 1e6:.1f} MB (" + N("copia temporal, se borra al final", "temp copy, deleted at the end") + ")")
         scan_local = tmp_remote is not None
         if not local_root: label = f"{label}-{os.path.basename(a.remote_path.rstrip('/'))}"
@@ -487,7 +515,7 @@ def main(argv=None):
         deps_text = ""
         for rel, ab, e, sz in files:
             if os.path.basename(rel) in ("package.json", "composer.json", "requirements.txt", "pyproject.toml", "pom.xml", "build.gradle", "go.mod", "Cargo.toml", "Gemfile", "pubspec.yaml") and rel.count("/") <= 3:
-                try: deps_text += open(ab, errors="ignore").read(60_000)
+                try: deps_text += open(ab, errors="ignore", encoding="utf-8").read(60_000)
                 except OSError: pass
         arch = docs.architecture_profile(scan_root, files, None, deps_text); metrics["architecture"] = arch
         ui.done(f"{len(files)} " + N("archivos", "files") + " · " + ", ".join(f"{k} {v}" for k, v in langs.most_common(6)) + " · " + N("arquitectura", "architecture") + ": " + ", ".join(arch["style"][:2]))
@@ -549,7 +577,7 @@ def main(argv=None):
         try: advf_, advinfo = advmod.analyze(scan_root, files, a.strictness)
         except Exception as ex_: advf_, advinfo = [], {"error": str(ex_)[:80], "states": [], "errors": [], "runtimes": [], "frameworks": []}
         raw += advf_; stream(advf_); metrics["advisories"] = advinfo
-        ui.done((f"{advinfo.get('components', 0)} " + N("dependencias", "dependencies") + f" · {advinfo.get('vulnerable', 0)} " + N("vulnerables", "vulnerable") + f" · {advinfo.get('kev', 0)} " + N("explotadas (KEV)", "exploited (KEV)") + " · " + (N("en vivo", "live") if advinfo.get("live") else N("sin red (datos no actualizados)", "offline (data not refreshed)"))) if not advinfo.get("error") else advinfo["error"], warn=bool(advinfo.get("error") or advinfo.get("errors")))
+        ui.done((f"{advinfo.get('components', 0)} " + N("dependencias", "dependencies") + f" · {advinfo.get('vulnerable', 0)} " + N("vulnerables", "vulnerable") + f" · {advinfo.get('kev', 0)} " + N("explotadas (KEV)", "exploited (KEV)") + " · " + (N("base local / datos disponibles", "local database / data available") if advinfo.get("live") else N("sin datos (ejecuta --update-db o usa --online)", "no data (run --update-db or use --online)"))) if not advinfo.get("error") else advinfo["error"], warn=bool(advinfo.get("error") or advinfo.get("errors")))
         L("version advisories (OSV · CISA KEV · NVD · endoflife.date)", "audit-security", "covered" if not advinfo.get("error") else "blocked", "dependency CVEs by locked version, runtime/framework end-of-life, CVEs of the exact runtime, recent actively exploited bugs of the stack")
         begin("hardcode")
         try: hf_, hinfo = hardcodemod.analyze(scan_root, files, a.strictness)
@@ -596,7 +624,7 @@ def main(argv=None):
     dbs, dbnotes = 0, []
     sql_files = [(rel, ab) for rel, ab, e, _ in ok_files if e in ("sql", "pls", "pks", "pkb", "tsql")]
     for rel, ab in sql_files:
-        try: fs = dbaudit.static_sql(open(ab, errors="ignore").read(), rel); raw += fs; stream(fs); dbs += 1
+        try: fs = dbaudit.static_sql(open(ab, errors="ignore", encoding="utf-8").read(), rel); raw += fs; stream(fs); dbs += 1
         except OSError: pass
     for spec in a.db:
         ui.note(re.sub(r"//([^:@/]+):[^@]*@", "//", spec)[:44] + "…")
@@ -728,7 +756,7 @@ def main(argv=None):
     if a.baseline: bl_path = (os.path.join(prev_runs[-1][1], "findings.json") if (a.baseline == "auto" and prev_runs) else (a.baseline if a.baseline != "auto" else None))
     if bl_path and os.path.isfile(bl_path):
         try:
-            old = {f["fingerprint"] for f in json.load(open(bl_path)) if f.get("status") == "confirmed"}
+            old = {f["fingerprint"] for f in json.load(open(bl_path, encoding="utf-8")) if f.get("status") == "confirmed"}
             cur = {f["fingerprint"] for f in findings if f["status"] == "confirmed"}
             for f in findings: f["legacy"] = f["status"] == "confirmed" and f["fingerprint"] in old
             metrics["baseline"] = dict(path=disp(bl_path), new=len(cur - old), existing=len(cur & old), fixed=len(old - cur))
@@ -737,7 +765,7 @@ def main(argv=None):
     hist = []
     for n_, d in prev_runs[-11:]:
         try:
-            sm = json.load(open(os.path.join(d, "summary.json"))); hist.append(dict(run=n_, date=sm.get("date"), counts=sm.get("counts"), ratings=sm.get("ratings"), gate=sm.get("gate"), confirmed=sm.get("confirmed")))
+            sm = json.load(open(os.path.join(d, "summary.json"), encoding="utf-8")); hist.append(dict(run=n_, date=sm.get("date"), counts=sm.get("counts"), ratings=sm.get("ratings"), gate=sm.get("gate"), confirmed=sm.get("confirmed")))
         except (OSError, ValueError): pass
     metrics["history"] = hist
     ref, dirty, branch = git_info(scan_root if tmp_git else local_root) if (tmp_git or (local_root and not tmp_remote)) else ("remote", False, "")
@@ -801,13 +829,13 @@ def main(argv=None):
     for k, v in (("findings.json", findings), ("metrics.json", metrics), ("run-metadata.json", meta), ("owasp-matrix.json", owasp_matrix(findings))):
         json.dump(v, open(os.path.join(run_dir, k), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
     json.dump([{"unit": u["unit"], "pass": u["pass_"], "state": u["state"], "note": u.get("note", "")} for u in ledger], open(os.path.join(run_dir, "coverage-ledger.json"), "w", encoding="utf-8"), indent=2)
-    if bom and bom["components"]: json.dump(bom, open(os.path.join(run_dir, "sbom.cdx.json"), "w"), indent=1)
+    if bom and bom["components"]: json.dump(bom, open(os.path.join(run_dir, "sbom.cdx.json"), "w", encoding="utf-8"), indent=1)
     if a.evidence_pack and metrics.get("compliance"):
         packed = compliance.write_pack(os.path.abspath(a.evidence_pack), metrics["compliance"], findings, metrics, meta, bom if bom and bom["components"] else None, policies.all_templates(), a.lang)
     else: packed = None
     conf = [f for f in findings if f["status"] == "confirmed"]
     ui.done(f"{len(conf)} " + N("confirmados", "confirmed") + f" · {len(findings) - len(conf)} " + N("por revisar", "to review") + (f" · baseline: {metrics['baseline']['new']} " + N("nuevos", "new") + f", {metrics['baseline']['fixed']} " + N("corregidos", "fixed") if metrics.get("baseline") else ""))
-    if tmp_remote: shutil.rmtree(tmp_remote, ignore_errors=True)
+    if tmp_remote: _rmtree(tmp_remote)
     if tmp_git: gitsrc.cleanup(tmp_git)
 
     begin("report")

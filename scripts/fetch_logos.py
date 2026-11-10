@@ -41,10 +41,10 @@ def main():
         if not svg: missing.append(name); continue
         paths = re.findall(r'<path[^>]*\sd="([^"]+)"', svg)
         if not paths: missing.append(name); continue
-        open(os.path.join(OUT, slug + ".svg"), "w").write(svg)
+        open(os.path.join(OUT, slug + ".svg"), "w", encoding="utf-8").write(svg)
         done[slug] = dict(hex="#" + hexes.get(slug, "6b7280"), path=" ".join(paths))
-    json.dump(done, open(os.path.join(OUT, "logos.json"), "w"), indent=0)
-    open(os.path.join(OUT, "README.md"), "w").write(f"# Brand logos\n\nIcons from [Simple Icons](https://simpleicons.org) v{VER} (data under CC0-1.0). The logos are trademarks of their respective owners and are shown only to identify the technologies PN-Ultra-Audit supports; no endorsement is implied. Refresh with `python3 scripts/fetch_logos.py`.\n")
+    json.dump(done, open(os.path.join(OUT, "logos.json"), "w", encoding="utf-8"), indent=0)
+    open(os.path.join(OUT, "README.md"), "w", encoding="utf-8").write(f"# Brand logos\n\nIcons from [Simple Icons](https://simpleicons.org) v{VER} (data under CC0-1.0). The logos are trademarks of their respective owners and are shown only to identify the technologies PN-Ultra-Audit supports; no endorsement is implied. Refresh with `python3 scripts/fetch_logos.py`.\n")
     print(len(done), "logos cached;", "missing (monogram fallback):", ", ".join(missing) or "none")
 
 

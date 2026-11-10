@@ -78,7 +78,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.30", run("--version").stdout)
+        self.assertIn("1.0.31", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")

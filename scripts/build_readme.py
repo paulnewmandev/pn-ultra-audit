@@ -3,12 +3,12 @@
 import json, os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); sys.path.insert(0, ROOT)
 from engine.rules import RULES; from engine.kb import KB; from engine import scanner
-idx = json.load(open(os.path.join(ROOT, "assets", "badges", "index.json")))
+idx = json.load(open(os.path.join(ROOT, "assets", "badges", "index.json"), encoding="utf-8"))
 b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">' for n, fn in idx[kind])
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.30"
+VER = "1.0.31"
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from llm_prompts import readme_section
 LLM_SECTION = readme_section()
@@ -256,7 +256,8 @@ python3 audit.py --update-db              # build / refresh it (OSV.dev + CISA K
 python3 audit.py --update-db --db-source nvd         # + NVD CVEs of runtimes and servers (PHP, Node.js, Python, nginx, OpenSSL, WordPress ... 28 products)
 python3 audit.py --update-db --db-eco Debian,Ubuntu  # any other OSV ecosystem (OS packages, Linux distros...)
 python3 audit.py --db-status              # what it holds and how old it is
-python3 audit.py ./my-app --offline       # no network at all: uses the local database
+python3 audit.py ./my-app --online        # no local database yet? allow live lookups (only package names and versions are sent)
+python3 audit.py ./my-app --offline       # never use the network (the default; this also overrides --online)
 ```
 
 | Source | What it contains |
@@ -266,7 +267,7 @@ python3 audit.py ./my-app --offline       # no network at all: uses the local da
 | **NVD** | CVEs with affected version ranges for the runtime/server itself (opt-in source) |
 | **endoflife.date** | support lifecycle of ~490 products (languages, frameworks, databases, OSes) |
 
-The audit looks versions up **locally first** (complete, ~0.3 s, works offline, and **no package name leaves your machine**), then falls back to the live APIs when the database is missing, and finally to a small offline end-of-life table; the dashboard says which data was used and how old it is. Findings are version-matched against your **lockfiles** (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `composer.lock`, `poetry.lock`, `Pipfile.lock`, pinned `requirements.txt`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, ...) and the runtime/framework versions declared in `Dockerfile`, `.nvmrc`, `.tool-versions`, `runtime.txt`, `composer.json`, `go.mod`, CI workflows and more. Refresh it weekly (cron or CI: `python3 audit.py --update-db`).
+The audit looks versions up **locally first** (complete, ~0.3 s, works offline, and **no package name leaves your machine**), then (only with `--online`) to the live APIs when the database is missing, and finally to a small built-in end-of-life table; the dashboard says which data was used and how old it is. Findings are version-matched against your **lockfiles** (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `composer.lock`, `poetry.lock`, `Pipfile.lock`, pinned `requirements.txt`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, ...) and the runtime/framework versions declared in `Dockerfile`, `.nvmrc`, `.tool-versions`, `runtime.txt`, `composer.json`, `go.mod`, CI workflows and more. Refresh it weekly (cron or CI: `python3 audit.py --update-db`).
 
 ## It recognises what it is auditing
 
@@ -294,7 +295,7 @@ A label needs several independent signals (dependencies, folders, README, databa
 | **domain** | **SaaS:** tenant isolation (unscoped queries, RLS/global scope), RBAC/SSO/SCIM, audit log, API-key hashing, export/delete, backups/PITR, per-tenant limits. **Fintech/banking:** float-for-money, idempotency, balance races, unsigned webhooks, PAN/CVV, ledger/reconciliation, MFA/SCA, KMS |
 | **pwa** | manifest + installability, icons/maskable, service worker (registration, strategy, versioned caches, offline fallback, update flow), push, HTTPS, SW security (remote `importScripts`, cached private data, unvalidated messages, leaked VAPID keys); live check with `--url` |
 | **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |
-| **malware** | **webshells** (eval/system on request data, c99/WSO/China Chopper signatures, PHP hidden in images and upload folders), **reverse shells** (`/dev/tcp`, `nc -e`, Python/Node/PHP/Go/PowerShell), decode-and-execute payloads, **miners** (stratum, XMRig, CoinHive), **stealers/exfiltration** (browser + wallet + SSH + cloud stores, webhooks, CI leaking env), **malicious install hooks** and known typosquats, **persistence** (authorized_keys, cron, LD_PRELOAD, auto_prepend, hidden trigger parameters), **Trojan Source** bidi/invisible characters; static and offline, specific signatures only (not a generic `eval` alarm), with **incident-response steps** and a reversible quarantine script |
+| **malware** | **webshells** (eval/system on request data, known webshell-family signatures, PHP hidden in images and upload folders), **reverse shells** (`/dev/tcp`, `nc -e`, Python/Node/PHP/Go/PowerShell), decode-and-execute payloads, **miners** (stratum, XMRig, CoinHive), **stealers/exfiltration** (browser + wallet + SSH + cloud stores, webhooks, CI leaking env), **malicious install hooks** and known typosquats, **persistence** (authorized_keys, cron, LD_PRELOAD, auto_prepend, hidden trigger parameters), **Trojan Source** bidi/invisible characters; static and offline, specific signatures only (not a generic `eval` alarm), with **incident-response steps** and a reversible quarantine script |
 | **aitrace** | project finish: comments/docs that reveal AI authoring, **agent & spec files** (CLAUDE.md, AGENTS.md, `.cursor/`, `openspec/`...), git `Co-Authored-By` trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers; tells you how to remove each and writes `cleanup-fixes.sh` (backups, safe by default). It never tries to defeat statistical watermarks |
 | **hardcode** | **unfinished work:** TODO/FIXME/HACK/XXX inside real comments (age from `git blame`), **security TODOs** (auth, validation, encryption, CSRF, rate limit postponed), "remove before prod" markers, unimplemented stubs, and a ready-to-paste `todo-backlog.md`; **hardcoded values:** environment URLs at call sites (localhost, staging), IPs as hosts, machine-specific home paths, personal emails, identity checks (`user.id == 1`), business rates inside functions - shown together with hardcoded credentials from the security scanner. Env-based defaults (`process.env.X || 'http://localhost'`) are not reported |
 | **advisories** | **version-aware vulnerabilities**: detects the language runtime (PHP, Node.js, Python, Ruby, Go, Java, .NET), the framework (Laravel, Symfony, Django, Rails, Spring Boot, React, Angular, Next.js, Nuxt, WordPress...) and every locked dependency with its exact version, and matches them against the vulnerability database: **known CVEs for that version**, **known malicious packages** (OpenSSF/OSV), **end-of-life** runtimes/frameworks, CVEs of the exact runtime version and **recent actively exploited bugs of your stack** (CISA KEV). Each finding carries the fixed version and the exact upgrade command |
@@ -417,7 +418,7 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | Flag | Meaning |
 |---|---|
 | `--plan` · `--only a,b` · `--skip a,b` · `--list-auditors` | show the project profile and choose auditors (default: auto-detect; malware, AI traces and hardcode always on) |
-| `--update-db` · `--db-status` · `--db-eco LIST` · `--db-source LIST` · `--offline` | build/inspect the local vulnerability database; `--offline` = no network |
+| `--update-db` · `--db-status` · `--db-eco LIST` · `--db-source LIST` · `--offline` | build/inspect the local vulnerability database; `--online` = allow live lookups, `--offline` = never the network (default) |
 | `--triage` · `--brief` · `--show ID` · `--run DIR` | anti false positives: suspicions grouped by rule with one confirm protocol; compact summary; fix card with the protocol |
 | `--level beginner\\|pro` · `--strictness basic\\|standard\\|strict` `--ask` · `--baseline auto` | learning mode · docs/complexity thresholds · ratchet |
 | `--git SPEC` `--branch` `--depth` `--history` `--git-host` `--git-token-env` | repositories |
@@ -499,6 +500,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 - **Read-only.** Your project, repositories, servers and databases are never modified. Cloned/remote code is **never executed**; `--run-tests` (explicit) only runs *your local* test suite.
 - Remote actions need **`--authorized`**: you confirm you own the systems or may assess them. SSH/SFTP use keys or agent (never passwords on the command line); FTP uses an env var and refuses clear-text by default.
 - **Secrets are scrubbed** from evidence and snippets; DB password checks return aggregates only; reports never contain your absolute local paths (guarded by a test).
+- **No network by default.** An audit sends nothing anywhere. Network is used only when you ask for it: `--update-db` (downloads public vulnerability data, once), `--online` (live advisory lookups: only package names and versions), `--url`/`--psi`/`--crawl` (SEO), `--vercel-project`, `--git`, `--ssh`/`--ftp`. `--offline` forbids it all.
 - No telemetry. The dashboard is a single offline file; PageSpeed (`--psi`), keyword ideas and live crawling are opt-in and send only the URL/seed you give.
 
 ## Install
@@ -508,7 +510,7 @@ git clone https://github.com/paulnewmandev/pn-ultra-audit
 cd pn-ultra-audit && python3 audit.py --version        # {VER}
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
-`pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
+`pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Runs on Linux, macOS, Windows, FreeBSD and other Unix systems (Python 3.9+, stdlib only; CI covers Ubuntu, macOS and Windows). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
 
 ## Limits (read them)
 

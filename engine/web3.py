@@ -28,13 +28,13 @@ def analyze(root, files):
     rs = [(r, a) for r, a, e, _ in files if e == "rs" and re.search(r"anchor|solana|programs?/", r)]
     names = {os.path.basename(r) for r, *_ in files}
     frameworks = [n for n, f in (("Hardhat", r"^hardhat\.config\.(js|ts|cjs)$"), ("Foundry", r"^foundry\.toml$"), ("Truffle", r"^truffle-config\.js$"), ("Brownie", r"^brownie-config\.ya?ml$"), ("Anchor (Solana)", r"^Anchor\.toml$"), ("Move", r"^Move\.toml$")) if any(re.match(f, x) for x in names)]
-    web3js = any(re.search(r"\b(ethers|web3|viem|wagmi|@solana/web3\.js|@web3-react)\b", open(a, errors="ignore").read(40_000)) for r, a, e, _ in files if os.path.basename(r) == "package.json")
+    web3js = any(re.search(r"\b(ethers|web3|viem|wagmi|@solana/web3\.js|@web3-react)\b", open(a, errors="ignore", encoding="utf-8").read(40_000)) for r, a, e, _ in files if os.path.basename(r) == "package.json")
     if not (sol or rs or frameworks or web3js): return out, {}
     info.update(frameworks=frameworks, solidity_files=len(sol), rust_programs=len(rs), web3_frontend=web3js)
     pragmas, contracts, ext_calls = Counter(), 0, 0
     for rel, ab in sol[:300]:
         if re.search(r"(^|/)(node_modules|lib|test|tests|mocks?|forge-std|openzeppelin)(/|$)|\.t\.sol$|\.s\.sol$", rel): continue
-        try: t = open(ab, errors="ignore").read(400_000)
+        try: t = open(ab, errors="ignore", encoding="utf-8").read(400_000)
         except OSError: continue
         pm = re.search(r"pragma\s+solidity\s+([^;]+);", t)
         ver = pm.group(1).strip() if pm else "?"; pragmas[ver] += 1
@@ -80,7 +80,7 @@ def analyze(root, files):
     info.update(contracts=contracts, pragmas=dict(pragmas), external_calls=ext_calls)
     # Solana / Anchor
     for rel, ab in rs[:200]:
-        try: t = open(ab, errors="ignore").read(300_000)
+        try: t = open(ab, errors="ignore", encoding="utf-8").read(300_000)
         except OSError: continue
         if re.search(r"AccountInfo<'info>|UncheckedAccount<'info>", t) and not re.search(r"CHECK:", t): out.append(_f("WEB3-SOL-UNCHECKED-ACCOUNT", "Anchor UncheckedAccount/AccountInfo without a `/// CHECK:` justification (missing owner/signer validation)", "vulnerability", "high", "access-control", rel, text_line(t, r"AccountInfo<'info>|UncheckedAccount<'info>"), "UncheckedAccount", "Prefer typed `Account<'info, T>` + `Signer<'info>`; add `has_one`/`constraint`/`seeds` checks", 60, cwe=["CWE-284"]))
         if re.search(r"invoke_signed\(|invoke\(", t) and not re.search(r"require_keys_eq|constraint\s*=|has_one|key\(\)\s*==", t): out.append(_f("WEB3-SOL-CPI", "Cross-program invocation without verifying the target program id / accounts", "security_hotspot", None, "access-control", rel, text_line(t, r"invoke"), "invoke/invoke_signed", "Validate program ids and account ownership before CPI", 60, status="needs_validation", priority="high", why="may be validated in an outer constraint"))
@@ -88,7 +88,7 @@ def analyze(root, files):
     if not (sol or rs) and not web3js: return out, info
     # project-level
     if sol and not any(re.search(r"(^|/)(test|tests)/.*\.(t\.sol|js|ts|sol|rs)$|\.t\.sol$", r) for r, *_ in files): out.append(_f("WEB3-NO-TESTS", "Smart contracts without tests", "test_gap", "high", "test-infra", ".", 1, f"{len(sol)} .sol files, no test directory", "Add Foundry/Hardhat tests incl. fuzz/invariant tests and fork tests; target ≥ 95 % line + branch coverage", 480))
-    if sol and not any(re.search(r"slither|echidna|medusa|mythril|certora|halmos|scribble", open(a, errors="ignore").read(60_000), re.I) for r, a, e, _ in files if e in ("yml", "yaml", "toml", "json") and ("workflow" in r or "foundry" in r or "package" in r)): out.append(_f("WEB3-NO-STATIC-ANALYSIS", "No Slither/Echidna/Medusa/Certora in CI", "test_gap", "low", "test-infra", ".", 1, "", "Run `slither .` and fuzzing (forge invariants/Echidna) on every PR; get an external audit before mainnet", 90))
+    if sol and not any(re.search(r"slither|echidna|medusa|mythril|certora|halmos|scribble", open(a, errors="ignore", encoding="utf-8").read(60_000), re.I) for r, a, e, _ in files if e in ("yml", "yaml", "toml", "json") and ("workflow" in r or "foundry" in r or "package" in r)): out.append(_f("WEB3-NO-STATIC-ANALYSIS", "No Slither/Echidna/Medusa/Certora in CI", "test_gap", "low", "test-infra", ".", 1, "", "Run `slither .` and fuzzing (forge invariants/Echidna) on every PR; get an external audit before mainnet", 90))
     return out, info
 
 

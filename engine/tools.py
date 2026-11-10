@@ -48,7 +48,7 @@ def run_external(root, ui_note, timeout=240, semgrep_config="auto"):
         rep = os.path.join(root, ".audit-gitleaks.json")
         rc, so, se = _run(["gitleaks", "detect", "--no-banner", "--no-git", "-s", ".", "-f", "json", "-r", rep, "--redact"], root, timeout)
         try:
-            for r in json.load(open(rep)) or []:
+            for r in json.load(open(rep, encoding="utf-8")) or []:
                 out.append(_f("GITLEAKS:" + r.get("RuleID", "secret"), f"Secret detected: {r.get('Description', r.get('RuleID'))}", "vulnerability", "high", "secrets", r["File"], r.get("StartLine", 1),
                               "(redacted by gitleaks)", KB["secrets"]["steps"][0], 30, family="secrets", cwe=["CWE-798"], owasp=["A07:2021"]))
             ran.append("gitleaks")
@@ -100,7 +100,7 @@ def detect_test_command(root):
     j = lambda *p: os.path.join(root, *p)
     if os.path.exists(j("package.json")):
         try:
-            t = (json.load(open(j("package.json"))).get("scripts") or {}).get("test", "")
+            t = (json.load(open(j("package.json"), encoding="utf-8")).get("scripts") or {}).get("test", "")
             if t and "no test specified" not in t and shutil.which("npm"): return ["npm", "test", "--silent"], "npm test"
         except (OSError, ValueError): pass
     if os.path.exists(j("pytest.ini")) or os.path.exists(j("pyproject.toml")) or os.path.isdir(j("tests")):

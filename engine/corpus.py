@@ -6,7 +6,7 @@ ROOT = os.path.join(HERE, "examples", "fixes")
 
 
 def load_index():
-    try: return json.load(open(os.path.join(ROOT, "index.json")))
+    try: return json.load(open(os.path.join(ROOT, "index.json"), encoding="utf-8"))
     except (OSError, ValueError): return []
 
 
@@ -42,6 +42,6 @@ def pair_for(rule):
     for e in load_index():
         if e["rule"] == rule:
             d = os.path.join(ROOT, e["id"])
-            try: return dict(id=e["id"], note=e["note"], file=e["file"], vulnerable=open(os.path.join(d, "vulnerable", e["file"])).read(), fixed=open(os.path.join(d, "fixed", e["file"])).read())
+            try: return dict(id=e["id"], note=e["note"], file=e["file"], vulnerable=open(os.path.join(d, "vulnerable", e["file"]), encoding="utf-8").read(), fixed=open(os.path.join(d, "fixed", e["file"]), encoding="utf-8").read())
             except OSError: return None
     return None

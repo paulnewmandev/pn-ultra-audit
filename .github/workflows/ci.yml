@@ -4,15 +4,22 @@ permissions: { contents: read }
 env: { PNUA_OFFLINE: "1" }   # deterministic CI: no live advisory lookups
 jobs:
   test:
-    runs-on: ubuntu-24.04   # pinned: ubuntu-latest (26.04) has no Python 3.9 build
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
-      matrix: { python: ["3.9", "3.11", "3.12", "3.13"] }
+      matrix:
+        os: [ubuntu-24.04]   # pinned: ubuntu-latest (26.04) has no Python 3.9 build
+        python: ["3.9", "3.11", "3.12", "3.13"]
+        include:
+          - { os: macos-latest, python: "3.12" }
+          - { os: windows-latest, python: "3.9" }
+          - { os: windows-latest, python: "3.13" }
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: { python-version: "${{ matrix.python }}" }
       - run: pip install ruff && ruff check .
+        shell: bash
       - run: python -m unittest -v
-      - run: python audit.py examples/vulnerable-demo --out /tmp/out --color never --lang en --export /tmp/docs
+      - run: python audit.py examples/vulnerable-demo --out ci-out --color never --lang en --export ci-docs
       - run: python scripts/gen_docs.py && git diff --exit-code docs/RULES.md docs/CLI.md || echo "docs regenerated (commit them)"

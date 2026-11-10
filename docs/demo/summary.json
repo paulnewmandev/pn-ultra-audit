@@ -1,13 +1,13 @@
 {
-  "date": "2026-11-09",
+  "date": "2026-11-10",
   "counts": {
-    "critical": 10,
-    "high": 32,
-    "medium": 34,
-    "low": 23,
-    "info": 4
+    "critical": 7,
+    "high": 29,
+    "medium": 32,
+    "low": 20,
+    "info": 1
   },
-  "confirmed": 103,
+  "confirmed": 89,
   "gate": "FAIL",
   "ratings": {
     "reliability": "D",

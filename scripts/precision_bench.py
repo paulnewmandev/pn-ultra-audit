@@ -20,7 +20,7 @@ def bench(path, only, extra, samples, min_sev):
         runs = [d for d in os.listdir(out) if d.startswith("run-")]
         if not runs: return dict(error=(r.stderr or r.stdout)[-300:])
         rd = os.path.join(out, sorted(runs)[-1])
-        f = json.load(open(os.path.join(rd, "findings.json"))); m = json.load(open(os.path.join(rd, "metrics.json")))
+        f = json.load(open(os.path.join(rd, "findings.json"), encoding="utf-8")); m = json.load(open(os.path.join(rd, "metrics.json"), encoding="utf-8"))
     ncloc = m.get("ncloc") or 1
     conf = [x for x in f if x["status"] == "confirmed" and SEV.index(x.get("severity") or "info") <= SEV.index(min_sev)]
     by_sev = collections.Counter(x["severity"] for x in conf)
@@ -41,7 +41,7 @@ def main():
         for rule, n, ex in r.get("top", []):
             print(f"   {n:>4}  {rule}")
             for x in ex: print(f"           {x['location']['file']}:{x['location']['line']}  {(x.get('evidence') or '')[:110].strip().splitlines()[-1] if x.get('evidence') else ''}")
-    if a.json: json.dump(allr, open(a.json, "w"), indent=1, default=dict)
+    if a.json: json.dump(allr, open(a.json, "w", encoding="utf-8"), indent=1, default=dict)
 
 
 if __name__ == "__main__":

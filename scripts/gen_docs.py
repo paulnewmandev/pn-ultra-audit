@@ -24,7 +24,7 @@ L += ["", "## Engines beyond regex rules", "", "| Engine | Checks |", "|---|---|
       "| `gitsrc.py` | Shallow clone, repo statistics, churn hotspots, secrets in git history |", "",
       "## Languages with dedicated rules", "", ", ".join(sorted({scanner.LANG[e] for r in RULES if r.exts for e in r.exts if e in scanner.LANG})), "",
       f"File types counted in size/complexity metrics: {len(scanner.LANG)} extensions.", ""]
-open(os.path.join(ROOT, "docs", "RULES.md"), "w").write("\n".join(L))
+open(os.path.join(ROOT, "docs", "RULES.md"), "w", encoding="utf-8").write("\n".join(L))
 h = subprocess.run([sys.executable, os.path.join(ROOT, "audit.py"), "--help"], capture_output=True, text=True, env=dict(os.environ, COLUMNS="110")).stdout
-open(os.path.join(ROOT, "docs", "CLI.md"), "w").write("# CLI reference\n\nGenerated from `python3 audit.py --help`.\n\n```text\n" + h + "```\n\n## Auditors\n\n| Auditor | Scope |\n|---|---|\n" + "\n".join(f"| `{k}` | {v} |" for k, v in detect.AUDITORS.items()) + "\n")
+open(os.path.join(ROOT, "docs", "CLI.md"), "w", encoding="utf-8").write("# CLI reference\n\nGenerated from `python3 audit.py --help`.\n\n```text\n" + h + "```\n\n## Auditors\n\n| Auditor | Scope |\n|---|---|\n" + "\n".join(f"| `{k}` | {v} |" for k, v in detect.AUDITORS.items()) + "\n")
 print(len(RULES), "rules;", len(KB), "KB guides;", len(scanner.LANG), "extensions")

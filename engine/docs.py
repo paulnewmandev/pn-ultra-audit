@@ -176,7 +176,7 @@ def project_docs(root, files, S, prof, tracked):
     low = {r.lower() for r in rels}
     top = {r.split("/")[0].lower() for r in rels}
     ncloc = sum(S.lang_ncloc.values()) if S else 0
-    read = lambda p: open(os.path.join(root, p), errors="ignore").read() if os.path.exists(os.path.join(root, p)) else ""
+    read = lambda p: open(os.path.join(root, p), errors="ignore", encoding="utf-8").read() if os.path.exists(os.path.join(root, p)) else ""
     readme = next((r for r in rels if r.lower() in ("readme.md", "readme.rst", "readme.txt", "readme")), None)
     if ncloc < 50: return out, {}
     if not readme:
@@ -426,7 +426,7 @@ def architecture_profile(root, files, S, deps_text=""):
     rels = [r for r, *_ in files]; low = [r.lower() for r in rels]
     dirs = Counter(); [dirs.update(p.lower() for p in r.split("/")[:-1][:4]) for r in rels]
     has = lambda *n: any(x in dirs for x in n)
-    read = lambda p: open(os.path.join(root, p), errors="ignore").read(200_000) if os.path.exists(os.path.join(root, p)) else ""
+    read = lambda p: open(os.path.join(root, p), errors="ignore", encoding="utf-8").read(200_000) if os.path.exists(os.path.join(root, p)) else ""
     mono = [m for m in ("nx.json", "turbo.json", "lerna.json", "pnpm-workspace.yaml", "rush.json") if m in {os.path.basename(r) for r in rels}] or (["workspaces"] if '"workspaces"' in read("package.json") else [])
     pkgs = sorted({r.split("/")[1] for r in rels if r.split("/")[0] in ("packages", "apps", "services", "libs", "modules") and r.count("/") >= 2})
     compose = [r for r in rels if re.search(r"(^|/)(docker-)?compose[^/]*\.ya?ml$", r)]

@@ -4,7 +4,7 @@ checked against public sources LIVE (read-only; only package names and versions 
   * CISA KEV       - vulnerabilities exploited in the wild (also surfaces RECENT actively exploited bugs of the detected runtime/framework, e.g. PHP)
   * NVD            - CVEs of the exact runtime version (PHP, Node.js, Python, Ruby, Go) when the version is known
   * endoflife.date - support status of runtimes and frameworks
-Results are cached (12 h) and the audit keeps working offline (`--offline` or PNUA_OFFLINE=1): the report then says the advisory data was not refreshed.
+NO network by default: the audit uses the local text database (`--update-db`); live lookups only with `--online` (PNUA_ONLINE=1); `--offline` (PNUA_OFFLINE=1) always forbids them. The report says which data was used.
 Nothing here modifies the project."""
 import datetime, hashlib, json, os, re, time, urllib.error, urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -31,7 +31,9 @@ EOL_FALLBACK = {"php": {"7.4": "2022-11-28", "8.0": "2023-11-26", "8.1": "2025-1
 FETCH = None   # replaceable in tests: FETCH(url, data=None, timeout=8) -> parsed json
 
 
-def offline(): return os.environ.get("PNUA_OFFLINE") == "1"
+def offline():
+    """No network by default: live lookups need --online (PNUA_ONLINE=1). --offline / PNUA_OFFLINE=1 always wins."""
+    return os.environ.get("PNUA_OFFLINE") == "1" or os.environ.get("PNUA_ONLINE") != "1"
 
 
 def _cache_dir():
@@ -310,13 +312,15 @@ def analyze(root, files, level="standard", today=None):
     today = today or datetime.date.today()
     from . import vulndb
     db = vulndb.open_db()
-    info = dict(live=not offline(), states=[], errors=[], runtimes=[], frameworks=[], components=0, vulnerable=0, kev=0, malicious=0, sources=["OSV.dev", "CISA KEV", "NVD", "endoflife.date"], fetched=today.isoformat(),
+    info = dict(live=False, states=[], errors=[], runtimes=[], frameworks=[], components=0, vulnerable=0, kev=0, malicious=0, sources=["OSV.dev", "CISA KEV", "NVD", "endoflife.date"], fetched=today.isoformat(),
                 db=dict(used=bool(db), age_days=(db.age_days() if db else None), updated=(db.meta.get("updated") if db else None)))
     out = []
     end = time.time() + 75
     rts = runtimes(root, files); comps = components(root, files)
     info["components"] = len(comps)
     kev = kev_catalog(info, db) if (comps or rts) else {}
+    if not db and offline() and (comps or rts):
+        info["errors"].append("no local vulnerability database and live lookups are off: run `python3 audit.py --update-db` (downloads public data once) or add `--online` (sends only package names and versions)")
     # ---------------- dependencies
     vulns = osv_scan(comps[:4000], info, end, db) if comps else {}
     for c in comps:
@@ -406,6 +410,6 @@ def analyze(root, files, level="standard", today=None):
                       "; ".join(f"{cid} ({v['date']}): {(v.get('name') or '')[:70]}" for da, cid, v in hits[:5]) + " | " + (hits[0][2].get("action") or "")[:120],
                       f"Check that your {LABEL.get(p, p)} version includes the fixes for {', '.join(c for _, c, _ in hits[:4])} (read each CVE's fixed versions on nvd.nist.gov) and patch to the latest release of your line.", "needs_validation", 45, typ="vulnerability", priority="high",
                       why="These bugs are being exploited in the wild: confirm your exact version is patched.", cat="dependency"))
-    info["live"] = any(s in ("live", "cache", "local") for _, s in info["states"]) if info["states"] else not offline()
+    info["live"] = any(s in ("live", "cache", "local") for _, s in info["states"])
     info["states"] = sorted({f"{k}:{s}" for k, s in info["states"]})
     return out, info

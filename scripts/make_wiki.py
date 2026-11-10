@@ -10,7 +10,7 @@ from engine.kb import KB  # noqa: E402
 from engine.rules import RULES  # noqa: E402
 
 OUT = os.path.join(ROOT, "docs", "wiki"); os.makedirs(OUT, exist_ok=True)
-VER = "1.0.30"
+VER = "1.0.31"
 REPO = "https://github.com/paulnewmandev/pn-ultra-audit"
 IMG = "https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/"   # absolute: works on the GitHub wiki and in the repo
 P = {}  # page name -> markdown
@@ -629,8 +629,8 @@ Location: `~/.cache/pn-ultra-audit/db` (override with `PNUA_DB`). Files: `osv/<e
 ## How the audit uses it
 
 1. **Local database** (if built) - then nothing is sent anywhere.
-2. **Live APIs** (OSV.dev, CISA KEV, NVD, endoflife.date; only package names and versions) when the database is missing; cached for 12 h.
-3. **Offline table** of end-of-life dates as a last resort. `--offline` (or `PNUA_OFFLINE=1`) forbids any network request.
+2. **Live APIs** (OSV.dev, CISA KEV, NVD, endoflife.date; only package names and versions), **only with `--online`** (or `PNUA_ONLINE=1`), when the database is missing; cached for 12 h.
+3. **Built-in table** of end-of-life dates as a last resort. By default NO network request is made; `--offline` (or `PNUA_OFFLINE=1`) forbids it even with `--online`.
 
 Findings: `DEP-VULN` (lockfile version matches an advisory; fixed version and exact upgrade command included, same-major fix preferred), `MAL-MALICIOUS-PACKAGE`, `RUNTIME-EOL`, `RUNTIME-VULN` (CVEs of the exact runtime version), `ADV-KEV-RECENT` (recent actively exploited bugs of a product you use). Keep it fresh with a weekly `--update-db` (cron or CI).
 """
@@ -651,7 +651,7 @@ These files are the wiki pages of the project (GitHub-wiki compatible: `Home.md`
 Read them here on GitHub, or locally: start at [Home.md](Home.md).
 """)
 sh = os.path.join(ROOT, "scripts", "publish_wiki.sh")
-open(sh, "w").write(r'''#!/usr/bin/env bash
+open(sh, "w", encoding="utf-8").write(r'''#!/usr/bin/env bash
 # Copies docs/wiki/*.md to the GitHub wiki repository. Dry run by default: shows what would change. Add --push to publish.
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

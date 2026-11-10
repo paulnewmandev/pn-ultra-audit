@@ -119,6 +119,11 @@ def is_generated(rel, text):
 
 
 CTX_REQUIRE = {"CFG-COOKIE": re.compile(r"cookie|session|set-?cookie", re.I)}   # the match must be about cookies/sessions (e.g. not `secure=False` of an HTTP client)
+# a lookup by id is fine when the SAME statement scopes it to the caller (workspaceId/tenantId/ownerId/userId key, a policy, authorize()); checked on the surrounding lines
+CTX_EXCLUDE = {"AUTHZ-IDOR": re.compile(r"\b(workspace|tenant|org|organi[sz]ation|account|team|company|owner|author|customer|project|created_?by|created_?by_?id)_?[iI]d\s*[:=]|\b(userId|user_id|ownerId|owner_id|createdBy|created_by)\s*[:=]|\buser\s*:\s*(req|ctx|session|current)|\.(workspace|tenant|org|owner|user|team|account)\w*\s*\)|policy|authorize|Gate::|->can\(|\bcan\(|scopedTo|forUser|forTenant|belongsTo", re.I)}
+# example/template env files: placeholders are expected there (a REAL-looking key in them is still reported)
+EXAMPLE_FILE = re.compile(r"(^|[._-])(example|sample|template|dist|tpl)(\.|$)", re.I)
+PLACEHOLDER_VALUE = re.compile(r"example|x{4,}|your[_-]|change[_-]?me|placeholder|dummy|fake|sample|<[^>]+>|\*{3,}|0{8,}|1234567|test[_-]|todo", re.I)
 STRIP_RULES = {"LOG-SECRET"}                                                   # secret word must be a variable/interpolation, not prose inside a string
 CLI_RELEVANT = {"cmdi", "sqli", "deser"}                                       # families where CLI/stdin input is still worth a (low-priority) review
 
@@ -229,6 +234,8 @@ def scan_files(files, progress=None, per_rule_cap=60):
                     if not mb or re.fullmatch(r"[Xx*.]+", mb.group(0)[:40]) or len(set(mb.group(0))) < 8: continue
                 if rule.id in STRIP_RULES and not rule.pattern.search(strip_literals(line)): continue
                 if rule.id in CTX_REQUIRE and not CTX_REQUIRE[rule.id].search("\n".join(L_[max(0, i - 3):i + 1])): continue
+                if rule.id in CTX_EXCLUDE and CTX_EXCLUDE[rule.id].search("\n".join(L_[max(0, i - 3):i + 6])): continue
+                if secretish and (re.search(r"AKIA\w*EXAMPLE|EXAMPLE\w*", m.group(0)) or (EXAMPLE_FILE.search(base) and PLACEHOLDER_VALUE.search(line))): continue
                 if rule.exclude and rule.exclude.search(line) and rule.id not in STRIP_RULES: continue
                 if COMMENT.match(line) and (rule.family not in ("secrets", "jwt") or rule.id == "SEC-HARDCODED"): continue
                 if rule.precision == "high": status, why = "confirmed", None
@@ -334,7 +341,7 @@ def project_checks(root, files, tracked, S):
         b = os.path.basename(rel).lower()
         if b.startswith(".env") and not re.search(r"example|sample|dist|template|\.md$", b):
             try:
-                keys = sum(1 for l in open(ab, errors="ignore") if re.match(r"\s*[A-Za-z_]\w*\s*=\s*\S", l) and not l.lstrip().startswith("#"))
+                keys = sum(1 for l in open(ab, errors="ignore", encoding="utf-8") if re.match(r"\s*[A-Za-z_]\w*\s*=\s*\S", l) and not l.lstrip().startswith("#"))
             except OSError:
                 keys = 0
             if keys:
@@ -347,7 +354,7 @@ def project_checks(root, files, tracked, S):
     # Dockerfile without USER
     for rel, (ab, ext) in names.items():
         if ext == "dockerfile":
-            try: t = open(ab, errors="ignore").read()
+            try: t = open(ab, errors="ignore", encoding="utf-8").read()
             except OSError: continue
             if not re.search(r"^\s*USER\s+(?!root\b)\S+", t, re.M | re.I):
                 f("CFG-DOCKER-NOUSER", f"`{rel}` never switches to a non-root USER", "docker", "security_hotspot", None, "misconfiguration", rel, 1, "(no USER instruction)", KB["docker"]["impact"],
@@ -368,7 +375,7 @@ def project_checks(root, files, tracked, S):
     # .gitignore must cover env
     gi = os.path.join(root, ".gitignore")
     if tracked is not None and any(os.path.basename(r).startswith(".env") for r in names):
-        try: g = open(gi, errors="ignore").read() if os.path.exists(gi) else ""
+        try: g = open(gi, errors="ignore", encoding="utf-8").read() if os.path.exists(gi) else ""
         except OSError: g = ""
         if ".env" not in g:
             f("SEC-GITIGNORE-ENV", ".gitignore does not ignore .env files", "secrets", "code_smell", "low", "secrets", ".gitignore", 1, "(no .env pattern)", KB["secrets"]["impact"], "Add `.env` and `.env.*` (except .env.example) to .gitignore", 5, cwe=["CWE-540"])

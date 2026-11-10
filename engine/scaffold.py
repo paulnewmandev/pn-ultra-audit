@@ -44,7 +44,7 @@ def plan(root, files, deps_text, arch=None):
     stacks = _stacks(rels, deps_text); proj = os.path.basename(os.path.abspath(root)) or "project"; out = []
     scripts = {}
     if os.path.exists(os.path.join(root, "package.json")):
-        try: scripts = json.load(open(os.path.join(root, "package.json"))).get("scripts", {})
+        try: scripts = json.load(open(os.path.join(root, "package.json"), encoding="utf-8")).get("scripts", {})
         except (OSError, ValueError): pass
     def add(path, content, why):
         if path.lower() not in lowset and not os.path.exists(os.path.join(root, path)): out.append((path, content, why))
@@ -53,7 +53,7 @@ def plan(root, files, deps_text, arch=None):
     envs = {}
     for r, ab, e, sz in files:
         if e in ("js", "jsx", "ts", "tsx", "mjs", "cjs", "py", "php", "rb", "go", "java", "kt", "cs", "rs", "vue", "svelte") and sz < 400_000:
-            try: t = open(ab, errors="ignore").read()
+            try: t = open(ab, errors="ignore", encoding="utf-8").read()
             except OSError: continue
             for rx in ENV_RX:
                 for m in re.finditer(rx, t): envs.setdefault(m.group(1), r)

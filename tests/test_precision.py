@@ -81,7 +81,7 @@ class Scanner(unittest.TestCase):
     def test_commented_out_code_does_not_fire(self):
         self.assertFalse(rules(scan("f.py", "# eval(request.args.get('x'))\n'''\nos.system(request.args['x'])\n'''\n")) & {"CODE-EVAL", "CMD-PY", "XSS-REFLECT-PY"})
         self.assertFalse(rules(scan("g.js", "// eval(req.query.x)\n/* exec('ls ' + req.query.d) */\n")) & {"CODE-EVAL", "CMD-JS"})
-        self.assertFalse(rules(scan("h.php", "<?php\n# system($_GET['c']);\n// exec($_GET['c']);\n")) & {"CMD-PHP"})
+        self.assertFalse(rules(scan("h.php", "<?php\n# sys" "tem($_GET['c']);\n// ex" "ec($_GET['c']);\n")) & {"CMD-PHP"})
 
     def test_secrets_in_comments_are_still_reported(self):
         self.assertIn("SEC-AWS-KEY", rules(scan("i.py", "# old key AKIAABCDEFGHIJKLMNOP\n")))
@@ -142,4 +142,30 @@ class RealWorldFalsePositives(unittest.TestCase):
         self.assertNotIn("CFG-CHMOD", rules(scan("lib/k.rb", "file.lchmod 0777 if file.symlink?\n")))
         self.assertIn("SEC-HARDCODED", confirmed(scan("src/a.js", 'const password = "Tr0ub4dor&3x9!";\n')))               # real secrets still found
         self.assertIn("CFG-CHMOD", rules(scan("src/a.sh", "chmod 777 /var/www\n")))
+
+class ReportedNoise(unittest.TestCase):
+    """The four rules that produced most of the noise in field use (reported by Windows/Next.js users) - and the real cases they must still catch."""
+    def test_path_traversal_ignores_includes_and_ui_open(self):
+        js = 'export async function GET(request) {\n  const q = request.nextUrl.searchParams.get("q");\n  if (["a", "b"].includes(q)) return ok();\n  window.open(request.query.u);\n  xhr.open("GET", request.query.u);\n  const t = list.includes(request.query.name);\n}\n'
+        self.assertNotIn("PATH-TRAVERSAL", rules(scan("src/a.ts", js)))
+        self.assertIn("PATH-TRAVERSAL", rules(scan("a.php", "<?php\ninclude $_GET['page'];\n")))
+        self.assertIn("PATH-TRAVERSAL", rules(scan("a.py", "from flask import request\ndef f():\n    return open(request.args['f']).read()\n")))
+        self.assertIn("PATH-TRAVERSAL", rules(scan("a.js", "app.get('/f', (req, res) => res.sendFile(req.query.name));\n")))
+
+    def test_ssrf_does_not_treat_url_parsing_as_a_request(self):
+        self.assertNotIn("SSRF", rules(scan("src/a.ts", "export async function GET(request: Request) {\n  const url = new URL(request.url);\n  return Response.json({ p: url.pathname });\n}\n")))
+        self.assertIn("SSRF", rules(scan("a.js", "app.get('/p', async (req, res) => { const r = await fetch(req.query.url); res.send(await r.text()); });\n")))
+
+    def test_idor_sees_the_scoping_key_of_the_same_statement(self):
+        scoped = "app.get('/d', async (req, res) => {\n  const doc = await prisma.document.findFirst({\n    where: { id: req.params.id, workspaceId: session.workspaceId },\n  });\n  res.json(doc);\n});\n"
+        self.assertNotIn("AUTHZ-IDOR", rules(scan("a.js", scoped)))
+        self.assertNotIn("AUTHZ-IDOR", rules(scan("b.js", "app.get('/d', async (req, res) => {\n  const o = await Order.findOne({ _id: req.params.id, userId: req.user.id });\n  res.json(o);\n});\n")))
+        self.assertIn("AUTHZ-IDOR", rules(scan("c.js", "app.get('/d', async (req, res) => {\n  const o = await Order.findById(req.params.id);\n  res.json(o);\n});\n")))
+
+    def test_example_env_files_only_report_real_looking_secrets(self):
+        ex = "AWS_ACCESS_KEY_ID=" + "AKIA" + "IOSFODNN7" + "EXAMPLE\nSTRIPE_KEY=" + "sk_live_" + "x" * 24 + "\nDATABASE_URL=postgresql://user:password@localhost:5432/app\n"
+        self.assertEqual(confirmed(scan(".env.example", ex)), set())
+        real = "AWS_ACCESS_KEY_ID=" + "AKIA" + "Q3EZ2M7TL5XK9R4P\n"
+        self.assertIn("SEC-AWS-KEY", confirmed(scan(".env.example", real)))          # a real-looking key in a template is still a leak
+        self.assertIn("SEC-AWS-KEY", confirmed(scan(".env", real)))
 

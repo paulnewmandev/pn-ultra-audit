@@ -53,7 +53,7 @@ def _guide(home): return GUIDE.format(home=home)
 
 def _write(path, text, force, log):
     if os.path.exists(path):
-        old = open(path, errors="ignore").read()
+        old = open(path, errors="ignore", encoding="utf-8").read()
         if MARK not in old and not force:
             log.append(f"  ! skipped (exists, not managed): {path}  (use --force)"); return False
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -66,7 +66,7 @@ def _merge_block(path, body, force, log, fm=""):
     block = f"{b}\n{body.strip()}\n{e}\n"
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     if os.path.exists(path):
-        t = open(path, errors="ignore").read()
+        t = open(path, errors="ignore", encoding="utf-8").read()
         t = re.sub(re.escape(b) + r".*?" + re.escape(e) + r"\n?", block, t, flags=re.S) if b in t else t.rstrip() + "\n\n" + block
     else: t = block
     open(path, "w", encoding="utf-8").write(t); log.append(f"  + {path} (managed block)")
@@ -89,7 +89,7 @@ def _copy_skills(dest_root, home, force, log):
                     t = re.sub(r'sys\.path\.insert\(0, .*\)\n', f'sys.path.insert(0, {home!r})\n', t, count=1); open(pp, "w", encoding="utf-8").write(t)
                 if f.endswith(".md"):
                     p = os.path.join(dp, f); t = open(p, encoding="utf-8").read().replace("<suite>", home); open(p, "w", encoding="utf-8").write(t)
-        open(os.path.join(d, ".pn-managed"), "w").write(MARK); n += 1
+        open(os.path.join(d, ".pn-managed"), "w", encoding="utf-8").write(MARK); n += 1
     log.append(f"  + {n} skills -> {dest_root}")
 
 

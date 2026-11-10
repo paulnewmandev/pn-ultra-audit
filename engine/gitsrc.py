@@ -48,6 +48,15 @@ def _token_for(url, token_env):
     return None, None
 
 
+def _rm(p):
+    import stat
+    def _w(fn, path, exc):
+        try: os.chmod(path, stat.S_IWRITE); fn(path)
+        except OSError: pass
+    try: shutil.rmtree(p, onerror=_w)
+    except OSError: pass
+
+
 def clone(url, branch=None, depth=1, token_env=None, timeout=600, host=None):
     """-> (path, error). Accepts shorthands (github:org/repo, gitlab:group/repo, bitbucket:, azure:, gitea:host/org/repo) or any git URL.
     SSH keys / credential helpers of the current user are used as-is; for https a token can come from --git-token-env or the host's default
@@ -63,7 +72,7 @@ def clone(url, branch=None, depth=1, token_env=None, timeout=600, host=None):
         args = ["-c", f"http.extraHeader=Authorization: Basic {b64}"] + args
     rc, so, se = _git(args, timeout=timeout)
     if rc != 0:
-        shutil.rmtree(dest, ignore_errors=True)
+        _rm(dest)
         msg = re.sub(r"(https?://)[^@/\s]+@", r"\1***@", se.strip().splitlines()[-1] if se.strip() else f"exit {rc}")
         return None, "clone failed: " + msg + (" (private repo? use an SSH URL with your key, or export GITHUB_TOKEN / GITLAB_TOKEN / BITBUCKET_TOKEN, or --git-token-env VAR)" if re.search(r"auth|denied|403|404|not found|Permission|could not read", msg, re.I) else "")
     return os.path.join(dest, "repo"), None

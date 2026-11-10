@@ -461,7 +461,7 @@ def render(d, lang="es", strict=False, ncloc=None):
     json.dump(build_sarif(confirmed, nv), open(os.path.join(d, "findings.sarif"), "w", encoding="utf-8"), indent=2)
     cnt = Counter(f["severity"] for f in confirmed)
     json.dump(dict(date=meta.get("date"), counts={k: cnt.get(k, 0) for k in SEV}, confirmed=len(confirmed), gate=("PASS" if comp["gate_pass"] else "FAIL"),
-                   ratings=dict(reliability=comp["reliability"], security=comp["security"], maintainability=comp["maintainability"])), open(os.path.join(d, "summary.json"), "w"), indent=2)
+                   ratings=dict(reliability=comp["reliability"], security=comp["security"], maintainability=comp["maintainability"])), open(os.path.join(d, "summary.json"), "w", encoding="utf-8"), indent=2)
     comp["validation_errors"] = len(errs); comp["n_confirmed"] = len(confirmed); comp["n_nv"] = len(nv); comp["n_rejected"] = len(rejected)
     return comp
 

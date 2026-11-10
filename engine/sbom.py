@@ -39,7 +39,7 @@ def build(root, files):
     for rel, ab, e, sz in files:
         b = os.path.basename(rel); depth = rel.count("/")
         if depth > 2 or sz > 30_000_000: continue
-        try: t = open(ab, errors="ignore").read()
+        try: t = open(ab, errors="ignore", encoding="utf-8").read()
         except OSError: continue
         try:
             if b == "package-lock.json":

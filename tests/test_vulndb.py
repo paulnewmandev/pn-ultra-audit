@@ -87,5 +87,35 @@ class Advisories(unittest.TestCase):
         self.assertEqual(r.returncode, 1); self.assertIn("--update-db", r.stdout)
 
 
+class NetworkPolicy(unittest.TestCase):
+    """The documentation promises NO network by default: live lookups only with --online (PNUA_ONLINE=1); --offline always wins."""
+    def _project(self, tmp):
+        proj = os.path.join(tmp, "p"); os.makedirs(proj)
+        json.dump({"dependencies": {"lodash": "4.17.15"}}, open(os.path.join(proj, "package.json"), "w"))
+        json.dump({"lockfileVersion": 3, "packages": {"": {"name": "x"}, "node_modules/lodash": {"version": "4.17.15"}}}, open(os.path.join(proj, "package-lock.json"), "w"))
+        return proj
+
+    def _run(self, env, calls):
+        saved = {k: os.environ.get(k) for k in ("PNUA_ONLINE", "PNUA_OFFLINE", "PNUA_DB", "PNUA_CACHE")}
+        with tempfile.TemporaryDirectory() as tmp:
+            os.environ.pop("PNUA_ONLINE", None); os.environ.pop("PNUA_OFFLINE", None); os.environ["PNUA_DB"] = os.path.join(tmp, "nodb"); os.environ["PNUA_CACHE"] = os.path.join(tmp, "cache"); os.environ.update(env)
+            advisories.FETCH = lambda url, data=None, timeout=8: (calls.append(url), {"results": [], "vulnerabilities": []})[1]
+            try:
+                proj = self._project(tmp); files, _, _ = scanner.discover(proj); return advisories.analyze(proj, files)
+            finally:
+                advisories.FETCH = None
+                for k, v in saved.items():
+                    if v is None: os.environ.pop(k, None)
+                    else: os.environ[k] = v
+
+    def test_default_makes_no_network_request_and_says_how_to_get_data(self):
+        calls = []; _f, info = self._run({}, calls)
+        self.assertEqual(calls, []); self.assertFalse(info["live"]); self.assertTrue(any("--update-db" in e and "--online" in e for e in info["errors"]))
+
+    def test_online_flag_allows_lookups_but_offline_wins(self):
+        calls = []; self._run({"PNUA_ONLINE": "1"}, calls); self.assertTrue(any("osv.dev" in u or "cisa.gov" in u for u in calls))
+        calls2 = []; self._run({"PNUA_ONLINE": "1", "PNUA_OFFLINE": "1"}, calls2); self.assertEqual(calls2, [])
+
+
 if __name__ == "__main__":
     unittest.main()

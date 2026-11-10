@@ -46,7 +46,7 @@ def analyze(root, files, deps_text, det, has_ratelimit=False):
     texts = {}
     for rel, ab, e, sz in files:
         if e in SRC and sz < 400_000 and not re.search(r"(^|/)(node_modules|vendor|dist|build|tests?|__tests__|spec|fixtures?|mocks?)(/|$)|\.(test|spec)\.", rel):
-            try: texts[rel] = open(ab, errors="ignore").read()
+            try: texts[rel] = open(ab, errors="ignore", encoding="utf-8").read()
             except OSError: pass
     blob = (deps_text + "\n" + "\n".join(texts.values())).lower()
     has = lambda rx: bool(re.search(rx, blob))

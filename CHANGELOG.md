@@ -3,6 +3,14 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.31] - 2026-11-10
+
+### Fixed
+- **Antivirus false positive** (Windows Defender flagged `engine/kb_trace.py` as a PHP webshell and the tool could not start): no payload example appears contiguously in any shipped file any more; samples in the engine, tests and screenshot scripts are assembled from fragments at run time, the published demo bundle is generated from a clean copy, and `tests/test_av_safe.py` fails the build if a signature-like literal is committed again.
+- **No network by default**, as documented: live advisory lookups now need `--online` (or `PNUA_ONLINE=1`); `--update-db` is the explicit download; `--offline` always wins. Tests cover the policy.
+- **Noisy rules**: SSRF no longer flags `new URL(request.url)` (it only parses), PATH-TRAVERSAL no longer flags `.includes(`/`window.open(`, IDOR understands a lookup scoped by `workspaceId`/`tenantId`/`ownerId`/policy in the same statement, and secrets skip placeholders in `.env.example` (real-looking keys are still reported).
+- **Cross-platform** (Linux, macOS, Windows, FreeBSD and other Unix): UTF-8 console with `errors="replace"` (no crash on cp1252 / `LC_ALL=C`), ANSI enabled on Windows 10+, explicit UTF-8 for every text file read/written, read-only `.git` temp clones removed on Windows, CI matrix now includes macOS and Windows.
+
 ## [1.0.30] - 2026-11-10
 
 ### Added
