@@ -436,6 +436,13 @@
               }
             },
             {
+              "id": "TODO-BLOCKER",
+              "name": "todo",
+              "shortDescription": {
+                "text": "Marker says to remove or fix this before production"
+              }
+            },
+            {
               "id": "SEO-NO-DESCRIPTION",
               "name": "seo",
               "shortDescription": {
@@ -475,6 +482,13 @@
               "name": "test-quality",
               "shortDescription": {
                 "text": "Focused test committed (`.only` / `fit`) - the rest of the suite is silently skipped"
+              }
+            },
+            {
+              "id": "STD-NO-FORMATTER",
+              "name": "standards",
+              "shortDescription": {
+                "text": "No formatter / .editorconfig configured"
               }
             },
             {
@@ -534,6 +548,13 @@
               }
             },
             {
+              "id": "HC-PATH",
+              "name": "hardcode",
+              "shortDescription": {
+                "text": "Personal machine path hardcoded: /Users/ana/"
+              }
+            },
+            {
               "id": "WEB3-FLOATING-PRAGMA",
               "name": "smart-contract",
               "shortDescription": {
@@ -559,6 +580,13 @@
               "name": "supply-chain",
               "shortDescription": {
                 "text": "`package.json` has no lockfile"
+              }
+            },
+            {
+              "id": "TODO-FIXME",
+              "name": "todo",
+              "shortDescription": {
+                "text": "1 FIXME/HACK marker(s) in api_client.js"
               }
             },
             {
@@ -681,6 +709,20 @@
               }
             },
             {
+              "id": "TODO-SECURITY",
+              "name": "todo",
+              "shortDescription": {
+                "text": "TODO says security work is still missing: auth"
+              }
+            },
+            {
+              "id": "HC-ADMIN-ID",
+              "name": "hardcode",
+              "shortDescription": {
+                "text": "Authorization depends on a literal user id"
+              }
+            },
+            {
               "id": "MAL-UPLOAD-SCRIPT",
               "name": "malware",
               "shortDescription": {
@@ -765,6 +807,20 @@
               }
             },
             {
+              "id": "HC-URL-LOCAL",
+              "name": "hardcode",
+              "shortDescription": {
+                "text": "localhost URL hardcoded at a call site"
+              }
+            },
+            {
+              "id": "HC-IP",
+              "name": "hardcode",
+              "shortDescription": {
+                "text": "IP address hardcoded as a host: 10.0.3.17"
+              }
+            },
+            {
               "id": "A11Y-INPUT-LABEL",
               "name": "a11y",
               "shortDescription": {
@@ -776,6 +832,20 @@
               "name": "resource-exhaustion",
               "shortDescription": {
                 "text": "Outbound HTTP call without timeout"
+              }
+            },
+            {
+              "id": "HC-RATE",
+              "name": "hardcode",
+              "shortDescription": {
+                "text": "Business rate hardcoded in a function: tax_rate"
+              }
+            },
+            {
+              "id": "HC-URL-ENV",
+              "name": "hardcode",
+              "shortDescription": {
+                "text": "Environment-specific host hardcoded: api-staging.myapp.com"
               }
             }
           ]
@@ -2972,7 +3042,7 @@
             "text": "Front-end has no unit/component test runner (Vitest/Jest/Karma) \u2014 Add Vitest (Vite) or Jest + Testing Library; test components by behavior (role/label/text)"
           },
           "partialFingerprints": {
-            "auditFingerprint/v1": "QA-FE-NO-UNIT:package.json:b6ec2bfd53"
+            "auditFingerprint/v1": "QA-FE-NO-UNIT:package.json:4ccabdf506"
           },
           "locations": [
             {
@@ -3055,8 +3125,38 @@
           }
         },
         {
-          "ruleId": "SEO-NO-DESCRIPTION",
+          "ruleId": "TODO-BLOCKER",
           "ruleIndex": 61,
+          "level": "warning",
+          "message": {
+            "text": "Marker says to remove or fix this before production \u2014 Remove the shortcut now, or gate it behind a flag that is OFF in production; add a CI check that rejects `remove before prod` / `debug only` markers."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "TODO-BLOCKER:web/api_client.js:b5836abc31"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-005",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "SEO-NO-DESCRIPTION",
+          "ruleIndex": 62,
           "level": "warning",
           "message": {
             "text": "Pages without meta description (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3086,7 +3186,7 @@
         },
         {
           "ruleId": "SEO-NO-VIEWPORT",
-          "ruleIndex": 62,
+          "ruleIndex": 63,
           "level": "warning",
           "message": {
             "text": "Pages without viewport meta (not mobile-friendly) (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3116,7 +3216,7 @@
         },
         {
           "ruleId": "A11Y-IMG-ALT",
-          "ruleIndex": 63,
+          "ruleIndex": 64,
           "level": "warning",
           "message": {
             "text": "Image without alt text \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -3146,7 +3246,7 @@
         },
         {
           "ruleId": "A11Y-CLICK-NONINTERACTIVE",
-          "ruleIndex": 64,
+          "ruleIndex": 65,
           "level": "warning",
           "message": {
             "text": "Click handler on a non-interactive element (keyboard/screen-reader inaccessible) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -3176,7 +3276,7 @@
         },
         {
           "ruleId": "QA-SLEEP",
-          "ruleIndex": 65,
+          "ruleIndex": 66,
           "level": "warning",
           "message": {
             "text": "Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) \u2014 Replace sleeps with auto-waiting web-first assertions (`await expect(locator).toBeVisible()`), `waitFor`, or explicit network/route waits.; Locate like a user: getByRole > getByLabel > getByText > getByTestId > CSS (last resort); avoid XPath and deep CSS chains."
@@ -3206,7 +3306,7 @@
         },
         {
           "ruleId": "TST-FOCUSED",
-          "ruleIndex": 66,
+          "ruleIndex": 67,
           "level": "warning",
           "message": {
             "text": "Focused test committed (`.only` / `fit`) - the rest of the suite is silently skipped \u2014 Remove `.only`/`fit`"
@@ -3235,14 +3335,14 @@
           }
         },
         {
-          "ruleId": "DOC-COVERAGE-LOW",
-          "ruleIndex": 67,
+          "ruleId": "STD-NO-FORMATTER",
+          "ruleIndex": 68,
           "level": "note",
           "message": {
-            "text": "Public API documentation coverage is 0.0% (target 60%) \u2014 Adopt a rule: new/changed public code must be documented (enforce with pydocstyle/interrogate, eslint-plugin-jsdoc, phpcs, detekt UndocumentedPublicClass, golint/revive exported, SwiftLint missing_docs)"
+            "text": "No formatter / .editorconfig configured \u2014 Add .editorconfig + an auto-formatter (Prettier/Biome, Black/ruff format, Pint, gofmt, ktlint, SwiftFormat) and run it in CI"
           },
           "partialFingerprints": {
-            "auditFingerprint/v1": "DOC-COVERAGE-LOW:.:f2390ed072"
+            "auditFingerprint/v1": "STD-NO-FORMATTER:.:5535775b85"
           },
           "locations": [
             {
@@ -3257,7 +3357,37 @@
             }
           ],
           "properties": {
-            "id": "COD-005",
+            "id": "COD-006",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DOC-COVERAGE-LOW",
+          "ruleIndex": 69,
+          "level": "note",
+          "message": {
+            "text": "Public API documentation coverage is 0.0% (target 60%) \u2014 Adopt a rule: new/changed public code must be documented (enforce with pydocstyle/interrogate, eslint-plugin-jsdoc, phpcs, detekt UndocumentedPublicClass, golint/revive exported, SwiftLint missing_docs)"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DOC-COVERAGE-LOW:.:b4bf29ca87"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "."
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-007",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3266,7 +3396,7 @@
         },
         {
           "ruleId": "MOB-IOS-NO-COVERAGE",
-          "ruleIndex": 68,
+          "ruleIndex": 70,
           "level": "note",
           "message": {
             "text": "iOS: code coverage not enabled in scheme/test plan \u2014 Enable 'Gather coverage' and export with xcrun xccov in CI"
@@ -3296,7 +3426,7 @@
         },
         {
           "ruleId": "WEB3-NO-STATIC-ANALYSIS",
-          "ruleIndex": 69,
+          "ruleIndex": 71,
           "level": "note",
           "message": {
             "text": "No Slither/Echidna/Medusa/Certora in CI \u2014 Run `slither .` and fuzzing (forge invariants/Echidna) on every PR; get an external audit before mainnet"
@@ -3326,7 +3456,7 @@
         },
         {
           "ruleId": "DB-FK-OFF",
-          "ruleIndex": 70,
+          "ruleIndex": 72,
           "level": "note",
           "message": {
             "text": "Foreign keys declared but PRAGMA foreign_keys is OFF by default \u2014 Execute `PRAGMA foreign_keys=ON` when opening every connection."
@@ -3347,7 +3477,7 @@
             }
           ],
           "properties": {
-            "id": "COD-006",
+            "id": "COD-008",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3356,7 +3486,7 @@
         },
         {
           "ruleId": "SQL-FK-NO-INDEX",
-          "ruleIndex": 71,
+          "ruleIndex": 73,
           "level": "note",
           "message": {
             "text": "Foreign key `orders.user_id` without index \u2014 CREATE INDEX idx_orders_user_id ON orders(user_id);"
@@ -3386,7 +3516,7 @@
         },
         {
           "ruleId": "DOC-API-UNDOCUMENTED",
-          "ruleIndex": 72,
+          "ruleIndex": 74,
           "level": "note",
           "message": {
             "text": "Public API under-documented in `backend/app.py` (0/12) \u2014 Add doc comments to every public symbol: one-line summary, params/returns/raises (where non-obvious), and a usage example for entry points"
@@ -3407,7 +3537,7 @@
             }
           ],
           "properties": {
-            "id": "COD-007",
+            "id": "COD-009",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3416,7 +3546,7 @@
         },
         {
           "ruleId": "BUG-PY-MUTABLE-DEFAULT",
-          "ruleIndex": 73,
+          "ruleIndex": 75,
           "level": "note",
           "message": {
             "text": "Mutable default argument that is mutated or leaked \u2014 Apply the safer idiom shown below.; Add a test that hits the edge case."
@@ -3448,7 +3578,7 @@
         },
         {
           "ruleId": "BUG-EMPTY-CATCH",
-          "ruleIndex": 74,
+          "ruleIndex": 76,
           "level": "note",
           "message": {
             "text": "Empty catch/except (swallowed error) \u2014 Catch the narrowest exception; log with context or re-raise.; If intentionally ignored, comment why."
@@ -3469,7 +3599,7 @@
             }
           ],
           "properties": {
-            "id": "COD-008",
+            "id": "COD-010",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [
@@ -3481,8 +3611,40 @@
           }
         },
         {
+          "ruleId": "HC-PATH",
+          "ruleIndex": 77,
+          "level": "note",
+          "message": {
+            "text": "Personal machine path hardcoded: /Users/ana/ \u2014 Use a project-relative path (Path(__file__).parent / path.join(__dirname, ...)) or a configurable directory (DATA_DIR); never a personal home path."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "HC-PATH:backend/billing.py:72bcf1a771"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/billing.py"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-011",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [
+              "CWE-200"
+            ],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "WEB3-FLOATING-PRAGMA",
-          "ruleIndex": 75,
+          "ruleIndex": 78,
           "level": "note",
           "message": {
             "text": "Floating pragma (^0.8.0): deployed bytecode may differ from what was audited \u2014 Pin the exact compiler (e.g. `pragma solidity 0.8.24;`) for deployable contracts"
@@ -3503,7 +3665,7 @@
             }
           ],
           "properties": {
-            "id": "COD-009",
+            "id": "COD-012",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [
@@ -3514,7 +3676,7 @@
         },
         {
           "ruleId": "SQL-FK-NO-INDEX",
-          "ruleIndex": 71,
+          "ruleIndex": 73,
           "level": "note",
           "message": {
             "text": "Foreign key `orders.user_id` without index \u2014 CREATE INDEX idx_orders_user_id ON orders(user_id);"
@@ -3544,7 +3706,7 @@
         },
         {
           "ruleId": "SQL-MYISAM",
-          "ruleIndex": 76,
+          "ruleIndex": 79,
           "level": "note",
           "message": {
             "text": "Table `orders` uses MyISAM \u2014 Convert to InnoDB (`ALTER TABLE t ENGINE=InnoDB`)."
@@ -3565,7 +3727,7 @@
             }
           ],
           "properties": {
-            "id": "COD-010",
+            "id": "COD-013",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3574,7 +3736,7 @@
         },
         {
           "ruleId": "MOB-IOS-CONTINUE-AFTER-FAILURE",
-          "ruleIndex": 77,
+          "ruleIndex": 80,
           "level": "note",
           "message": {
             "text": "iOS: 1 UI test file(s) do not set continueAfterFailure = false \u2014 In setUp: `continueAfterFailure = false`"
@@ -3604,7 +3766,7 @@
         },
         {
           "ruleId": "DEP-NO-LOCKFILE",
-          "ruleIndex": 78,
+          "ruleIndex": 81,
           "level": "note",
           "message": {
             "text": "`package.json` has no lockfile \u2014 Commit the lockfile (npm i / composer install / bundle install)"
@@ -3638,8 +3800,38 @@
           }
         },
         {
+          "ruleId": "TODO-FIXME",
+          "ruleIndex": 82,
+          "level": "note",
+          "message": {
+            "text": "1 FIXME/HACK marker(s) in api_client.js \u2014 Treat FIXME/HACK/XXX/BUG as defects: schedule or fix them; give each an issue number (`FIXME(#123)`)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "TODO-FIXME:web/api_client.js:0ead59e5da"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 4
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-014",
+            "type": "code_smell",
+            "status": "confirmed",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "SEO-NO-CANONICAL",
-          "ruleIndex": 79,
+          "ruleIndex": 83,
           "level": "note",
           "message": {
             "text": "Pages without canonical link (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3669,7 +3861,7 @@
         },
         {
           "ruleId": "SEO-H1",
-          "ruleIndex": 80,
+          "ruleIndex": 84,
           "level": "note",
           "message": {
             "text": "Pages with zero or multiple <h1> (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3699,7 +3891,7 @@
         },
         {
           "ruleId": "SEO-NO-OG",
-          "ruleIndex": 81,
+          "ruleIndex": 85,
           "level": "note",
           "message": {
             "text": "Pages missing Open Graph title/image (1 of 1 HTML pages) \u2014 Give every indexable page a unique <title> (30-60 chars, primary keyword first, brand last) and a unique meta description (70-160 chars, a reason to click).; Add <link rel=\"canonical\"> pointing to the preferred absolute URL (self-referencing by default)."
@@ -3729,7 +3921,7 @@
         },
         {
           "ruleId": "SEO-IMG-NO-SIZE",
-          "ruleIndex": 82,
+          "ruleIndex": 86,
           "level": "note",
           "message": {
             "text": "Pages with \u22653 images lacking width/height (layout shift) (1 of 1 HTML pages) \u2014 Targets: LCP < 2.5 s, INP < 200 ms, CLS < 0.1 (field data in Search Console / CrUX).; Images: modern formats (AVIF/WebP), responsive srcset, explicit width/height, `loading=\"lazy\"` below the fold, `fetchpriority=\"high\"` on the LCP image."
@@ -3759,7 +3951,7 @@
         },
         {
           "ruleId": "SEO-RENDER-BLOCKING",
-          "ruleIndex": 83,
+          "ruleIndex": 87,
           "level": "note",
           "message": {
             "text": "Pages with render-blocking <script> (no async/defer) (1 of 1 HTML pages) \u2014 Targets: LCP < 2.5 s, INP < 200 ms, CLS < 0.1 (field data in Search Console / CrUX).; Images: modern formats (AVIF/WebP), responsive srcset, explicit width/height, `loading=\"lazy\"` below the fold, `fetchpriority=\"high\"` on the LCP image."
@@ -3789,7 +3981,7 @@
         },
         {
           "ruleId": "A11Y-HTML-LANG",
-          "ruleIndex": 84,
+          "ruleIndex": 88,
           "level": "note",
           "message": {
             "text": "<html> without lang attribute \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -3819,7 +4011,7 @@
         },
         {
           "ruleId": "DEP-NO-LOCKFILE",
-          "ruleIndex": 78,
+          "ruleIndex": 81,
           "level": "note",
           "message": {
             "text": "`web/package.json` has no lockfile \u2014 Commit the lockfile (npm i / composer install / bundle install)"
@@ -3854,7 +4046,7 @@
         },
         {
           "ruleId": "AITRACE-AGENT-FILE",
-          "ruleIndex": 85,
+          "ruleIndex": 89,
           "level": "note",
           "message": {
             "text": "Cursor configuration committed: .cursor \u2014 Stop tracking it: git rm --cached -r <path> and add it to .gitignore (bash cleanup-fixes.sh AI-FILES), after checking it for secrets."
@@ -3875,7 +4067,7 @@
             }
           ],
           "properties": {
-            "id": "COD-011",
+            "id": "COD-015",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3884,7 +4076,7 @@
         },
         {
           "ruleId": "AITRACE-AGENT-FILE",
-          "ruleIndex": 85,
+          "ruleIndex": 89,
           "level": "note",
           "message": {
             "text": "Claude Code configuration committed: CLAUDE.md \u2014 Stop tracking it: git rm --cached -r <path> and add it to .gitignore (bash cleanup-fixes.sh AI-FILES), after checking it for secrets."
@@ -3905,7 +4097,7 @@
             }
           ],
           "properties": {
-            "id": "COD-012",
+            "id": "COD-016",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3914,7 +4106,7 @@
         },
         {
           "ruleId": "AITRACE-COMMENT",
-          "ruleIndex": 86,
+          "ruleIndex": 90,
           "level": "note",
           "message": {
             "text": "Comment reveals AI-assisted authoring \u2014 Delete the assistant/generator comment (or replace it with a comment explaining why); keep it only if disclosure is required. bash cleanup-fixes.sh AI-COMMENTS."
@@ -3935,7 +4127,7 @@
             }
           ],
           "properties": {
-            "id": "COD-013",
+            "id": "COD-017",
             "type": "code_smell",
             "status": "confirmed",
             "cwe": [],
@@ -3944,7 +4136,7 @@
         },
         {
           "ruleId": "SEO-ROBOTS-NO-SITEMAP",
-          "ruleIndex": 87,
+          "ruleIndex": 91,
           "level": "note",
           "message": {
             "text": "robots.txt does not reference the sitemap \u2014 Add `Sitemap: https://your-domain/sitemap.xml`"
@@ -3974,7 +4166,7 @@
         },
         {
           "ruleId": "SEO-CSR-ONLY",
-          "ruleIndex": 88,
+          "ruleIndex": 92,
           "level": "note",
           "message": {
             "text": "Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell) \u2014 Move to SSR/SSG (Next, Nuxt, Astro, SvelteKit, Remix) or prerender public routes (vite-plugin-ssr, react-snap)"
@@ -4004,7 +4196,7 @@
         },
         {
           "ruleId": "AUTHZ-MASS-ASSIGN",
-          "ruleIndex": 89,
+          "ruleIndex": 93,
           "level": "note",
           "message": {
             "text": "Mass assignment / over-posting \u2014 Use explicit allowlists (`$fillable`, DTO/serializer `fields=[...]`, `permit(:a,:b)`).; Never bind sensitive fields from input; set them server-side."
@@ -4039,7 +4231,7 @@
         },
         {
           "ruleId": "DOS-UNBOUNDED-SIZE",
-          "ruleIndex": 90,
+          "ruleIndex": 94,
           "level": "note",
           "message": {
             "text": "Client-controlled size/limit without cap \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
@@ -4074,7 +4266,7 @@
         },
         {
           "ruleId": "SOL-DELEGATECALL",
-          "ruleIndex": 91,
+          "ruleIndex": 95,
           "level": "note",
           "message": {
             "text": "Solidity delegatecall / selfdestruct / low-level call \u2014 Avoid shelling out: use a library or native API for the job.; If unavoidable, pass an argument array with no shell (`subprocess.run([...], shell=False)`, `execFile`, `ProcessBuilder(list)`)."
@@ -4106,7 +4298,7 @@
         },
         {
           "ruleId": "XSS-FRAMEWORK",
-          "ruleIndex": 92,
+          "ruleIndex": 96,
           "level": "note",
           "message": {
             "text": "Framework raw-HTML escape hatch \u2014 Identify the sink (innerHTML, v-html, dangerouslySetInnerHTML, `{!! !!}`, `|safe`, echo of request data).; Prefer auto-escaping output: `textContent`, `{{ }}`/`{{ }}` templates, `htmlspecialchars($x, ENT_QUOTES, 'UTF-8')`."
@@ -4140,7 +4332,7 @@
         },
         {
           "ruleId": "CFG-TF",
-          "ruleIndex": 93,
+          "ruleIndex": 97,
           "level": "note",
           "message": {
             "text": "Terraform/cloud over-exposure \u2014 Apply least privilege (no privileged pods, no `0.0.0.0/0` on admin ports, no `Principal: *`).; Pin GitHub Actions to commit SHAs; avoid `pull_request_target` with untrusted checkout; never interpolate `${{ github.event.* }}` into `run:`."
@@ -4176,7 +4368,7 @@
         },
         {
           "ruleId": "SQLI-JAVA",
-          "ruleIndex": 94,
+          "ruleIndex": 98,
           "level": "note",
           "message": {
             "text": "SQL built with concatenation (Java/Kotlin/Android) \u2014 Find every place the query string is built (the flagged line and its callers).; Replace concatenation/interpolation with placeholders (`?`, `%s`, `$1`, `:name`) and pass values separately."
@@ -4210,7 +4402,7 @@
         },
         {
           "ruleId": "DOS-NO-RATELIMIT",
-          "ruleIndex": 95,
+          "ruleIndex": 99,
           "level": "note",
           "message": {
             "text": "Web framework detected (express) but no rate limiting/throttling found anywhere \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints."
@@ -4245,8 +4437,73 @@
           }
         },
         {
+          "ruleId": "TODO-SECURITY",
+          "ruleIndex": 100,
+          "level": "note",
+          "message": {
+            "text": "TODO says security work is still missing: auth \u2014 Read the code: if the protection is really missing, implement it now (see the matching guide); if it exists elsewhere delete the stale TODO; if it must wait, ticket it with owner + date and add a compensating control."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "TODO-SECURITY:web/api_client.js:e343efb519"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-008",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-1059"
+            ],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "HC-ADMIN-ID",
+          "ruleIndex": 101,
+          "level": "note",
+          "message": {
+            "text": "Authorization depends on a literal user id \u2014 Replace the literal id/email check with a role or permission stored on the user; seed the admin through a migration or CLI."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "HC-ADMIN-ID:web/api_client.js:9711889c1d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "HOT-009",
+            "type": "security_hotspot",
+            "status": "needs_validation",
+            "cwe": [
+              "CWE-798",
+              "CWE-285"
+            ],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "MAL-UPLOAD-SCRIPT",
-          "ruleIndex": 96,
+          "ruleIndex": 102,
           "level": "note",
           "message": {
             "text": "Server-side script stored in an upload/cache/media folder \u2014 Move/delete the script (copy it first), disable script execution in that folder (nginx deny / php_flag engine off) and validate uploads."
@@ -4267,7 +4524,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-008",
+            "id": "HOT-010",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4281,7 +4538,7 @@
         },
         {
           "ruleId": "SEC-ENV-PRESENT",
-          "ruleIndex": 97,
+          "ruleIndex": 103,
           "level": "note",
           "message": {
             "text": "Environment file `.env` present - ensure it is git-ignored and not web-served \u2014 Add to .gitignore; keep outside document root"
@@ -4302,7 +4559,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-009",
+            "id": "HOT-011",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [],
@@ -4311,7 +4568,7 @@
         },
         {
           "ruleId": "CFG-DOCKER",
-          "ruleIndex": 98,
+          "ruleIndex": 104,
           "level": "note",
           "message": {
             "text": "Dockerfile weakness \u2014 Add a non-root `USER`; pin base images by version/digest; use multi-stage builds.; Never put secrets in ENV/ARG/layers - use runtime secrets."
@@ -4332,7 +4589,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-010",
+            "id": "HOT-012",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4347,7 +4604,7 @@
         },
         {
           "ruleId": "CFG-DOCKER-NOUSER",
-          "ruleIndex": 99,
+          "ruleIndex": 105,
           "level": "note",
           "message": {
             "text": "`Dockerfile` never switches to a non-root USER \u2014 Add `RUN adduser ...` and `USER app` before CMD"
@@ -4368,7 +4625,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-011",
+            "id": "HOT-013",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4381,7 +4638,7 @@
         },
         {
           "ruleId": "CFG-DOCKER",
-          "ruleIndex": 98,
+          "ruleIndex": 104,
           "level": "note",
           "message": {
             "text": "Dockerfile weakness \u2014 Add a non-root `USER`; pin base images by version/digest; use multi-stage builds.; Never put secrets in ENV/ARG/layers - use runtime secrets."
@@ -4402,7 +4659,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-012",
+            "id": "HOT-014",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4417,7 +4674,7 @@
         },
         {
           "ruleId": "PERF-NPLUS1",
-          "ruleIndex": 100,
+          "ruleIndex": 106,
           "level": "note",
           "message": {
             "text": "Query inside a loop (possible N+1) \u2014 Eager-load/batch: `with('rel')`, `select_related/prefetch_related`, `include`, `JOIN`, or `WHERE id IN (...)`.; Verify with query logging; add an assertion on query count in a test."
@@ -4449,7 +4706,7 @@
         },
         {
           "ruleId": "CFG-DEBUG",
-          "ruleIndex": 101,
+          "ruleIndex": 107,
           "level": "note",
           "message": {
             "text": "Debug mode enabled \u2014 Drive from environment: `DEBUG=False`/`APP_DEBUG=false`/`NODE_ENV=production` in production.; Ensure the dev value is not the default in committed prod config."
@@ -4470,7 +4727,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-013",
+            "id": "HOT-015",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4484,7 +4741,7 @@
         },
         {
           "ruleId": "CFG-CORS",
-          "ruleIndex": 102,
+          "ruleIndex": 108,
           "level": "note",
           "message": {
             "text": "Permissive CORS (*) \u2014 Replace `*` with an explicit allowlist of origins.; Never combine reflected-Origin with `Allow-Credentials: true`."
@@ -4505,7 +4762,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-014",
+            "id": "HOT-016",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4519,7 +4776,7 @@
         },
         {
           "ruleId": "AITRACE-PLACEHOLDER",
-          "ruleIndex": 103,
+          "ruleIndex": 109,
           "level": "note",
           "message": {
             "text": "Leftover AI placeholder comment (possible truncated code) \u2014 Compare with git history: restore the missing code or delete the leftover marker, then add a test."
@@ -4540,7 +4797,7 @@
             }
           ],
           "properties": {
-            "id": "COD-014",
+            "id": "COD-018",
             "type": "code_smell",
             "status": "needs_validation",
             "cwe": [],
@@ -4549,7 +4806,7 @@
         },
         {
           "ruleId": "MOB-STORAGE",
-          "ruleIndex": 104,
+          "ruleIndex": 110,
           "level": "note",
           "message": {
             "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4570,7 +4827,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-015",
+            "id": "HOT-017",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4583,7 +4840,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-MANIFEST",
-          "ruleIndex": 105,
+          "ruleIndex": 111,
           "level": "note",
           "message": {
             "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4604,7 +4861,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-016",
+            "id": "HOT-018",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4618,7 +4875,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-MANIFEST",
-          "ruleIndex": 105,
+          "ruleIndex": 111,
           "level": "note",
           "message": {
             "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4639,7 +4896,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-017",
+            "id": "HOT-019",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4653,7 +4910,7 @@
         },
         {
           "ruleId": "MOB-WEBVIEW",
-          "ruleIndex": 106,
+          "ruleIndex": 112,
           "level": "note",
           "message": {
             "text": "WebView risk (JS enabled / bridge / file access) \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4674,7 +4931,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-018",
+            "id": "HOT-020",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4688,7 +4945,7 @@
         },
         {
           "ruleId": "MOB-STORAGE",
-          "ruleIndex": 104,
+          "ruleIndex": 110,
           "level": "note",
           "message": {
             "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4709,7 +4966,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-019",
+            "id": "HOT-021",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4722,7 +4979,7 @@
         },
         {
           "ruleId": "QA-FE-NO-A11Y",
-          "ruleIndex": 107,
+          "ruleIndex": 113,
           "level": "note",
           "message": {
             "text": "No automated accessibility testing (axe / jsx-a11y / Lighthouse) \u2014 Add eslint-plugin-jsx-a11y (or vuejs-accessibility) and an axe scan per key page in E2E"
@@ -4743,7 +5000,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-020",
+            "id": "HOT-022",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [],
@@ -4751,8 +5008,68 @@
           }
         },
         {
+          "ruleId": "HC-URL-LOCAL",
+          "ruleIndex": 114,
+          "level": "note",
+          "message": {
+            "text": "localhost URL hardcoded at a call site \u2014 Move the base URL to configuration (API_URL / BASE_URL) loaded at startup; keep the localhost default only for development."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "HC-URL-LOCAL:web/api_client.js:998846a5fa"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-019",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "HC-IP",
+          "ruleIndex": 115,
+          "level": "note",
+          "message": {
+            "text": "IP address hardcoded as a host: 10.0.3.17 \u2014 Use a DNS name from configuration (env var / secret manager); define a deliberate IP once, with a comment."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "HC-IP:web/api_client.js:9a482fd595"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 6
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-020",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "A11Y-INPUT-LABEL",
-          "ruleIndex": 108,
+          "ruleIndex": 116,
           "level": "note",
           "message": {
             "text": "<input> without id/aria-label (cannot have an associated label) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -4782,7 +5099,7 @@
         },
         {
           "ruleId": "DOS-NO-TIMEOUT",
-          "ruleIndex": 109,
+          "ruleIndex": 117,
           "level": "note",
           "message": {
             "text": "Outbound HTTP call without timeout \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
@@ -4803,7 +5120,7 @@
             }
           ],
           "properties": {
-            "id": "HOT-021",
+            "id": "HOT-023",
             "type": "security_hotspot",
             "status": "needs_validation",
             "cwe": [
@@ -4812,6 +5129,66 @@
             "owasp": [
               "A04:2021"
             ]
+          }
+        },
+        {
+          "ruleId": "HC-RATE",
+          "ruleIndex": 118,
+          "level": "note",
+          "message": {
+            "text": "Business rate hardcoded in a function: tax_rate \u2014 Move the rate to configuration or a per-country/date table read through one function; store the applied rate on each invoice/order."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "HC-RATE:backend/billing.py:d16bb2a7dc"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "backend/billing.py"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-021",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "HC-URL-ENV",
+          "ruleIndex": 119,
+          "level": "note",
+          "message": {
+            "text": "Environment-specific host hardcoded: api-staging.myapp.com \u2014 Move the environment-specific URL to configuration (per-environment variable) instead of the code."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "HC-URL-ENV:web/api_client.js:b1b9b3bb37"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "web/api_client.js"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-022",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
           }
         }
       ]

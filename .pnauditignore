@@ -9,6 +9,9 @@ engine/kb_trace.py          MAL-*,AITRACE-*,CMD-*,SEC-*,CODE-*,DESER*,PATH-*
 engine/malware.py           MAL-*,AITRACE-*,CMD-*,SEC-*,CODE-*,QUA-COMPLEX-FILE
 engine/aitrace.py           MAL-*,AITRACE-*
 engine/cleanfix.py          MAL-*,AITRACE-*
+engine/triage.py            MAL-*,CRY-*,SEC-*,CMD-*,CFG-*,CODE-*,XSS-*,SQLI-*,DESER*,PATH-*,SSRF*,AUTHZ-*,DOS-*,OPEN-*,LOG-*,WEB3-*,QUA-COMPLEX-FILE
+engine/hardcode.py          HC-*,TODO-*,SEC-*,QUA-COMPLEX-FILE,FIN-*
+engine/kb_hardcode.py       HC-*,TODO-*,SEC-*,CMD-*,CFG-*
 engine/roadmap.py           CRY-*
 engine/qa.py                WEB3-*
 engine/ftpsrc.py            CFG-*

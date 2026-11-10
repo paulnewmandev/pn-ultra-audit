@@ -43,7 +43,7 @@ W("wordmark.svg", f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1
 <text x="163" y="112" font-family="Inter,'SF Pro Text','Segoe UI',Helvetica,Arial,sans-serif" font-size="17" font-weight="600" letter-spacing="4.2" fill="#8a94b8">AUDIT EVERYTHING · SHIP WITH CONFIDENCE</text></svg>''')
 
 # ───────── hero banner
-chips = ["Security", "Bugs", "Code Quality", "Docs &amp; Standards", "QA · Web &amp; Mobile", "SEO · SEM", "PWA", "Vercel", "Repo &amp; Keys", "Malware", "AI Traces", "Databases", "Servers · VPS", "Crypto · Web3"]
+chips = ["Security", "Bugs · Quality", "Docs &amp; Standards", "QA · Web &amp; Mobile", "SEO · SEM", "PWA", "Vercel", "Repo &amp; Keys", "Malware", "AI Traces", "Hardcode · TODO", "Databases", "Servers · VPS", "Crypto · Web3"]
 cx, cy, ch = 70, 380, []
 for t in chips:
     w = 44 + len(t.replace("&amp;", "&")) * 8.8

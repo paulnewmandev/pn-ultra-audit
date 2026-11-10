@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, cleanfix, fixplan, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, cleanfix, fixplan, triage, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.27"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.28"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -73,6 +73,7 @@ def to_schema(raw, lang="es"):
                         fix=r.get("fix") or "; ".join(kb.get("steps", [])[:2]) or "See remediation guide", effort_min=int(r.get("effort_min") or 15), cwe=r.get("cwe", []), owasp=r.get("owasp", []), tags=[r["family"]], source_pass="pn-ultra-audit",
                         needs_validation_reason=(r.get("why") or "Heuristic match - confirm the value's origin and reachability.") if status == "needs_validation" else None, priority=r.get("priority"),
                         explanation=kb.get("explain", ""), fix_steps=kb.get("steps", []), bad_example=kb.get("bad", ""), safe_example=kb.get("safe", ""), verify=kb.get("verify", ""), family=r["family"], title_family=kb.get("title", ""), seo_cat=r.get("seo_cat")))
+    for d_ in out: d_["triage"] = triage.for_finding(d_, lang)
     order_pri = {"high": 0, "medium": 1, "low": 2, None: 3}
     out.sort(key=lambda f: (f["status"] != "confirmed", RANK.get(f["severity"], 9), order_pri.get(f.get("priority"), 3), f["location"]["file"], f["location"]["line"]))
     cnt = Counter()
@@ -213,6 +214,7 @@ def main(argv=None):
     g.add_argument("--scaffold", action="store_true", help="create the professional files that are MISSING (.gitignore, .env.example, README, CI, pre-commit, SECURITY.md, docs/architecture.md). Dry-run unless --write; never overwrites")
     g.add_argument("--write", action="store_true", help="with --scaffold: actually write the files")
     g = ap.add_argument_group("Fix retrieval (offline; token-saving for humans and AI assistants)")
+    g.add_argument("--triage", action="store_true", help="print the triage worklist of the latest run: every finding that needs a human/AI decision, grouped by rule with ONE protocol (what to check, when it is real, when it is a false positive, how to suppress it) - read this before fixing or reporting suspicions")
     g.add_argument("--show", metavar="ID", help="print a compact fix card for one finding (e.g. SEC-001) from the latest run (see --run)")
     g.add_argument("--kb", metavar="QUERY", help="search the offline remediation knowledge base (e.g. --kb \"sql injection php\")")
     g.add_argument("--run", metavar="DIR", help="run dir / audit-output dir / project dir to read for --show and --mcp (default: ./audit-output)")
@@ -267,6 +269,10 @@ def main(argv=None):
         print(f"\n{len(r) - len(bad)}/{len(r)} pairs verified"); return 1 if bad else 0
     if a.mcp:
         mcpserver.serve(a.run or a.path or os.getcwd()); return 0
+    if a.triage:
+        run = kbsearch.latest_run(a.run or a.path or os.getcwd())
+        if not run: print("ERROR: no audit run found. Run `python3 audit.py <project>` first, or pass --run DIR.", file=sys.stderr); return 2
+        print(kbsearch.triage_list(run, a.lang if a.lang in ("es", "en") else "en")); return 0
     if a.show:
         run = kbsearch.latest_run(a.run or a.path or os.getcwd())
         if not run: print("ERROR: no audit run found. Run `python3 audit.py <project>` first, or pass --run DIR.", file=sys.stderr); return 2
@@ -353,6 +359,7 @@ def main(argv=None):
             if "domain" in plan: stages.append(("domain", N("Dominio: SaaS / Fintech / Banca (aislamiento, dinero, idempotencia, webhooks)", "Domain deep-dive: SaaS / Fintech / Banking (isolation, money, idempotency, webhooks)")))
             if "vercel" in plan: stages.append(("vercel", N("Vercel: vercel.json, Next.js, crons, variables y rutas API", "Vercel: vercel.json, Next.js, crons, env vars & API routes")))
             if "malware" in plan: stages.append(("malware", N("Malware y backdoors: webshells, reverse shells, mineros, stealers, hooks de instalación", "Malware & backdoors: webshells, reverse shells, miners, stealers, install hooks")))
+            if "hardcode" in plan: stages.append(("hardcode", N("Hardcode y TODOs: pendientes, valores atados al entorno y credenciales", "Hardcode & TODOs: unfinished work, environment-bound values & credentials")))
             if "aitrace" in plan: stages.append(("aitrace", N("Rastros de IA: comentarios, archivos de agentes, trailers de git y metadatos", "AI traces: comments, agent files, git trailers & metadata")))
             if "repo" in plan: stages.append(("repo", N("Higiene del repositorio: claves, historial y CI/CD", "Repository hygiene: keys, history & CI/CD")))
             if "pwa" in plan: stages.append(("pwa", N("PWA: manifest, service worker, offline e instalación", "PWA: manifest, service worker, offline & installability")))
@@ -508,6 +515,12 @@ def main(argv=None):
         raw += mf_; stream(mf_); metrics["malware"] = minfo
         ui.done((f"{len(mf_)} " + N("indicadores", "indicators") + f" · {minfo.get('scanned', 0)} " + N("archivos revisados", "files inspected")) if not minfo.get("error") else minfo["error"], warn=bool(mf_ or minfo.get("error")))
         L("malware & backdoor indicators", "audit-security", "covered" if not minfo.get("error") else "blocked", "webshells, reverse shells, decode-and-execute, miners, stealers, install hooks, persistence, polyglots, Trojan Source (static, offline; not an antivirus)")
+        begin("hardcode")
+        try: hf_, hinfo = hardcodemod.analyze(scan_root, files, a.strictness)
+        except Exception as ex_: hf_, hinfo = [], {"error": str(ex_)[:80]}
+        raw += hf_; stream(hf_); metrics["hardcode"] = {k: v for k, v in hinfo.items() if k != "todos"}; hardcode_info = hinfo
+        ui.done((f"{hinfo.get('todo_total', 0)} " + N("marcadores", "markers") + f" · {sum(hinfo.get('values', {}).get(k, 0) for k in ('HC-URL-LOCAL', 'HC-URL-ENV', 'HC-IP', 'HC-PATH', 'HC-EMAIL', 'HC-ADMIN-ID', 'HC-RATE', 'HC-STUB'))} " + N("valores hardcodeados", "hardcoded values") + f" · {hinfo.get('security', 0)} " + N("TODOs de seguridad", "security TODOs")) if not hinfo.get("error") else hinfo["error"], warn=bool(hinfo.get("error")))
+        L("hardcode & TODOs", "audit-quality", "covered" if not hinfo.get("error") else "blocked", "TODO/FIXME/HACK (age via git blame), security TODOs, remove-before-prod markers, stubs, environment URLs, IPs, machine paths, personal emails, identity checks, business rates")
         begin("aitrace")
         try: af_, ainfo = aitracemod.analyze(scan_root, files, a.strictness)
         except Exception as ex_: af_, ainfo = [], {"error": str(ex_)[:80]}
@@ -628,6 +641,7 @@ def main(argv=None):
         if f.get("seo_cat") or f["category"] in ("seo", "sem", "privacy") or r.startswith(("SEO-", "SEM-")): return "seo"
         if r.startswith(("FIN-", "SAAS-")) or fam in ("domain-fin", "domain-saas"): return "domain"
         if r.startswith("VERCEL-") or fam.startswith("vercel-"): return "vercel"
+        if r.startswith(("HC-", "TODO-")) or fam.startswith(("hc-", "todo-")): return "hardcode"
         if r.startswith("MAL-") or fam.startswith("mal-"): return "malware"
         if r.startswith("AITRACE-") or fam.startswith("ai-trace") or fam in ("ai-placeholder", "hidden-unicode"): return "aitrace"
         if r.startswith("REPO-") or fam.startswith("repo-"): return "repo"
@@ -694,6 +708,12 @@ def main(argv=None):
                 with open(os.path.join(run_dir, "repo-fixes.sh"), "w", encoding="utf-8") as fh_: fh_.write(rfx)
                 meta["notes"].append(N("Se generó repo-fixes.sh (limpieza guiada del repositorio; la herramienta nunca lo ejecuta): `bash repo-fixes.sh list`.", "repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`."))
         except Exception as ex_: meta["notes"].append(f"repo-fixes.sh not generated: {str(ex_)[:60]}")
+    try:
+        tb_ = hardcodemod.backlog_md(locals().get("hardcode_info") or {}, label)
+        if tb_:
+            with open(os.path.join(run_dir, "todo-backlog.md"), "w", encoding="utf-8") as fh_: fh_.write(tb_)
+            meta["notes"].append(N("Se generó todo-backlog.md: cada TODO/FIXME/HACK con su antigüedad, listo para pasarlo a tu gestor de tareas.", "todo-backlog.md was generated: every TODO/FIXME/HACK with its age, ready for your tracker."))
+    except Exception as ex_: meta["notes"].append(f"todo-backlog.md not generated: {str(ex_)[:60]}")
     try:
         fp_ = fixplan.build(findings, a.lang, label)
         with open(os.path.join(run_dir, "fix-plan.md"), "w", encoding="utf-8") as fh_: fh_.write(fixplan.to_md(fp_, a.lang))
@@ -779,7 +799,7 @@ def main(argv=None):
         for f in sorted(new_conf, key=lambda f: (RANK[f["severity"]], f["effort_min"]))[:6]: print(f"  {f['id']:<8} [{f['severity']:<8}] {f['title'][:70]}  {ui.c('dim', f['location']['file'] + ':' + str(f['location']['line']))}")
         print()
         print(ui.c("bold", N("Informes", "Reports")))
-        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + tuple((fn_, d_) for fn_, d_ in (("fix-plan.md", "ordered fix plan"), ("server-fixes.sh", "server fix script"), ("repo-fixes.sh", "repo fix script"), ("cleanup-fixes.sh", "AI-trace + malware fixes")) if os.path.exists(os.path.join(run_dir, fn_))): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
+        for fn, desc in (("report.html", "dashboard"), ("REPORT.md", "markdown + mermaid"), ("findings.sarif", "VS Code / GitHub"), ("findings.json", "data")) + tuple((fn_, d_) for fn_, d_ in (("fix-plan.md", "ordered fix plan"), ("todo-backlog.md", "TODO backlog"), ("server-fixes.sh", "server fix script"), ("repo-fixes.sh", "repo fix script"), ("cleanup-fixes.sh", "AI-trace + malware fixes")) if os.path.exists(os.path.join(run_dir, fn_))): print(f"  {fn:<16} {ui.c(desc.ljust(20), 'dim') if False else desc.ljust(20)} {disp(os.path.join(run_dir, fn))}")
         print()
     ui.verdict(comp["gate_pass"], f"Quality Gate {'PASSED' if comp['gate_pass'] else 'FAILED'}")
     if a.brief: print(kbsearch.brief(run_dir, a.top, label))

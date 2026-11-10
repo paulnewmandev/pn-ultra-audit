@@ -388,9 +388,6 @@ def aggregate_quality(root, S, files):
         elif st["cx"] >= 250:
             f("QUA-COMPLEX-FILE", f"High branching complexity in `{rel}` (≈{st['cx']} decision points in {ncloc} lines)", "code_smell", "medium", "complexity", rel, 1,
               f"ncloc={ncloc}, approx. cyclomatic={st['cx']}", KB["quality"]["impact"], "Extract cohesive functions; flatten nested conditionals", 120)
-    if len(S.todo) > 20:
-        top = Counter(r for r, _ in S.todo).most_common(3)
-        f("QUA-TODO", f"{len(S.todo)} TODO/FIXME/HACK markers", "code_smell", "info", "debt", top[0][0], S.todo[0][1], "; ".join(f"{r}:{c}" for r, c in top), "Unfinished work hidden in code.", "Triage: convert to tickets or fix", 15)
     return out
 
 

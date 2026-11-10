@@ -11,9 +11,9 @@
 [![Read-only target](assets/badges/st-readonly.svg)](#safety--privacy)
 [![PRs welcome](assets/badges/st-prs.svg)](CONTRIBUTING.md)
 
-### One command. Sixteen lenses. Live in your terminal, delivered as a dashboard.
+### One command. Seventeen lenses. Live in your terminal, delivered as a dashboard.
 
-**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
+**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Hardcode & TODOs · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
 
 [**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**Wiki**](docs/wiki/Home.md) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
 
@@ -111,9 +111,10 @@ STEPS
    d. Audit-readiness gaps (SOC 2 / ISO 27001 / GDPR...) and project-finish items (AI traces) in two lines each.
    e. Full paths of `report.html` (offer to open it), `fix-plan.md` and the generated fix scripts (`repo-fixes.sh`, `cleanup-fixes.sh`, `server-fixes.sh`) if any. Never run those scripts yourself.
 5. Token discipline: NEVER paste or read `report.html`, `REPORT.md` or `findings.json` in full. Read `fix-plan.md` ONE phase at a time, and use `python3 ~/.pn-ultra-audit/audit.py --show <ID> --run <run dir>` for the fix card of a specific finding (or `--kb "<topic>"` for guidance).
-6. STOP and ask me which phase/group to fix. Phase 0 (malware, exposed secrets) always comes first: for secrets tell me how to ROTATE them before touching code; for malware treat it as an incident (do not run it, follow the steps in the plan).
-7. When I say go: create a branch, fix ONE group per commit with the smallest safe change plus a regression test, run the project's tests, then re-audit with `--baseline auto --brief` and show me which findings disappeared and that no new ones appeared.
-8. Finish with a 10-line summary: gate and ratings before/after, what remains (and why), and the next 3 steps.
+6. Anti false positives: items marked "to review" are SUSPICIONS, not verdicts. Run `python3 ~/.pn-ultra-audit/audit.py --triage --run <run dir>` and follow the protocol of each rule (what to check, when it is real, when it is a false positive). Classify each as REAL / FALSE POSITIVE / UNSURE with the evidence you checked (file:line + what you read or ran); never present an unconfirmed item as a vulnerability. For false positives do not edit code: propose the exact `pn-audit: ignore=RULE <reason>` line.
+7. STOP and ask me which phase/group to fix. Phase 0 (malware, exposed secrets) always comes first: for secrets tell me how to ROTATE them before touching code; for malware treat it as an incident (do not run it, follow the steps in the plan).
+8. When I say go: create a branch, fix ONE group per commit with the smallest safe change plus a regression test, run the project's tests, then re-audit with `--baseline auto --brief` and show me which findings disappeared and that no new ones appeared.
+9. Finish with a 10-line summary: gate and ratings before/after, what remains (and why), and the next 3 steps.
 
 Never apply fixes without my go-ahead. If something fails, show the exact error and stop instead of improvising.
 ```
@@ -145,9 +146,10 @@ PASOS
    d. Brechas de preparación para auditoría (SOC 2 / ISO 27001 / GDPR...) y pendientes de acabado (rastros de IA) en dos líneas cada uno.
    e. Rutas completas de `report.html` (ofrece abrirlo), `fix-plan.md` y de los scripts de corrección generados (`repo-fixes.sh`, `cleanup-fixes.sh`, `server-fixes.sh`) si existen. Nunca ejecutes esos scripts tú mismo.
 5. Disciplina de tokens: NUNCA pegues ni leas completo `report.html`, `REPORT.md` ni `findings.json`. Lee `fix-plan.md` UNA fase a la vez y usa `python3 ~/.pn-ultra-audit/audit.py --show <ID> --run <carpeta de la corrida>` para la ficha de un hallazgo concreto (o `--kb "<tema>"` para orientación).
-6. DETENTE y pregúntame qué fase/grupo corregir. La fase 0 (malware, secretos expuestos) va siempre primero: con secretos dime cómo ROTARLOS antes de tocar código; con malware trátalo como un incidente (no lo ejecutes, sigue los pasos del plan).
-7. Cuando te diga adelante: crea una rama, corrige UN grupo por commit con el cambio seguro más pequeño y una prueba de regresión, ejecuta las pruebas del proyecto y vuelve a auditar con `--baseline auto --brief` para mostrarme qué hallazgos desaparecieron y que no apareció ninguno nuevo.
-8. Termina con un resumen de 10 líneas: gate y calificaciones antes/después, qué queda (y por qué) y los próximos 3 pasos.
+6. Anti falsos positivos: los elementos marcados "por revisar" son SOSPECHAS, no veredictos. Ejecuta `python3 ~/.pn-ultra-audit/audit.py --triage --run <carpeta de la corrida>` y sigue el protocolo de cada regla (qué comprobar, cuándo es real, cuándo es falso positivo). Clasifica cada uno como REAL / FALSO POSITIVO / DUDOSO con la evidencia que comprobaste (archivo:línea + qué leíste o ejecutaste); nunca presentes como vulnerabilidad algo sin confirmar. En falsos positivos no edites código: propón la línea exacta `pn-audit: ignore=REGLA <motivo>`.
+7. DETENTE y pregúntame qué fase/grupo corregir. La fase 0 (malware, secretos expuestos) va siempre primero: con secretos dime cómo ROTARLOS antes de tocar código; con malware trátalo como un incidente (no lo ejecutes, sigue los pasos del plan).
+8. Cuando te diga adelante: crea una rama, corrige UN grupo por commit con el cambio seguro más pequeño y una prueba de regresión, ejecuta las pruebas del proyecto y vuelve a auditar con `--baseline auto --brief` para mostrarme qué hallazgos desaparecieron y que no apareció ninguno nuevo.
+9. Termina con un resumen de 10 líneas: gate y calificaciones antes/después, qué queda (y por qué) y los próximos 3 pasos.
 
 Nunca apliques correcciones sin mi visto bueno. Si algo falla, muéstrame el error exacto y detente en lugar de improvisar.
 ```
@@ -188,6 +190,18 @@ I am about to deliver this project. Install https://github.com/paulnewmandev/pn-
 
 ```text
 Voy a entregar este proyecto. Instala https://github.com/paulnewmandev/pn-ultra-audit fuera de él y ejecuta `python3 audit.py <RUTA> --only aitrace,repo,docs,security,malware,quality --strictness standard --out <herramienta>/audit-output`. Dame una lista de entrega: bloqueantes (crítico/alto, secretos, malware), acabado (rastros de IA: comentarios, archivos de agentes como CLAUDE.md/.cursor, trailers de git, metadatos; docs; higiene) y qué dejar como está. Pregúntame si algún contrato, empleador o ley exige declarar el uso de IA ANTES de sugerirme quitar esos rastros. No cambies archivos hasta que yo apruebe.
+```
+
+</details>
+
+<details><summary><b>Clean up TODOs and hardcoded values</b> · Limpiar TODOs y valores hardcodeados</summary>
+
+```text
+Install https://github.com/paulnewmandev/pn-ultra-audit outside this project and run `python3 audit.py <PATH> --only hardcode,security --brief --out <tool>/audit-output`. Report: hardcoded credentials (names only), security TODOs and `remove before prod` markers, hardcoded URLs/IPs/paths/emails/identity checks/rates, and the TODO/FIXME/HACK totals with the oldest ones (see todo-backlog.md). Then propose the order: credentials first (rotate), then security TODOs, then moving values to configuration (.env + .env.example), then triaging todo-backlog.md (do / ticket / delete). Do not change files until I approve each group.
+```
+
+```text
+Instala https://github.com/paulnewmandev/pn-ultra-audit fuera de este proyecto y ejecuta `python3 audit.py <RUTA> --only hardcode,security --brief --out <herramienta>/audit-output`. Reporta: credenciales hardcodeadas (solo nombres), TODOs de seguridad y marcadores `remove before prod`, URLs/IPs/rutas/correos/chequeos de identidad/tasas hardcodeados, y los totales de TODO/FIXME/HACK con los más antiguos (ver todo-backlog.md). Luego propón el orden: credenciales primero (rotar), después TODOs de seguridad, luego mover valores a configuración (.env + .env.example) y por último clasificar todo-backlog.md (hacer / ticket / borrar). No cambies archivos hasta que yo apruebe cada grupo.
 ```
 
 </details>
@@ -257,6 +271,10 @@ AUTORIZO una auditoría de solo lectura de mi servidor. Instala https://github.c
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-malware.png" alt="Malware and backdoors" width="100%"><br><sub><b>Malware &amp; backdoors</b> - webshells, reverse shells, miners, stealers, install hooks, with incident-response steps</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-aitrace.png" alt="AI traces" width="100%"><br><sub><b>AI traces</b> - project finish: comments, agent files, git trailers, metadata and how to remove them</sub></td>
+</tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/gal-hardcode.png" alt="Hardcode and TODOs" width="100%"><br><sub><b>Hardcode &amp; TODOs</b> - unfinished work, security TODOs, hardcoded URLs/IPs/paths/rates, with <code>todo-backlog.md</code></sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-fixplan.png" alt="Phased fix plan" width="100%"><br><sub><b>Phased fix plan</b> - contain &amp; rotate first, one group per root cause, with steps and verification</sub></td>
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - ordered phases (contain &amp; rotate first), one group per root cause, with steps, verification and an AI prompt each</sub></td>
@@ -336,7 +354,8 @@ flowchart LR
     C --> D7[domain deep-dive]
     C --> D8[malware and backdoors]
     C --> D9[AI traces - project finish]
-    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
+    C --> D10[hardcode and TODOs]
+    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
     E --> F[Roadmap + Audit readiness + SBOM]
     F --> G[Dashboard HTML · REPORT.md · SARIF · JSON · PDF · Evidence pack<br/>9 languages · brand colors and logo]
     F --> H[Fix scripts - generated, never executed<br/>repo-fixes.sh · server-fixes.sh · cleanup-fixes.sh]
@@ -350,6 +369,7 @@ flowchart TB
       web3[web3.py] --- domain[domain.py<br/>saas · fintech]
       repo[repo.py + gitsrc.py + ftpsrc.py<br/>keys · history · CI/CD] --- vercel[vercel.py<br/>config · live · API]
       malware[malware.py<br/>webshells · revshells · miners · stealers] --- aitrace[aitrace.py<br/>AI comments · agent files · trailers]
+      hardcode[hardcode.py<br/>TODO · FIXME · hardcoded values] --- fixplan[fixplan.py<br/>phased fix plan]
       dbaudit[dbaudit.py] --- remote[remote.py / remote_extra.py / aws.py<br/>VPS · cloud · k8s · containers]
       roadmap[roadmap.py] --- compliance[compliance.py / sbom.py / policies.py]
       kb[kb*.py + i18n.py<br/>remediation guides · 9 languages] --- fixes[repofix.py / serverfix.py / cleanfix.py<br/>reviewable fix scripts]
@@ -377,6 +397,7 @@ flowchart TB
 | **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |
 | **malware** | **webshells** (eval/system on request data, c99/WSO/China Chopper signatures, PHP hidden in images and upload folders), **reverse shells** (`/dev/tcp`, `nc -e`, Python/Node/PHP/Go/PowerShell), decode-and-execute payloads, **miners** (stratum, XMRig, CoinHive), **stealers/exfiltration** (browser + wallet + SSH + cloud stores, webhooks, CI leaking env), **malicious install hooks** and known typosquats, **persistence** (authorized_keys, cron, LD_PRELOAD, auto_prepend, hidden trigger parameters), **Trojan Source** bidi/invisible characters; static and offline, specific signatures only (not a generic `eval` alarm), with **incident-response steps** and a reversible quarantine script |
 | **aitrace** | project finish: comments/docs that reveal AI authoring, **agent & spec files** (CLAUDE.md, AGENTS.md, `.cursor/`, `openspec/`...), git `Co-Authored-By` trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers; tells you how to remove each and writes `cleanup-fixes.sh` (backups, safe by default). It never tries to defeat statistical watermarks |
+| **hardcode** | **unfinished work:** TODO/FIXME/HACK/XXX inside real comments (age from `git blame`), **security TODOs** (auth, validation, encryption, CSRF, rate limit postponed), "remove before prod" markers, unimplemented stubs, and a ready-to-paste `todo-backlog.md`; **hardcoded values:** environment URLs at call sites (localhost, staging), IPs as hosts, machine-specific home paths, personal emails, identity checks (`user.id == 1`), business rates inside functions - shown together with hardcoded credentials from the security scanner. Env-based defaults (`process.env.X || 'http://localhost'`) are not reported |
 | **vercel** | `vercel.json`, Next.js, crons without `CRON_SECRET`, API routes without auth, secret-looking `NEXT_PUBLIC_*`, CVE-2025-29927, headers, source maps; live site; project settings via the read-only API (`--vercel-project`) |
 | **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
@@ -425,7 +446,7 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 | Assistant | What gets installed | Invoke |
 |---|---|---|
-| **Claude Code** | 20 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
+| **Claude Code** | 21 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
 | **Codex** | skills in `.agents/skills/` + `AGENTS.md` block | ask in chat |
 | **Cursor** | `.cursor/rules/pn-ultra-audit.mdc` + `.cursor/commands/pn-audit.md` | `/pn-audit` |
 | **Windsurf** | `.windsurf/rules/` + `.windsurf/workflows/pn-audit.md` | `/pn-audit` |
@@ -437,13 +458,16 @@ Files follow each tool's documented conventions at the time of writing; installs
 
 ### Fix cards, offline search and an MCP server (token-saving)
 
+**Anti false positives:** the scanner only sees indicators, so every finding carries a *triage protocol* (checks to run, when it is real, when it is a false positive, and the exact `pn-audit: ignore=RULE reason` line). `needs_validation` items are suspicions, never verdicts; `--triage` lists them with one protocol per rule, the fix cards and the fix plan repeat it, and the AI prompts tell the assistant to classify REAL / FALSE POSITIVE / UNSURE with evidence before touching code.
+
 Assistants (and people) rarely need the whole report - they need the one passage that tells them how to fix a finding.
 
 ```bash
 python3 audit.py . --brief                                  # ~40 lines (gate, ratings, top findings) - what an AI assistant should read first
+python3 audit.py --triage --run audit-output/myapp            # suspicions grouped by rule with ONE protocol: what to check, when it is real, when it is a false positive, how to suppress it
 python3 audit.py --show SEC-001 --run audit-output/myapp    # compact card: code, why, steps, safe form, tested before/after, verify
 python3 audit.py --kb "sql injection php"                   # offline BM25 search over 60+ remediation guides and 110+ rules
-python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, search_kb, get_summary, verify_corpus
+python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, get_triage, search_kb, get_summary, verify_corpus
 python3 audit.py --verify-corpus                            # prove the fixes: each vulnerable/ example fires the rule, each fixed/ one stays silent
 ```
 
@@ -580,7 +604,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.27
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.28
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -601,4 +625,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 94 remediation guides · 20 skills · 14 compliance frameworks · 7 AI assistants · v1.0.27</sub></div>
+<div align="center"><sub>110 rules · 104 remediation guides · 21 skills · 14 compliance frameworks · 7 AI assistants · v1.0.28</sub></div>

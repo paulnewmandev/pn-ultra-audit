@@ -35,9 +35,10 @@ STEPS
    d. Audit-readiness gaps (SOC 2 / ISO 27001 / GDPR...) and project-finish items (AI traces) in two lines each.
    e. Full paths of `report.html` (offer to open it), `fix-plan.md` and the generated fix scripts (`repo-fixes.sh`, `cleanup-fixes.sh`, `server-fixes.sh`) if any. Never run those scripts yourself.
 5. Token discipline: NEVER paste or read `report.html`, `REPORT.md` or `findings.json` in full. Read `fix-plan.md` ONE phase at a time, and use `python3 ~/.pn-ultra-audit/audit.py --show <ID> --run <run dir>` for the fix card of a specific finding (or `--kb "<topic>"` for guidance).
-6. STOP and ask me which phase/group to fix. Phase 0 (malware, exposed secrets) always comes first: for secrets tell me how to ROTATE them before touching code; for malware treat it as an incident (do not run it, follow the steps in the plan).
-7. When I say go: create a branch, fix ONE group per commit with the smallest safe change plus a regression test, run the project's tests, then re-audit with `--baseline auto --brief` and show me which findings disappeared and that no new ones appeared.
-8. Finish with a 10-line summary: gate and ratings before/after, what remains (and why), and the next 3 steps.
+6. Anti false positives: items marked "to review" are SUSPICIONS, not verdicts. Run `python3 ~/.pn-ultra-audit/audit.py --triage --run <run dir>` and follow the protocol of each rule (what to check, when it is real, when it is a false positive). Classify each as REAL / FALSE POSITIVE / UNSURE with the evidence you checked (file:line + what you read or ran); never present an unconfirmed item as a vulnerability. For false positives do not edit code: propose the exact `pn-audit: ignore=RULE <reason>` line.
+7. STOP and ask me which phase/group to fix. Phase 0 (malware, exposed secrets) always comes first: for secrets tell me how to ROTATE them before touching code; for malware treat it as an incident (do not run it, follow the steps in the plan).
+8. When I say go: create a branch, fix ONE group per commit with the smallest safe change plus a regression test, run the project's tests, then re-audit with `--baseline auto --brief` and show me which findings disappeared and that no new ones appeared.
+9. Finish with a 10-line summary: gate and ratings before/after, what remains (and why), and the next 3 steps.
 
 Never apply fixes without my go-ahead. If something fails, show the exact error and stop instead of improvising.
 ```
@@ -65,9 +66,10 @@ PASOS
    d. Brechas de preparación para auditoría (SOC 2 / ISO 27001 / GDPR...) y pendientes de acabado (rastros de IA) en dos líneas cada uno.
    e. Rutas completas de `report.html` (ofrece abrirlo), `fix-plan.md` y de los scripts de corrección generados (`repo-fixes.sh`, `cleanup-fixes.sh`, `server-fixes.sh`) si existen. Nunca ejecutes esos scripts tú mismo.
 5. Disciplina de tokens: NUNCA pegues ni leas completo `report.html`, `REPORT.md` ni `findings.json`. Lee `fix-plan.md` UNA fase a la vez y usa `python3 ~/.pn-ultra-audit/audit.py --show <ID> --run <carpeta de la corrida>` para la ficha de un hallazgo concreto (o `--kb "<tema>"` para orientación).
-6. DETENTE y pregúntame qué fase/grupo corregir. La fase 0 (malware, secretos expuestos) va siempre primero: con secretos dime cómo ROTARLOS antes de tocar código; con malware trátalo como un incidente (no lo ejecutes, sigue los pasos del plan).
-7. Cuando te diga adelante: crea una rama, corrige UN grupo por commit con el cambio seguro más pequeño y una prueba de regresión, ejecuta las pruebas del proyecto y vuelve a auditar con `--baseline auto --brief` para mostrarme qué hallazgos desaparecieron y que no apareció ninguno nuevo.
-8. Termina con un resumen de 10 líneas: gate y calificaciones antes/después, qué queda (y por qué) y los próximos 3 pasos.
+6. Anti falsos positivos: los elementos marcados "por revisar" son SOSPECHAS, no veredictos. Ejecuta `python3 ~/.pn-ultra-audit/audit.py --triage --run <carpeta de la corrida>` y sigue el protocolo de cada regla (qué comprobar, cuándo es real, cuándo es falso positivo). Clasifica cada uno como REAL / FALSO POSITIVO / DUDOSO con la evidencia que comprobaste (archivo:línea + qué leíste o ejecutaste); nunca presentes como vulnerabilidad algo sin confirmar. En falsos positivos no edites código: propón la línea exacta `pn-audit: ignore=REGLA <motivo>`.
+7. DETENTE y pregúntame qué fase/grupo corregir. La fase 0 (malware, secretos expuestos) va siempre primero: con secretos dime cómo ROTARLOS antes de tocar código; con malware trátalo como un incidente (no lo ejecutes, sigue los pasos del plan).
+8. Cuando te diga adelante: crea una rama, corrige UN grupo por commit con el cambio seguro más pequeño y una prueba de regresión, ejecuta las pruebas del proyecto y vuelve a auditar con `--baseline auto --brief` para mostrarme qué hallazgos desaparecieron y que no apareció ninguno nuevo.
+9. Termina con un resumen de 10 líneas: gate y calificaciones antes/después, qué queda (y por qué) y los próximos 3 pasos.
 
 Nunca apliques correcciones sin mi visto bueno. Si algo falla, muéstrame el error exacto y detente en lugar de improvisar.
 ```
@@ -100,6 +102,16 @@ I am about to deliver this project. Install https://github.com/paulnewmandev/pn-
 
 ```text
 Voy a entregar este proyecto. Instala https://github.com/paulnewmandev/pn-ultra-audit fuera de él y ejecuta `python3 audit.py <RUTA> --only aitrace,repo,docs,security,malware,quality --strictness standard --out <herramienta>/audit-output`. Dame una lista de entrega: bloqueantes (crítico/alto, secretos, malware), acabado (rastros de IA: comentarios, archivos de agentes como CLAUDE.md/.cursor, trailers de git, metadatos; docs; higiene) y qué dejar como está. Pregúntame si algún contrato, empleador o ley exige declarar el uso de IA ANTES de sugerirme quitar esos rastros. No cambies archivos hasta que yo apruebe.
+```
+
+## Clean up TODOs and hardcoded values / Limpiar TODOs y valores hardcodeados
+
+```text
+Install https://github.com/paulnewmandev/pn-ultra-audit outside this project and run `python3 audit.py <PATH> --only hardcode,security --brief --out <tool>/audit-output`. Report: hardcoded credentials (names only), security TODOs and `remove before prod` markers, hardcoded URLs/IPs/paths/emails/identity checks/rates, and the TODO/FIXME/HACK totals with the oldest ones (see todo-backlog.md). Then propose the order: credentials first (rotate), then security TODOs, then moving values to configuration (.env + .env.example), then triaging todo-backlog.md (do / ticket / delete). Do not change files until I approve each group.
+```
+
+```text
+Instala https://github.com/paulnewmandev/pn-ultra-audit fuera de este proyecto y ejecuta `python3 audit.py <RUTA> --only hardcode,security --brief --out <herramienta>/audit-output`. Reporta: credenciales hardcodeadas (solo nombres), TODOs de seguridad y marcadores `remove before prod`, URLs/IPs/rutas/correos/chequeos de identidad/tasas hardcodeados, y los totales de TODO/FIXME/HACK con los más antiguos (ver todo-backlog.md). Luego propón el orden: credenciales primero (rotar), después TODOs de seguridad, luego mover valores a configuración (.env + .env.example) y por último clasificar todo-backlog.md (hacer / ticket / borrar). No cambies archivos hasta que yo apruebe cada grupo.
 ```
 
 ## A GitHub repository (not local) / Un repositorio de GitHub (no local)

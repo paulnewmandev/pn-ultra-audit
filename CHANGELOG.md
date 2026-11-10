@@ -3,6 +3,19 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.28] - 2026-11-09
+
+### Added
+- **Hardcode & TODOs** auditor (`--only hardcode`, always in the automatic plan; new sidebar item, own icon): TODO/FIXME/HACK/XXX/BUG markers found only inside real comments (age from `git blame`, stale ones flagged), **security TODOs** (auth, validation, encryption, CSRF, rate limit postponed), "remove before production" / debug-shortcut markers, unimplemented stubs, and values that belong in configuration: localhost/staging URLs at call sites (env-based defaults such as `process.env.X || 'http://localhost'` are fine), IPs used as hosts, machine-specific home paths, personal emails, identity checks (`user.id == 1`, `email == 'admin'`) and business rates inside functions. The view also lists hardcoded credentials from the security scanner. Generates `todo-backlog.md` (every marker with file:line, text and age, ready for your tracker); remediation guides in English and Spanish; skill `audit-hardcode` (21 skills); LLM prompt variant; README, diagrams, banner and screenshots updated. The old aggregated `QUA-TODO` finding is superseded.
+- Precision: benchmarked on the Python standard library, Homebrew and global npm packages (0 individual false positives after tuning: docstrings such as "for testing only", `skip checks`, URLs inside TODOs, the `.dev` TLD, comments/shebangs/generated config, `/home/foo` in tests); regression tests in `tests/test_hardcode.py`.
+
+- **Triage protocol on every finding** (`engine/triage.py`, bilingual, specific for all 104 remediation families): `triage` in `findings.json` with the checks that confirm it, when it is REAL, when it is a FALSE POSITIVE, how to report it and the exact suppression line. New `--triage` (and MCP `get_triage`) prints the suspicions grouped by rule with ONE protocol each; `--show` cards, the fix plan (`fix-plan.md`, group prompts), the dashboard drawer/plan view and the AI prompts repeat it, and `--brief` warns that "to review" items are suspicions. The PRO LLM prompt and the assistant guide now require classifying each suspicion as REAL / FALSE POSITIVE / UNSURE with evidence before touching code.
+
+### Fixed
+- Suppression: an inline `pn-audit: ignore=RULE free-text reason` silently did nothing (the reason was parsed as part of the rule list); the rule list now ends at the first space and the text after it is the reason.
+- `--show <ID>` crashed on "to review" findings (no severity) and the MCP `list_findings` tool crashed the same way; both fixed.
+- Dashboard: the suggested-prompt box in the finding drawer used dark text on a dark background in the light theme (unreadable). It now uses the code-block foreground; a browser test checks contrast in both themes.
+
 ## [1.0.27] - 2026-11-09
 
 ### Added

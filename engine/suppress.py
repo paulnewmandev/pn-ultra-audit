@@ -1,8 +1,8 @@
-"""Finding suppression: `.pnauditignore` (path globs, optional rule globs) and inline `pn-audit: ignore[=RULE,...]`.
+"""Finding suppression: `.pnauditignore` (path globs, optional rule globs) and inline `pn-audit: ignore[=RULE,...] reason`.
 Suppressed findings are never silent: the count is reported in the run (coverage ledger + metrics)."""
 import fnmatch, os, re
 
-INLINE = re.compile(r"pn-audit:\s*ignore(?:=([A-Za-z0-9_*,\- ]+))?", re.I)
+INLINE = re.compile(r"pn-audit:\s*ignore(?:=([A-Za-z0-9_*\-]+(?:\s*,\s*[A-Za-z0-9_*\-]+)*))?", re.I)    # rule list ends at the first space: free text after it is the reason
 
 
 def load(root):

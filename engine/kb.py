@@ -279,6 +279,8 @@ from .kb_repo import KB_REPO
 KB.update(KB_REPO)
 from .kb_trace import KB_TRACE
 KB.update(KB_TRACE)
+from .kb_hardcode import KB_HC
+KB.update(KB_HC)
 from .kb_vercel import KB_VERCEL
 KB.update(KB_VERCEL)
 

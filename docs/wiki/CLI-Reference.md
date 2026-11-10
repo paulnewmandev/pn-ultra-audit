@@ -9,16 +9,16 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--exclude EXCLUDE] [--tools] [--semgrep-config SEMGREP_CONFIG] [--run-tests]
                       [--test-timeout TEST_TIMEOUT] [--only ONLY] [--skip SKIP] [--plan] [--list-auditors]
                       [--no-docs] [--no-qa] [--domain DOMAIN] [--compliance LIST|all] [--evidence-pack DIR]
-                      [--level {beginner,pro}] [--scaffold] [--write] [--show ID] [--kb QUERY] [--run DIR]
-                      [--mcp] [--verify-corpus] [--install-agent TOOL[,TOOL]] [--agent-scope {project,user}]
-                      [--agent-dir AGENT_DIR] [--force] [--ftp URL] [--ftp-pass-env FTP_PASS_ENV]
-                      [--ftp-allow-plain] [--sftp USER@HOST] [--git-host GIT_HOST] [--git URL]
-                      [--branch BRANCH] [--depth DEPTH] [--git-token-env VAR] [--history]
-                      [--history-commits HISTORY_COMMITS] [--export DIR] [--pdf] [--db DB] [--db-sample]
-                      [--via-ssh] [--aws-rds] [--aws-profile AWS_PROFILE] [--aws-region AWS_REGION]
-                      [--aws-db-id AWS_DB_ID] [--ssh USER@HOST[:PORT]] [--ssh-key SSH_KEY]
-                      [--ssh-port SSH_PORT] [--ssh-opts SSH_OPTS] [--accept-new-hostkey] [--sudo]
-                      [--remote-path REMOTE_PATH] [--remote-root REMOTE_ROOT] [--url URL]
+                      [--level {beginner,pro}] [--scaffold] [--write] [--triage] [--show ID] [--kb QUERY]
+                      [--run DIR] [--mcp] [--verify-corpus] [--install-agent TOOL[,TOOL]]
+                      [--agent-scope {project,user}] [--agent-dir AGENT_DIR] [--force] [--ftp URL]
+                      [--ftp-pass-env FTP_PASS_ENV] [--ftp-allow-plain] [--sftp USER@HOST]
+                      [--git-host GIT_HOST] [--git URL] [--branch BRANCH] [--depth DEPTH]
+                      [--git-token-env VAR] [--history] [--history-commits HISTORY_COMMITS] [--export DIR]
+                      [--pdf] [--db DB] [--db-sample] [--via-ssh] [--aws-rds] [--aws-profile AWS_PROFILE]
+                      [--aws-region AWS_REGION] [--aws-db-id AWS_DB_ID] [--ssh USER@HOST[:PORT]]
+                      [--ssh-key SSH_KEY] [--ssh-port SSH_PORT] [--ssh-opts SSH_OPTS] [--accept-new-hostkey]
+                      [--sudo] [--remote-path REMOTE_PATH] [--remote-root REMOTE_ROOT] [--url URL]
                       [--crawl-max CRAWL_MAX] [--psi] [--psi-key PSI_KEY] [--keywords KEYWORDS]
                       [--kw-lang KW_LANG] [--kw-country KW_COUNTRY] [--gsc-csv GSC_CSV]
                       [--competitor COMPETITOR] [--vercel-project NAME] [--vercel-team TEAM_ID]
@@ -27,7 +27,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.27 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.28 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -53,8 +53,8 @@ options:
   --semgrep-config SEMGREP_CONFIG
   --run-tests           EXECUTES the project's own test suite (runs target code)
   --test-timeout TEST_TIMEOUT
-  --only ONLY           run only these auditors (comma list):
-                        security,quality,docs,tests,qa,seo,repo,malware,aitrace,vercel,pwa,web3,db,domain
+  --only ONLY           run only these auditors (comma list): security,quality,docs,tests,qa,seo,repo,malwar
+                        e,hardcode,aitrace,vercel,pwa,web3,db,domain
   --skip SKIP           skip these auditors (comma list)
   --plan                detect the project type, print which auditors would run, and exit
   --list-auditors       list the auditors and exit
@@ -89,6 +89,10 @@ Learning / beginner friendly:
   --write               with --scaffold: actually write the files
 
 Fix retrieval (offline; token-saving for humans and AI assistants):
+  --triage              print the triage worklist of the latest run: every finding that needs a human/AI
+                        decision, grouped by rule with ONE protocol (what to check, when it is real, when it
+                        is a false positive, how to suppress it) - read this before fixing or reporting
+                        suspicions
   --show ID             print a compact fix card for one finding (e.g. SEC-001) from the latest run (see
                         --run)
   --kb QUERY            search the offline remediation knowledge base (e.g. --kb "sql injection php")

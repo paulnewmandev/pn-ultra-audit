@@ -64,7 +64,7 @@ class Smoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             open(os.path.join(d, "schema.sql"), "w").write("CREATE TABLE t (a int);\n")
             out = run(d, "--plan", "--lang", "en").stdout
-            self.assertIn("Auditors: aitrace, db, malware, security", out)
+            self.assertIn("Auditors: aitrace, db, hardcode, malware, security", out)
 
     def test_only_flag_and_bad_name(self):
         with tempfile.TemporaryDirectory() as d:
@@ -77,7 +77,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.27", run("--version").stdout)
+        self.assertIn("1.0.28", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")
@@ -387,6 +387,22 @@ class Smoke(unittest.TestCase):
             js = """<script>setTimeout(function(){var m=document.getElementById('main'),o=[];ST.view='overview';render();o.push('ov='+m.querySelectorAll('.card .empty.mini').length);ST.view='issues';render();o.push('is='+m.querySelectorAll('.empty').length);document.title='RESULT|'+o.join(';')},600);</script>"""
             tp = os.path.join(rd, "te.html"); open(tp, "w", encoding="utf-8").write(h.replace("</body>", js + "</body>"))
             self.assertEqual(self._dom_title(chrome, tp, "v=overview"), "ov=0;is=1")
+
+    def test_prompt_box_and_code_blocks_are_readable_in_both_themes(self):
+        """The suggested-prompt box (and every dark code block) must have readable text in light AND dark theme (regression: dark text on a dark background)."""
+        chrome = self._chrome()
+        if not chrome: self.skipTest("Chrome/Chromium not available")
+        with tempfile.TemporaryDirectory() as o:
+            run(DEMO, "--out", os.path.join(o, "r"), "--color", "never", "--lang", "en")
+            rd = os.path.join(o, "r", "run-1")
+            with open(os.path.join(rd, "report.html"), encoding="utf-8") as fh: h = fh.read()
+            js = """<script>setTimeout(function(){function lum(c){var m=c.match(/[\\d.]+/g).map(Number),f=function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)};return 0.2126*f(m[0])+0.7152*f(m[1])+0.0722*f(m[2])}
+            function ratio(a,b){var x=lum(a),y=lum(b);return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)}
+            var out=[];['dark','light'].forEach(function(t){document.documentElement.dataset.theme=t;drawer(F[0].id);var ta=document.getElementById('aip'),cs=getComputedStyle(ta);out.push(t+'='+(ratio(cs.color,cs.backgroundColor)>=7))});
+            document.title='RESULT|'+out.join(';')},700);</script>"""
+            tp = os.path.join(rd, "tc.html")
+            with open(tp, "w", encoding="utf-8") as fh: fh.write(h.replace("</body>", js + "</body>"))
+            self.assertEqual(self._dom_title(chrome, tp, "v=overview"), "dark=true;light=true")
 
     def test_report_has_static_fallback(self):
         """The HTML must show content even when scripts are blocked or fail (no header-only reports)."""

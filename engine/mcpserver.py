@@ -14,6 +14,7 @@ TOOLS = [
     dict(name="search_kb", description="Search the offline remediation knowledge base (BM25) and rule catalog; returns the best matching guide.",
          inputSchema=dict(type="object", properties=dict(query=dict(type="string"), limit=dict(type="integer", default=5)), required=["query"])),
     dict(name="get_brief", description="START HERE: ~40-line summary (gate, ratings, counts, top findings, next commands). Cheaper than any report.", inputSchema=dict(type="object", properties=dict(top=dict(type="integer", default=10)))),
+    dict(name="get_triage", description="Triage worklist: every SUSPICION (needs_validation) grouped by rule with ONE protocol - what to check, when it is real, when it is a false positive, how to suppress it. Use it BEFORE reporting or fixing suspicions; never present an unconfirmed finding as a vulnerability.", inputSchema=dict(type="object", properties={})),
     dict(name="get_summary", description="Score, ratings, gate and counts of the latest run.", inputSchema=dict(type="object", properties={})),
     dict(name="verify_corpus", description="Run the self-check: every tested vulnerable/fixed pair must fire on the flaw and stay silent on the fix.", inputSchema=dict(type="object", properties={})),
 ]
@@ -31,7 +32,7 @@ def call(name, args, root):
         rows = [f for f in fs if (not sev or f.get("severity") == sev) and (not st or f.get("status") == st) and (not q or q in json.dumps(f, default=str).lower())]
         order = ["critical", "high", "medium", "low", "info"]; rows.sort(key=lambda f: order.index(f.get("severity")) if f.get("severity") in order else 9)
         lim = int(args.get("limit") or 15)
-        out = [f"{f['id']}  {f.get('severity'):<8} {f.get('status'):<16} {f.get('rule'):<18} {(f.get('location') or {}).get('file')}:{(f.get('location') or {}).get('line')}  {f.get('title')}" for f in rows[:lim]]
+        out = [f"{f['id']}  {(f.get('severity') or 'review'):<8} {f.get('status'):<16} {f.get('rule'):<18} {(f.get('location') or {}).get('file')}:{(f.get('location') or {}).get('line')}  {f.get('title')}" for f in rows[:lim]]
         return f"{len(rows)} findings (showing {len(out)})\n" + "\n".join(out)
     if name == "get_fix_card":
         f = kbsearch.find(kbsearch.load_findings(_run(root)), args.get("id", ""))
@@ -39,6 +40,7 @@ def call(name, args, root):
         return kbsearch.card(f)
     if name == "search_kb": return kbsearch.format_results(args.get("query", ""), int(args.get("limit") or 5))
     if name == "get_brief": return kbsearch.brief(_run(root), int(args.get("top") or 10))
+    if name == "get_triage": return kbsearch.triage_list(_run(root))
     if name == "get_summary":
         p = os.path.join(_run(root), "summary.json")
         return open(p, encoding="utf-8").read() if os.path.isfile(p) else "summary.json not found"

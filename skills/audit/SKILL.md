@@ -31,6 +31,13 @@ Unless the user already stated it, **ask how strict the audit should be** (one s
 
 In a plain terminal the user can run `python3 <suite>/audit.py <path> --ask` to get the same menu.
 
+## Verify before you report or fix (anti false positives)
+The CLI only sees indicators. `confirmed` = a dangerous pattern matched; `needs_validation` = a SUSPICION, never a verdict.
+1. Run `python3 <suite>/audit.py --triage --run <run dir>` (MCP `get_triage`): suspicions grouped by rule with ONE protocol each (what to check, when it is REAL, when it is a FALSE POSITIVE, the exact suppression line). Every fix card (`--show <ID>`) repeats it.
+2. Classify each occurrence as REAL / FALSE POSITIVE / UNSURE and quote the evidence you checked (file:line + what you read or ran).
+3. Fix only the REAL ones. For false positives do NOT edit code: propose `pn-audit: ignore=RULE <real reason>` (or a `.pnauditignore` entry). If UNSURE, ask the code owner and say so.
+4. Never present an unconfirmed finding as a vulnerability in the final report.
+
 ## Safety rules (apply to every pass)
 
 1. **Source-first, read-only.** Never modify the target's source. Fixes are *proposed* (diffs in the report) unless the user explicitly asks to apply them.

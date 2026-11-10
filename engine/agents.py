@@ -29,9 +29,15 @@ python3 {home}/audit.py <path> --export docs --pdf      # write the dashboard/MD
 Auditors: `security` (SQLi, XSS, DoS, injection, secrets, crypto, auth, IaC/CI), `quality`, `docs` (docstrings, standards, complexity, cycles, architecture),
 `tests`, `qa` (front-end Playwright/axe + mobile Android/iOS/Flutter/RN), `seo` (SEO + SEM + consent), `web3` (Solidity/Anchor/dApps), `db` (SQL, migrations).
 `malware` (webshells, reverse shells, miners, stealers, malicious install hooks, persistence, Trojan Source; static, not an antivirus - never execute suspicious code, follow the incident-response steps) and `aitrace` (project finish: AI comments, agent/spec files, git trailers, metadata; ask about disclosure obligations before removing anything). Both write `cleanup-fixes.sh` (never executed by the tool; backups and quarantine).
+`hardcode` (TODO/FIXME/HACK with age, security TODOs, remove-before-prod markers, hardcoded environment URLs/IPs/paths/emails/identity checks/rates; writes `todo-backlog.md`): hardcoded credentials first, then security TODOs, then move values to configuration, then triage the backlog (do / ticket / delete).
 Extras by flag: `--db <sqlite|postgres://|mysql://|redis://|mongodb://|mssql://>`, `--ssh user@host --authorized` (server hardening, DB tunnel), `--aws-rds`,
 `--url https://site --authorized` (live SEO crawl), `--keywords`, `--gsc-csv`, `--tools` (semgrep/gitleaks/npm audit), `--run-tests` (executes the project's own tests).
 Strictness: `--strictness basic|standard|strict` (default standard; `--ask` prompts in a terminal). **Before running from an assistant, ask the user which level they want** unless they already said: 1 basic (core risks only), 2 standard (recommended, default), 3 strict (enterprise-grade). For legacy code use `--baseline auto` so the gate judges only NEW findings. Language: `--lang es|en`.
+
+## Verify before you report or fix (anti false positives)
+- `confirmed` = a dangerous pattern was matched; `needs_validation` = only a SUSPICION. A suspicion is NOT a vulnerability: never present it as one.
+- Run `python3 {home}/audit.py --triage --run <run dir>` (or MCP `get_triage`): suspicions grouped by rule with ONE protocol each - what to check, when it is REAL, when it is a FALSE POSITIVE and the exact suppression line.
+- Every fix card (`--show <ID>`) repeats that protocol. Classify each occurrence as REAL / FALSE POSITIVE / UNSURE and quote the evidence you checked (what you read or ran). Fix only the REAL ones; for false positives do NOT edit the code: add `pn-audit: ignore=RULE <real reason>` (or a `.pnauditignore` entry); if UNSURE ask the code owner.
 
 ## After the run
 0. `fix-plan.md` (and `fix-plan.json`) in the run folder is the ordered, complete plan: phase 0 contain & rotate, 1 now, 2 sprint, 3 backlog, 4 validate, 5 polish. Every finding is in exactly one group (one root cause = one commit) with steps, safe form, verification and a prompt. Read ONE phase at a time, never the whole file.

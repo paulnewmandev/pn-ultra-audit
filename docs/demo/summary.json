@@ -3,11 +3,11 @@
   "counts": {
     "critical": 10,
     "high": 32,
-    "medium": 33,
-    "low": 20,
+    "medium": 34,
+    "low": 23,
     "info": 4
   },
-  "confirmed": 99,
+  "confirmed": 103,
   "gate": "FAIL",
   "ratings": {
     "reliability": "D",

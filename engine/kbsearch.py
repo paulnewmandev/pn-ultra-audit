@@ -134,6 +134,7 @@ def brief(run, top=10, label=None):
             pl = _j.load(open(pj, encoding="utf-8"))
             L.append("fix plan: " + " | ".join(f"{ph['title'].split(' · ')[0].replace('Phase ', 'P').replace('Fase ', 'P')} {ph['findings']}" for ph in pl.get("phases", [])) + f" | {os.path.join(run, 'fix-plan.md')}")
         except (OSError, ValueError): pass
+    if rev: L.append(f"{rev} finding(s) are SUSPICIONS (to review), not verdicts: run `--triage --run <run dir>` for the confirm protocol BEFORE reporting or fixing them; never present an unconfirmed item as a vulnerability.")
     L.append(f"report: {os.path.join(run, 'report.html')}")
     extra = [n for n in ("server-fixes.sh", "repo-fixes.sh", "cleanup-fixes.sh") if os.path.exists(os.path.join(run, n))]
     L.append("NEXT: --show <ID> --run <run dir> (one fix card) | --kb \"<topic>\" | " + (", ".join(extra) + " (review, never auto-run) | " if extra else "") + "do NOT read report.html / REPORT.md / findings.json in full")
@@ -142,7 +143,7 @@ def brief(run, top=10, label=None):
 
 def card(f, with_pair=True):
     loc = f.get("location") or {}; sn = f.get("snippet") or {}
-    L = [f"{f.get('id')}  {f.get('severity', '').upper()}  {f.get('status', '')}  {f.get('rule')}  {','.join(f.get('cwe') or [])}",
+    L = [f"{f.get('id')}  {(f.get('severity') or 'review').upper()}  {f.get('status', '')}  {f.get('rule')}  {','.join(f.get('cwe') or [])}",
          f"{f.get('title')}", f"at {loc.get('file')}:{loc.get('line')}", ""]
     if sn.get("lines"):
         s = sn.get("start", 1)
@@ -160,4 +161,32 @@ def card(f, with_pair=True):
         p = corpus.pair_for(f.get("rule"))
         if p: L += ["", f"Tested before/after ({p['id']}: {p['note']})", "  vulnerable:", "    " + p["vulnerable"].strip().replace("\n", "\n    "), "  fixed:", "    " + p["fixed"].strip().replace("\n", "\n    ")]
     if f.get("verify"): L += ["", "Verify: " + str(f["verify"])]
+    t = f.get("triage")
+    if t:
+        review = f.get("status") != "confirmed"
+        L += ["", ("VERIFY BEFORE FIXING (this is a suspicion, not a verdict):" if review else "Quick check before fixing:")]
+        L += [f"  {i}. {x}" for i, x in enumerate(t["confirm"] if review else t["confirm"][:1], 1)]
+        L += ["  REAL if: " + t["real_if"], "  FALSE POSITIVE if: " + t["false_positive_if"], "  " + t["report_as"]]
+        if review: L += ["  If it is a false positive do NOT edit the code; suppress it with a reason:", "    inline : " + t["suppress_inline"], "    file   : .pnauditignore -> " + t["suppress_file"]]
+    return "\n".join(L)
+
+
+def triage_list(run, lang="en"):
+    """Worklist for AI assistants: every finding that still needs a decision, grouped by rule with ONE protocol (token-saving)."""
+    fs = [f for f in load_findings(run) if f.get("status") != "confirmed" and not f.get("legacy")]
+    if not fs: return "No findings need triage: everything reported is confirmed. Use fix-plan.md to fix them."
+    groups = {}
+    for f in fs: groups.setdefault(f["rule"], []).append(f)
+    order = {"high": 0, "medium": 1, "low": 2, None: 3}
+    L = [f"TRIAGE WORKLIST - {len(fs)} suspicion(s) in {len(groups)} rule(s). These are INDICATORS, not verdicts: confirm each before fixing or reporting it as a vulnerability.", ""]
+    for rule, g in sorted(groups.items(), key=lambda kv: (order.get(kv[1][0].get("priority"), 3), -len(kv[1]))):
+        t = g[0].get("triage") or {}
+        L.append(f"## {rule} - {g[0].get('title')} ({len(g)}, priority {g[0].get('priority') or 'medium'})")
+        for i, x in enumerate(t.get("confirm", []), 1): L.append(f"  check {i}: {x}")
+        L += [f"  REAL if: {t.get('real_if', '')}", f"  FALSE POSITIVE if: {t.get('false_positive_if', '')}"]
+        L.append("  where: " + ", ".join(f"{(x.get('location') or {}).get('file')}:{(x.get('location') or {}).get('line')} ({x['id']})" for x in g[:12]) + (f" ... +{len(g) - 12} more" if len(g) > 12 else ""))
+        if t.get("suppress_inline"): L.append("  suppress (only if false positive, with reason): " + t["suppress_inline"])
+        L.append("")
+    L.append((t.get("decide") if (t := (groups[next(iter(groups))][0].get("triage") or {})) else "") + " " + (t.get("report_as", "") if t else ""))
+    L.append("Then show one fix card per REAL finding: python3 audit.py --show <ID> --run <run dir>")
     return "\n".join(L)

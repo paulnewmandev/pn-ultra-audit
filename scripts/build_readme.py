@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.27"
+VER = "1.0.28"
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from llm_prompts import readme_section
 LLM_SECTION = readme_section()
@@ -25,9 +25,9 @@ R = f'''<div align="center">
 [![Read-only target](assets/badges/st-readonly.svg)](#safety--privacy)
 [![PRs welcome](assets/badges/st-prs.svg)](CONTRIBUTING.md)
 
-### One command. Sixteen lenses. Live in your terminal, delivered as a dashboard.
+### One command. Seventeen lenses. Live in your terminal, delivered as a dashboard.
 
-**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
+**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Hardcode & TODOs · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
 
 [**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**Wiki**](docs/wiki/Home.md) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
 
@@ -132,6 +132,10 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <td width="50%" valign="top"><img src="docs/img/gal-aitrace.png" alt="AI traces" width="100%"><br><sub><b>AI traces</b> - project finish: comments, agent files, git trailers, metadata and how to remove them</sub></td>
 </tr>
 <tr>
+<td width="50%" valign="top"><img src="docs/img/gal-hardcode.png" alt="Hardcode and TODOs" width="100%"><br><sub><b>Hardcode &amp; TODOs</b> - unfinished work, security TODOs, hardcoded URLs/IPs/paths/rates, with <code>todo-backlog.md</code></sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-fixplan.png" alt="Phased fix plan" width="100%"><br><sub><b>Phased fix plan</b> - contain &amp; rotate first, one group per root cause, with steps and verification</sub></td>
+</tr>
+<tr>
 <td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - ordered phases (contain &amp; rotate first), one group per root cause, with steps, verification and an AI prompt each</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-coverage.png" alt="Coverage" width="100%"><br><sub><b>Coverage</b> - what was and was not examined</sub></td>
 </tr>
@@ -209,7 +213,8 @@ flowchart LR
     C --> D7[domain deep-dive]
     C --> D8[malware and backdoors]
     C --> D9[AI traces - project finish]
-    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
+    C --> D10[hardcode and TODOs]
+    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
     E --> F[Roadmap + Audit readiness + SBOM]
     F --> G[Dashboard HTML · REPORT.md · SARIF · JSON · PDF · Evidence pack<br/>9 languages · brand colors and logo]
     F --> H[Fix scripts - generated, never executed<br/>repo-fixes.sh · server-fixes.sh · cleanup-fixes.sh]
@@ -223,6 +228,7 @@ flowchart TB
       web3[web3.py] --- domain[domain.py<br/>saas · fintech]
       repo[repo.py + gitsrc.py + ftpsrc.py<br/>keys · history · CI/CD] --- vercel[vercel.py<br/>config · live · API]
       malware[malware.py<br/>webshells · revshells · miners · stealers] --- aitrace[aitrace.py<br/>AI comments · agent files · trailers]
+      hardcode[hardcode.py<br/>TODO · FIXME · hardcoded values] --- fixplan[fixplan.py<br/>phased fix plan]
       dbaudit[dbaudit.py] --- remote[remote.py / remote_extra.py / aws.py<br/>VPS · cloud · k8s · containers]
       roadmap[roadmap.py] --- compliance[compliance.py / sbom.py / policies.py]
       kb[kb*.py + i18n.py<br/>remediation guides · 9 languages] --- fixes[repofix.py / serverfix.py / cleanfix.py<br/>reviewable fix scripts]
@@ -250,6 +256,7 @@ flowchart TB
 | **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |
 | **malware** | **webshells** (eval/system on request data, c99/WSO/China Chopper signatures, PHP hidden in images and upload folders), **reverse shells** (`/dev/tcp`, `nc -e`, Python/Node/PHP/Go/PowerShell), decode-and-execute payloads, **miners** (stratum, XMRig, CoinHive), **stealers/exfiltration** (browser + wallet + SSH + cloud stores, webhooks, CI leaking env), **malicious install hooks** and known typosquats, **persistence** (authorized_keys, cron, LD_PRELOAD, auto_prepend, hidden trigger parameters), **Trojan Source** bidi/invisible characters; static and offline, specific signatures only (not a generic `eval` alarm), with **incident-response steps** and a reversible quarantine script |
 | **aitrace** | project finish: comments/docs that reveal AI authoring, **agent & spec files** (CLAUDE.md, AGENTS.md, `.cursor/`, `openspec/`...), git `Co-Authored-By` trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers; tells you how to remove each and writes `cleanup-fixes.sh` (backups, safe by default). It never tries to defeat statistical watermarks |
+| **hardcode** | **unfinished work:** TODO/FIXME/HACK/XXX inside real comments (age from `git blame`), **security TODOs** (auth, validation, encryption, CSRF, rate limit postponed), "remove before prod" markers, unimplemented stubs, and a ready-to-paste `todo-backlog.md`; **hardcoded values:** environment URLs at call sites (localhost, staging), IPs as hosts, machine-specific home paths, personal emails, identity checks (`user.id == 1`), business rates inside functions - shown together with hardcoded credentials from the security scanner. Env-based defaults (`process.env.X || 'http://localhost'`) are not reported |
 | **vercel** | `vercel.json`, Next.js, crons without `CRON_SECRET`, API routes without auth, secret-looking `NEXT_PUBLIC_*`, CVE-2025-29927, headers, source maps; live site; project settings via the read-only API (`--vercel-project`) |
 | **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
@@ -298,7 +305,7 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 | Assistant | What gets installed | Invoke |
 |---|---|---|
-| **Claude Code** | 20 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
+| **Claude Code** | 21 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
 | **Codex** | skills in `.agents/skills/` + `AGENTS.md` block | ask in chat |
 | **Cursor** | `.cursor/rules/pn-ultra-audit.mdc` + `.cursor/commands/pn-audit.md` | `/pn-audit` |
 | **Windsurf** | `.windsurf/rules/` + `.windsurf/workflows/pn-audit.md` | `/pn-audit` |
@@ -310,13 +317,16 @@ Files follow each tool's documented conventions at the time of writing; installs
 
 ### Fix cards, offline search and an MCP server (token-saving)
 
+**Anti false positives:** the scanner only sees indicators, so every finding carries a *triage protocol* (checks to run, when it is real, when it is a false positive, and the exact `pn-audit: ignore=RULE reason` line). `needs_validation` items are suspicions, never verdicts; `--triage` lists them with one protocol per rule, the fix cards and the fix plan repeat it, and the AI prompts tell the assistant to classify REAL / FALSE POSITIVE / UNSURE with evidence before touching code.
+
 Assistants (and people) rarely need the whole report - they need the one passage that tells them how to fix a finding.
 
 ```bash
 python3 audit.py . --brief                                  # ~40 lines (gate, ratings, top findings) - what an AI assistant should read first
+python3 audit.py --triage --run audit-output/myapp            # suspicions grouped by rule with ONE protocol: what to check, when it is real, when it is a false positive, how to suppress it
 python3 audit.py --show SEC-001 --run audit-output/myapp    # compact card: code, why, steps, safe form, tested before/after, verify
 python3 audit.py --kb "sql injection php"                   # offline BM25 search over 60+ remediation guides and 110+ rules
-python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, search_kb, get_summary, verify_corpus
+python3 audit.py --mcp --run audit-output/myapp             # read-only MCP server (stdio): list_findings, get_fix_card, get_triage, search_kb, get_summary, verify_corpus
 python3 audit.py --verify-corpus                            # prove the fixes: each vulnerable/ example fires the rule, each fixed/ one stays silent
 ```
 
@@ -473,6 +483,6 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 20 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
+<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 21 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
 '''
 open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8").write(R); print("README.md", len(R.splitlines()), "lines")

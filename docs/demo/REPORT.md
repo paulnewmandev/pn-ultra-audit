@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.27
+- **Tool:** PN-Ultra-Audit 1.0.28
 
 ## Contents
 
@@ -19,9 +19,9 @@
 |---|---|---|
 | Reliability ≥ B | ❌ | D |
 | Security ≥ B | ❌ | E |
-| Maintainability ≤ 10% debt | ❌ | 27.3% |
+| Maintainability ≤ 10% debt | ❌ | 27.2% |
 | 0 secrets in source | ❌ | 4 |
-| Executed coverage units all covered | ✅ | 10/10 |
+| Executed coverage units all covered | ✅ | 11/11 |
 
 ### Ratings
 
@@ -30,20 +30,20 @@
 | Reliability (bugs) | **D** |
 | Security | **E** |
 | Maintainability | **D** |
-| Technical debt ratio | 27.3% (~18.0 h) |
+| Technical debt ratio | 27.2% (~19.0 h) |
 
 ### Findings by severity
 
 | critical | high | medium | low | info | Total | Needs review / validation |
 |---|---|---|---|---|---|---|
-| 10 | 32 | 33 | 20 | 4 | 99 | 25 |
+| 10 | 32 | 34 | 23 | 4 | 103 | 31 |
 
 ### Audited environment
 
 - **Databases:** 1 .sql · app.db: 2 tables
-- **Tests:** 3 files · 4 cases · ratio 0.168 · skipped 0 · no-assert files 2
+- **Tests:** 3 files · 4 cases · ratio 0.157 · skipped 0 · no-assert files 2
 - **Duplication:** 0.0%
-- **LOC:** Python 57, Solidity 18, JavaScript 17, PHP 13, TypeScript 11, Swift 9, SQL 4, Shell 2
+- **LOC:** Python 61, JavaScript 21, Solidity 18, PHP 13, TypeScript 11, Swift 9, SQL 4, Shell 2
 
 ### Fix priorities
 
@@ -68,8 +68,8 @@ pie showData
     title Confirmed findings by severity
     "critical" : 10
     "high" : 32
-    "medium" : 33
-    "low" : 20
+    "medium" : 34
+    "low" : 23
     "info" : 4
 ```
 
@@ -79,7 +79,7 @@ pie showData
 pie showData
     title By type
     "vulnerability" : 45
-    "code_smell" : 21
+    "code_smell" : 25
     "bug" : 17
     "test_gap" : 12
     "performance" : 2
@@ -101,9 +101,9 @@ xychart-beta
 ```mermaid
 pie showData
     title To review, by priority
-    "medium" : 15
-    "high" : 9
-    "low" : 1
+    "medium" : 17
+    "high" : 11
+    "low" : 3
 ```
 
 ### Project map: modules, size and findings
@@ -111,14 +111,14 @@ pie showData
 ```mermaid
 flowchart LR
     P(["vulnerable-demo"])
-    P --> M0["backend<br/>64 LOC<br/>0 findings"]
+    P --> M0["backend<br/>68 LOC<br/>0 findings"]
     P --> M1["contracts<br/>18 LOC<br/>0 findings"]
     P --> M2["app/Http<br/>12 LOC<br/>0 findings"]
     P --> M3["frontend<br/>6 LOC<br/>0 findings"]
     P --> M4["mobile<br/>6 LOC<br/>0 findings"]
-    P --> M5["db<br/>4 LOC<br/>0 findings"]
-    P --> M6["scripts<br/>2 LOC<br/>0 findings"]
-    P --> M7["web<br/>1 LOC<br/>0 findings"]
+    P --> M5["web<br/>5 LOC<br/>0 findings"]
+    P --> M6["db<br/>4 LOC<br/>0 findings"]
+    P --> M7["scripts<br/>2 LOC<br/>0 findings"]
     classDef bad fill:#ffcdd2,stroke:#c62828,color:#000;
     classDef warn fill:#fff3cd,stroke:#f9a825,color:#000;
     classDef ok fill:#c8e6c9,stroke:#2e7d32,color:#000;
@@ -155,8 +155,8 @@ gantt
     Likely bug pattern x3 :t12, after t11, 1d
     Test coverage gap / test hygiene x3 :t13, after t12, 1d
     Web accessibility WCAG 2.2 x3 :t14, after t13, 1d
-    Predictable randomness for secrets x2 :t15, after t14, 1d
-    Test infrastructure gaps front-end x2 :t16, after t15, 1d
+    Engineering standards & tooling x2 :t15, after t14, 1d
+    Predictable randomness for secrets x2 :t16, after t15, 1d
     section Backlog debt
     Smart contract / crypto security x1 :t17, after t16, 1d
     API documentation docstrings / doc x1 :t18, after t17, 1d
@@ -226,6 +226,7 @@ gantt
 | COD-002 | medium | code_smell | `.github/workflows/deploy.yml:1` | CI does not appear to run: tests, lint | 45 min |
 | COD-003 | medium | code_smell | `app.db:1` | Table `users` has no PRIMARY KEY | 25 min |
 | COD-004 | medium | code_smell | `db/schema.sql:1` | Table `users` has no PRIMARY KEY | 20 min |
+| COD-005 | medium | code_smell | `web/api_client.js:5` | Marker says to remove or fix this before production | 20 min |
 | SEC-039 | medium | vulnerability | `app.db:1` | SQLite file is world-accessible (0o644) | 5 min |
 | SEC-040 | medium | vulnerability | `backend/app.py:35` | Redirect to user-controlled URL | 10 min |
 | SEC-041 | medium | vulnerability | `backend/server.js:9` | Non-cryptographic RNG for secrets | 10 min |
@@ -247,12 +248,15 @@ gantt
 | TST-009 | medium | test_gap | `web/tests/checkout.spec.ts:4` | Fixed sleeps in tests: 2 occurrence(s) in 1 file(s) | 8 min |
 | A11-003 | low | bug | `web/index.html:2` | <html> without lang attribute | 2 min |
 | BUG-011 | low | bug | `backend/app.py:53` | Mutable default argument that is mutated or leaked | 10 min |
-| COD-005 | low | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
-| COD-006 | low | code_smell | `app.db:1` | Foreign keys declared but PRAGMA foreign_keys is OFF by default | 10 min |
-| COD-007 | low | code_smell | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
-| COD-008 | low | code_smell | `backend/app.py:62` | Empty catch/except (swallowed error) | 10 min |
-| COD-009 | low | code_smell | `contracts/Vault.sol:1` | Floating pragma (^0.8.0): deployed bytecode may differ from what was audited | 5 min |
-| COD-010 | low | code_smell | `db/schema.sql:2` | Table `orders` uses MyISAM | 20 min |
+| COD-006 | low | code_smell | `.:1` | No formatter / .editorconfig configured | 20 min |
+| COD-007 | low | code_smell | `.:1` | Public API documentation coverage is 0.0% (target 60%) | 15 min |
+| COD-008 | low | code_smell | `app.db:1` | Foreign keys declared but PRAGMA foreign_keys is OFF by default | 10 min |
+| COD-009 | low | code_smell | `backend/app.py:1` | Public API under-documented in `backend/app.py` (0/12) | 36 min |
+| COD-010 | low | code_smell | `backend/app.py:62` | Empty catch/except (swallowed error) | 10 min |
+| COD-011 | low | code_smell | `backend/billing.py:1` | Personal machine path hardcoded: /Users/ana/ | 10 min |
+| COD-012 | low | code_smell | `contracts/Vault.sol:1` | Floating pragma (^0.8.0): deployed bytecode may differ from what was audited | 5 min |
+| COD-013 | low | code_smell | `db/schema.sql:2` | Table `orders` uses MyISAM | 20 min |
+| COD-014 | low | code_smell | `web/api_client.js:4` | 1 FIXME/HACK marker(s) in api_client.js | 10 min |
 | DEP-001 | low | dependency | `package.json:1` | `package.json` has no lockfile | 5 min |
 | DEP-002 | low | dependency | `web/package.json:1` | `web/package.json` has no lockfile | 5 min |
 | PER-001 | low | performance | `app.db:1` | Foreign key `orders.user_id` without index | 10 min |
@@ -265,9 +269,9 @@ gantt
 | TST-010 | low | test_gap | `.:1` | iOS: code coverage not enabled in scheme/test plan | 10 min |
 | TST-011 | low | test_gap | `.:1` | No Slither/Echidna/Medusa/Certora in CI | 90 min |
 | TST-012 | low | test_gap | `mobile/ios/AppUITests/LoginUITests.swift:1` | iOS: 1 UI test file(s) do not set continueAfterFailure = false | 2 min |
-| COD-011 | info | code_smell | `.cursor/rules/style.mdc:1` | Cursor configuration committed: .cursor | 5 min |
-| COD-012 | info | code_smell | `CLAUDE.md:1` | Claude Code configuration committed: CLAUDE.md | 5 min |
-| COD-013 | info | code_smell | `backend/utils_ai.py:1` | Comment reveals AI-assisted authoring | 2 min |
+| COD-015 | info | code_smell | `.cursor/rules/style.mdc:1` | Cursor configuration committed: .cursor | 5 min |
+| COD-016 | info | code_smell | `CLAUDE.md:1` | Claude Code configuration committed: CLAUDE.md | 5 min |
+| COD-017 | info | code_smell | `backend/utils_ai.py:1` | Comment reveals AI-assisted authoring | 2 min |
 | SEO-011 | info | code_smell | `web/public/robots.txt:1` | robots.txt does not reference the sitemap | 2 min |
 
 ### Files with most findings
@@ -280,7 +284,7 @@ gantt
 | `backend/server.js` | 8 |
 | `contracts/Vault.sol` | 8 |
 | `db/schema.sql` | 8 |
-| `.` | 7 |
+| `.` | 8 |
 | `app/Http/UserController.php` | 5 |
 | `mobile/ios/AppUITests/LoginUITests.swift` | 4 |
 | `web/tests/checkout.spec.ts` | 3 |
@@ -333,7 +337,7 @@ function withdraw(uint amt) external nonReentrant {
 
 **How to verify:** `slither .` clean of high/medium; invariant test 'sum(balances) == address(this).balance' holds under fuzzing; external audit report resolved.
 
-- [ ] `SEC-007`, `SEC-029`, `SEC-030`, `SEC-032`, `SEC-033`, `TST-011`, `COD-009`  — tick when fixed, then re-run the audit
+- [ ] `SEC-007`, `SEC-029`, `SEC-030`, `SEC-032`, `SEC-033`, `TST-011`, `COD-012`  — tick when fixed, then re-run the audit
 
 ### 2. Hard-coded secret / credential  · **critical**  · 4 confirmed · 1 to review
 
@@ -624,7 +628,7 @@ CREATE TABLE t (id BIGSERIAL PRIMARY KEY, name text NOT NULL);  CREATE INDEX ON 
 
 **How to verify:** Re-run `python3 audit.py --db ...`; finding gone.
 
-- [ ] `SEC-034`, `BUG-003`, `COD-003`, `BUG-004`, `BUG-005`, `COD-004`, `BUG-008`, `SEC-043`, `BUG-009`, `COD-006`, `PER-001`, `PER-002` …  — tick when fixed, then re-run the audit
+- [ ] `SEC-034`, `BUG-003`, `COD-003`, `BUG-004`, `BUG-005`, `COD-004`, `BUG-008`, `SEC-043`, `BUG-009`, `COD-008`, `PER-001`, `PER-002` …  — tick when fixed, then re-run the audit
 
 ### 10. Cross-Site Scripting (XSS)  · **high**  · 6 confirmed · 1 to review
 
@@ -1290,7 +1294,42 @@ vitest + @testing-library + playwright + axe + CI job with traces/artifacts
 
 - [ ] `TST-006`, `TST-007`  — tick when fixed, then re-run the audit
 
-### 28. Predictable randomness for secrets  · **medium**  · 2 confirmed · 0 to review
+### 28. Engineering standards & tooling  · **medium**  · 2 confirmed · 0 to review
+
+**What it is.** Linter, formatter, type checker, CI checks, config documentation or hooks are missing, so quality depends on individual discipline.
+
+**Impact.** Style and bug classes recur; reviews waste time on formatting; regressions reach main.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `.github/workflows/deploy.yml:1` | CI does not appear to run: tests, lint | 45 min |
+| low | `.:1` | No formatter / .editorconfig configured | 20 min |
+
+**Steps:**
+
+1. Pick one formatter and one linter per language; commit their configs; add `lint`, `format`, `typecheck`, `test` scripts.
+2. Turn on strict typing: TS `strict`, Python mypy/pyright (ratchet per package), PHP phpstan level ≥ 6, Kotlin explicit API mode, Swift strict concurrency.
+3. Run lint + types + tests in CI on every PR and make them required checks.
+4. Add pre-commit hooks (format, lint, gitleaks).
+5. Document env vars in .env.example; adopt Conventional Commits + SemVer.
+
+**Vulnerable code/config:**
+```
+no eslint/ruff config, no CI
+```
+
+**Safe form:**
+```
+eslint.config.js + prettier + tsc --noEmit + vitest in .github/workflows/ci.yml (required)
+```
+
+**How to verify:** A PR with a lint/type/test failure cannot be merged.
+
+- [ ] `COD-002`, `COD-006`  — tick when fixed, then re-run the audit
+
+### 29. Predictable randomness for secrets  · **medium**  · 2 confirmed · 0 to review
 
 **What it is.** Non-cryptographic RNGs (`Math.random`, `rand`, `random`) are predictable and must not generate tokens, OTPs or reset codes.
 
@@ -1322,7 +1361,7 @@ token = crypto.randomBytes(32).toString('hex')   // Python: secrets.token_urlsaf
 
 - [ ] `SEC-041`, `SEC-042`  — tick when fixed, then re-run the audit
 
-### 29. SEM / analytics tracking setup  · **medium**  · 1 confirmed · 0 to review
+### 30. SEM / analytics tracking setup  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** Advertising and analytics tags are missing, duplicated, misconfigured, or fire without user consent; conversions are not tracked.
 
@@ -1356,7 +1395,7 @@ gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user
 
 - [ ] `SEM-001`  — tick when fixed, then re-run the audit
 
-### 30. Project documentation  · **medium**  · 1 confirmed · 0 to review
+### 31. Project documentation  · **medium**  · 1 confirmed · 0 to review
 
 **What it is.** Missing or thin project documentation (README, architecture notes, API spec, contributing guide) makes onboarding slow and decisions invisible.
 
@@ -1389,40 +1428,6 @@ README.md: purpose · requirements · install · run · test · config table · 
 **How to verify:** A teammate follows the README on a clean machine without asking you anything.
 
 - [ ] `COD-001`  — tick when fixed, then re-run the audit
-
-### 31. Engineering standards & tooling  · **medium**  · 1 confirmed · 0 to review
-
-**What it is.** Linter, formatter, type checker, CI checks, config documentation or hooks are missing, so quality depends on individual discipline.
-
-**Impact.** Style and bug classes recur; reviews waste time on formatting; regressions reach main.
-
-**Where to fix:**
-
-| Sev. | File | Title | Effort |
-|---|---|---|---|
-| medium | `.github/workflows/deploy.yml:1` | CI does not appear to run: tests, lint | 45 min |
-
-**Steps:**
-
-1. Pick one formatter and one linter per language; commit their configs; add `lint`, `format`, `typecheck`, `test` scripts.
-2. Turn on strict typing: TS `strict`, Python mypy/pyright (ratchet per package), PHP phpstan level ≥ 6, Kotlin explicit API mode, Swift strict concurrency.
-3. Run lint + types + tests in CI on every PR and make them required checks.
-4. Add pre-commit hooks (format, lint, gitleaks).
-5. Document env vars in .env.example; adopt Conventional Commits + SemVer.
-
-**Vulnerable code/config:**
-```
-no eslint/ruff config, no CI
-```
-
-**Safe form:**
-```
-eslint.config.js + prettier + tsc --noEmit + vitest in .github/workflows/ci.yml (required)
-```
-
-**How to verify:** A PR with a lint/type/test failure cannot be merged.
-
-- [ ] `COD-002`  — tick when fixed, then re-run the audit
 
 ### 32. World-writable permissions  · **medium**  · 1 confirmed · 0 to review
 
@@ -1519,7 +1524,40 @@ logger.info('login attempt', {user})
 
 - [ ] `SEC-044`  — tick when fixed, then re-run the audit
 
-### 35. API documentation (docstrings / doc comments)  · **low**  · 2 confirmed · 0 to review
+### 35. Marker says to remove or fix this before production  · **medium**  · 1 confirmed · 0 to review
+
+**What it is.** A comment says the code is temporary, for debugging/testing only, bypasses a check, or must be removed/disabled before release (for example `remove before prod`, `debug only`, `temporary hack`, `skip auth for now`).
+
+**Impact.** Debug backdoors, disabled checks and test shortcuts reach production because nobody removed them.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| medium | `web/api_client.js:5` | Marker says to remove or fix this before production | 20 min |
+
+**Steps:**
+
+1. Open the code and decide: remove it now, or gate it behind a build/runtime flag that is OFF in production.
+2. If it bypasses authentication, validation or limits, treat it as a vulnerability and fix it before anything else.
+3. Add a CI check that fails the release when such markers exist (`grep -RInE 'remove before|debug only|do not (ship|merge)'`).
+4. Delete the marker once the code is clean.
+
+**Vulnerable code/config:**
+```
+if (req.query.debug === '1') return next(); // TEMP: skip auth, remove before prod
+```
+
+**Safe form:**
+```
+if (process.env.NODE_ENV !== 'production' && req.query.debug === '1') return next();   // dev-only, covered by test
+```
+
+**How to verify:** The shortcut is gone or impossible in production builds; CI blocks new `remove before prod` markers.
+
+- [ ] `COD-005`  — tick when fixed, then re-run the audit
+
+### 36. API documentation (docstrings / doc comments)  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** Public functions, classes and modules lack doc comments, or the comments are too short to say what the code promises (parameters, return value, errors, side effects).
 
@@ -1566,9 +1604,9 @@ def charge(user: User, amount: Decimal, retry: int = 3) -> Receipt:
 
 **How to verify:** Run the doc linter / doc generator: no missing-docstring warnings on public API; generated docs read well.
 
-- [ ] `COD-005`, `COD-007`  — tick when fixed, then re-run the audit
+- [ ] `COD-007`, `COD-009`  — tick when fixed, then re-run the audit
 
-### 36. Vulnerable or outdated dependency  · **low**  · 2 confirmed · 0 to review
+### 37. Vulnerable or outdated dependency  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** A dependency has a known CVE or is end-of-life.
 
@@ -1601,7 +1639,7 @@ lodash@4.17.21
 
 - [ ] `DEP-001`, `DEP-002`  — tick when fixed, then re-run the audit
 
-### 37. Page experience & Core Web Vitals  · **low**  · 2 confirmed · 0 to review
+### 38. Page experience & Core Web Vitals  · **low**  · 2 confirmed · 0 to review
 
 **What it is.** Slow server response, render-blocking scripts, unsized/oversized images and missing lazy-loading hurt LCP, CLS and INP - ranking and conversion signals.
 
@@ -1636,7 +1674,7 @@ lodash@4.17.21
 
 - [ ] `SEO-009`, `SEO-010`  — tick when fixed, then re-run the audit
 
-### 38. Swallowed errors  · **low**  · 1 confirmed · 0 to review
+### 39. Swallowed errors  · **low**  · 1 confirmed · 0 to review
 
 **What it is.** Empty catch/except blocks hide failures so bugs surface far from their cause.
 
@@ -1665,9 +1703,76 @@ try { save(); } catch (e) { logger.error('save failed', e); throw e; }
 
 **How to verify:** Force the failure in a test; it must be visible.
 
-- [ ] `COD-008`  — tick when fixed, then re-run the audit
+- [ ] `COD-010`  — tick when fixed, then re-run the audit
 
-### 39. AI agent / spec files are tracked in the repository  · **info**  · 2 confirmed · 0 to review
+### 40. Hardcoded machine-specific path  · **low**  · 1 confirmed · 0 to review
+
+**What it is.** A path points into a person's home directory (`/Users/<name>/...`, `/home/<name>/...`, `C:\Users\<name>\...`). It only exists on one computer and reveals a username and folder layout.
+
+**Impact.** The code breaks on every other machine and in CI/production, and the path leaks personal information about the developer.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| low | `backend/billing.py:1` | Personal machine path hardcoded: /Users/ana/ | 10 min |
+
+**Steps:**
+
+1. Replace it with a path relative to the project (`Path(__file__).parent`, `path.join(__dirname, ...)`) or a configurable directory (`DATA_DIR` environment variable).
+2. For user-specific locations use the platform API (`Path.home()`, `os.homedir()`, `%APPDATA%`).
+3. Search for other copies: `grep -RInE '/Users/|/home/[a-z]|C:\\Users'`.
+
+**Vulnerable code/config:**
+```
+open('/Users/ana/Desktop/data.csv')
+```
+
+**Safe form:**
+```
+open(Path(__file__).parent / 'data' / 'data.csv')
+```
+
+**How to verify:** No personal paths remain; the project runs from a fresh clone in another directory.
+
+- [ ] `COD-011`  — tick when fixed, then re-run the audit
+
+### 41. Unfinished-work markers (TODO / FIXME / HACK / XXX)  · **low**  · 1 confirmed · 0 to review
+
+**What it is.** Comments mark work that was postponed or code that is known to be fragile. A few are normal; hundreds, undated and unowned, mean unfinished features, known bugs and workarounds that nobody tracks.
+
+**Impact.** Hidden backlog and hidden bugs: FIXME/HACK markers are admitted defects; old ones are usually forgotten until they break in production.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| low | `web/api_client.js:4` | 1 FIXME/HACK marker(s) in api_client.js | 10 min |
+
+**Steps:**
+
+1. Open `todo-backlog.md` (generated next to the report): every marker with file:line, text and age, ready to paste into your tracker.
+2. Triage each one: DO it now (if small), TICKET it (`TODO(#123)` with the issue number), or DELETE it (obsolete, already done, or wishful thinking).
+3. Treat FIXME / HACK / XXX / BUG as defects: schedule them; anything older than a year needs an owner or must go.
+4. Stop the bleeding: add a lint rule (ESLint `no-warning-comments`, flake8-todo / ruff `TD` and `FIX` rules, golangci `godox`) that requires an issue reference, and fail CI on new FIXME/HACK.
+5. Re-run the audit: the count should only go down.
+
+**Vulnerable code/config:**
+```
+# TODO fix this later
+# HACK: works for now
+```
+
+**Safe form:**
+```
+# TODO(#482): support pagination once the API returns a cursor (blocked by vendor v2, review 2026-02)
+```
+
+**How to verify:** Every remaining marker has an issue reference or an owner; FIXME/HACK count is zero or scheduled; CI rejects new unreferenced markers.
+
+- [ ] `COD-014`  — tick when fixed, then re-run the audit
+
+### 42. AI agent / spec files are tracked in the repository  · **info**  · 2 confirmed · 0 to review
 
 **What it is.** Files that configure AI coding assistants or spec-driven workflows (CLAUDE.md, AGENTS.md, .cursor/, .windsurfrules, .github/copilot-instructions.md, openspec/, .specify/, memory-bank/ ...) are committed to the project.
 
@@ -1705,9 +1810,9 @@ openspec/
 
 **How to verify:** `git ls-files | grep -Ei 'claude\.md|agents\.md|\.cursor/|openspec/'` prints nothing (or only what you decided to keep).
 
-- [ ] `COD-011`, `COD-012`  — tick when fixed, then re-run the audit
+- [ ] `COD-015`, `COD-016`  — tick when fixed, then re-run the audit
 
-### 40. Comments or docs that reveal AI-assisted authoring  · **info**  · 1 confirmed · 0 to review
+### 43. Comments or docs that reveal AI-assisted authoring  · **info**  · 1 confirmed · 0 to review
 
 **What it is.** Source comments, headers or documentation say the code was generated or assisted by an AI tool (for example 'Generated with Claude Code', 'written by ChatGPT', 'As an AI language model'). They are not a vulnerability: they are noise that makes a finished project look unreviewed.
 
@@ -1742,9 +1847,9 @@ def total(items): ...
 
 **How to verify:** Re-run the audit: no AITRACE-COMMENT / AITRACE-DOC findings; `git diff` shows only the lines you intended to change.
 
-- [ ] `COD-013`  — tick when fixed, then re-run the audit
+- [ ] `COD-017`  — tick when fixed, then re-run the audit
 
-### 41. Denial of Service / Resource exhaustion (DoS/DDoS hardening)  · _review_  · 0 confirmed · 3 to review
+### 44. Denial of Service / Resource exhaustion (DoS/DDoS hardening)  · _review_  · 0 confirmed · 3 to review
 
 **What it is.** Code-level conditions let one client (or many) consume unbounded CPU, memory, connections or time: no rate limit, unbounded page size, catastrophic regex, missing timeouts, unbounded uploads/archives, blocking calls on the event loop.
 
@@ -1782,7 +1887,7 @@ requests.get(url, timeout=(3, 10))
 
 **How to verify:** Send an oversized value / burst of requests to local staging and confirm 4xx/429 and bounded memory.
 
-### 42. Container hardening  · _review_  · 0 confirmed · 3 to review
+### 45. Container hardening  · _review_  · 0 confirmed · 3 to review
 
 **What it is.** Root user, floating `latest` tags, remote ADD, secrets in ENV/ARG, curl|sh increase blast radius and break reproducibility.
 
@@ -1816,7 +1921,39 @@ USER node
 
 **How to verify:** `docker run --rm image id` is not uid 0; `hadolint Dockerfile` clean.
 
-### 43. Mass assignment / over-posting  · _review_  · 0 confirmed · 1 to review
+### 46. Hardcoded environment URL  · _review_  · 0 confirmed · 2 to review
+
+**What it is.** A request or client is built with a literal URL tied to one environment (localhost/127.0.0.1, or a staging/dev/test host) instead of configuration. It works on one machine and breaks, or leaks test traffic, elsewhere.
+
+**Impact.** Broken deployments, production code talking to localhost or staging, and secrets or data sent to the wrong environment.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| review/medium | `web/api_client.js:1` | localhost URL hardcoded at a call site | 15 min |
+| review/low | `web/api_client.js:2` | Environment-specific host hardcoded: api-staging.myapp.com | 15 min |
+
+**Steps:**
+
+1. Move the base URL to configuration: environment variable / settings file (`API_URL`, `BASE_URL`) loaded once at startup.
+2. Keep a safe default only for development (`process.env.API_URL ?? 'http://localhost:3000'`), never in the code path used in production.
+3. Add the variable to `.env.example` and to your deployment settings (Vercel/Docker/CI).
+4. Fail fast at startup when the variable is missing in production.
+
+**Vulnerable code/config:**
+```
+const r = await fetch('http://localhost:3000/api/users');
+```
+
+**Safe form:**
+```
+const r = await fetch(`${process.env.API_URL}/api/users`);   // API_URL set per environment
+```
+
+**How to verify:** `grep -RInE "https?://(localhost|127\.0\.0\.1)" src/` finds only dev defaults; the app works with a different API_URL.
+
+### 47. Mass assignment / over-posting  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Request data is bound wholesale to a model, letting clients set fields like `is_admin`, `role`, `price`, `tenant_id`.
 
@@ -1845,7 +1982,7 @@ User::create($request->validated());   // FormRequest with explicit rules
 
 **How to verify:** POST `is_admin=1`; value must be ignored.
 
-### 44. Infrastructure misconfiguration (K8s/Terraform/CI/nginx)  · _review_  · 0 confirmed · 1 to review
+### 48. Infrastructure misconfiguration (K8s/Terraform/CI/nginx)  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Over-permissive network, IAM, privileges or CI triggers.
 
@@ -1875,7 +2012,71 @@ cidr_blocks = ["203.0.113.0/24"]  # office/VPN only
 
 **How to verify:** `checkov`/`tfsec`/`kube-linter` clean.
 
-### 45. N+1 queries  · _review_  · 0 confirmed · 1 to review
+### 49. Security work postponed in a TODO  · _review_  · 0 confirmed · 1 to review
+
+**What it is.** A TODO/FIXME says that authentication, validation, sanitising, encryption, rate limiting, CSRF or similar protection still has to be added. The code ships without the protection until somebody remembers.
+
+**Impact.** Missing controls in production: the comment is evidence that the risk is known and unmitigated.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| review/high | `web/api_client.js:3` | TODO says security work is still missing: auth | 30 min |
+
+**Steps:**
+
+1. Read the surrounding code: is the protection really missing? If yes, treat it as a security finding and fix it now (use the matching guide: `--kb "<topic>"`).
+2. If it is already implemented elsewhere, delete the stale TODO so it does not mislead reviewers.
+3. If it must wait, open a ticket with an owner and a date, and add a compensating control (feature flag off, network restriction, monitoring).
+4. Add a test that fails without the protection so the TODO cannot silently come back.
+
+**Vulnerable code/config:**
+```
+# TODO: add auth check
+def delete_user(id): ...
+```
+
+**Safe form:**
+```
+@require_role('admin')
+def delete_user(id): ...
+```
+
+**How to verify:** The protection exists and a test covers it; the TODO is gone; unauthorized requests are rejected.
+
+### 50. Hardcoded identity check (backdoor smell)  · _review_  · 0 confirmed · 1 to review
+
+**What it is.** Authorization depends on a literal identity: `user.id == 1`, `email == 'admin'`, `username == 'root'`. Whoever owns that account (or can create one with that value) becomes privileged.
+
+**Impact.** Privilege escalation by registering the magic email/username, or a forgotten developer backdoor.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| review/high | `web/api_client.js:7` | Authorization depends on a literal user id | 30 min |
+
+**Steps:**
+
+1. Replace the literal with a role or permission stored on the user and checked by your authorization layer (RBAC/policies).
+2. Remove the special-case account from the code and seed the admin through a migration or CLI command.
+3. Review how accounts are created so nobody can register with a reserved value.
+4. Add a test that a normal user with that id/email pattern is NOT privileged.
+
+**Vulnerable code/config:**
+```
+if (user.id === 1) allowAll();
+```
+
+**Safe form:**
+```
+if (user.can('manage-users')) allowAll();
+```
+
+**How to verify:** Privileged behaviour depends on roles/permissions only; the test with a look-alike account is denied.
+
+### 51. N+1 queries  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** A query runs inside a loop - one query per row instead of one for all rows.
 
@@ -1904,7 +2105,7 @@ users = User.objects.prefetch_related('orders')
 
 **How to verify:** Query count independent of N.
 
-### 46. Debug/dev configuration  · _review_  · 0 confirmed · 1 to review
+### 52. Debug/dev configuration  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Debug mode exposes stack traces, config, and sometimes an interactive console.
 
@@ -1933,7 +2134,7 @@ app.run(debug=os.environ.get('FLASK_DEBUG') == '1')
 
 **How to verify:** Trigger an error in prod-like env: generic error page only.
 
-### 47. Permissive CORS  · _review_  · 0 confirmed · 1 to review
+### 53. Permissive CORS  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** Any origin may read responses; with credentials this exposes authenticated data cross-site.
 
@@ -1962,7 +2163,7 @@ cors({ origin: ['https://app.example.com'], credentials: true })
 
 **How to verify:** Send `Origin: https://evil.com` and confirm no ACAO header.
 
-### 48. Leftover AI placeholder (truncated code)  · _review_  · 0 confirmed · 1 to review
+### 54. Leftover AI placeholder (truncated code)  · _review_  · 0 confirmed · 1 to review
 
 **What it is.** A comment such as '... rest of the code remains the same', '// ... existing code ...' or 'implementation goes here' is a common leftover of AI-assisted edits. If it replaced real code, the file is incomplete; if not, it is just noise.
 
@@ -1996,6 +2197,70 @@ def process(order):
 ```
 
 **How to verify:** The function is implemented and tests pass; no placeholder phrases remain.
+
+### 55. Hardcoded IP address  · _review_  · 0 confirmed · 1 to review
+
+**What it is.** A host, server or endpoint is configured with a literal IP address inside the code.
+
+**Impact.** Outages when the address changes, no failover or load balancing, impossible to point staging at another host, and internal topology exposed in the repository.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| review/medium | `web/api_client.js:6` | IP address hardcoded as a host: 10.0.3.17 | 20 min |
+
+**Steps:**
+
+1. Use a DNS name and put it in configuration (environment variable / secret manager / service discovery).
+2. If the IP is intentional (allow-list, fixed appliance), define it once in config with a comment explaining why.
+3. Remove internal addresses from public repositories and rotate anything that depended on their secrecy.
+
+**Vulnerable code/config:**
+```
+DB_HOST = '10.0.3.17'
+```
+
+**Safe form:**
+```
+DB_HOST = os.environ['DB_HOST']   # db.internal.example.com
+```
+
+**How to verify:** No IP literals remain in application code; the service starts with the hostname from the environment.
+
+### 56. Hardcoded business rate (tax / fee / discount)  · _review_  · 0 confirmed · 1 to review
+
+**What it is.** A tax, fee, commission, discount or interest rate is written as a number inside a function. Business rules change, differ per country/customer, and must be auditable.
+
+**Impact.** Wrong totals after a rate change, no history of which rate applied to which order, and inconsistent copies across the code.
+
+**Where to fix:**
+
+| Sev. | File | Title | Effort |
+|---|---|---|---|
+| review/low | `backend/billing.py:3` | Business rate hardcoded in a function: tax_rate | 20 min |
+
+**Steps:**
+
+1. Move the rate to configuration or a table (per country/plan/date) with an effective-from date.
+2. Read it through one function (`get_tax_rate(country, date)`) and use decimal/integer cents for money.
+3. Store the rate used on each invoice/order so past totals stay reproducible.
+4. Add tests for each rate and for a rate change.
+
+**Vulnerable code/config:**
+```
+def total(x):
+    tax_rate = 0.21
+    return x * (1 + tax_rate)
+```
+
+**Safe form:**
+```
+def total(x, country):
+    return x * (1 + rates.tax(country))
+```
+
+**How to verify:** No literal rates remain in business logic; changing the table changes the result without a deploy.
 
 <a id="detalle"></a>
 ## Confirmed findings — detail
@@ -2545,6 +2810,15 @@ users(email, password, balance)
 CREATE TABLE users (...)  -- no PRIMARY KEY
 ```
 
+#### COD-005 · medium · Marker says to remove or fix this before production
+
+- **Location:** `web/api_client.js:5`  ·  **Type:** code_smell/todo  ·  **Effort:** 20 min
+
+**Evidence:**
+```
+// TEMP: skip auth for now, remove before prod
+```
+
 #### SEC-039 · medium · SQLite file is world-accessible (0o644)
 
 - **Location:** `app.db:1`  ·  **Type:** vulnerability/misconfiguration  ·  **CWE:** CWE-732  ·  **OWASP:** A05:2021  ·  **Effort:** 5 min
@@ -2691,7 +2965,7 @@ mobile/ios/AppUITests/LoginUITests.swift:3
 
 **Evidence:**
 ```
-2 UI source files, no runner in package.json
+3 UI source files, no runner in package.json
 ```
 
 #### TST-007 · medium · package.json has no working `test` script
@@ -2741,16 +3015,25 @@ web/tests/checkout.spec.ts:2
 def add(x, acc=[]):
 ```
 
-#### COD-005 · low · Public API documentation coverage is 0.0% (target 60%)
+#### COD-006 · low · No formatter / .editorconfig configured
+
+- **Location:** `.:1`  ·  **Type:** code_smell/standards  ·  **Effort:** 20 min
+
+**Evidence:**
+```
+(no prettier/black/gofmt-style config or .editorconfig)
+```
+
+#### COD-007 · low · Public API documentation coverage is 0.0% (target 60%)
 
 - **Location:** `.:1`  ·  **Type:** code_smell/documentation  ·  **Effort:** 15 min
 
 **Evidence:**
 ```
-php 0% (0/2), js 0% (0/1), Python 0% (0/13), swift 0% (0/3), kt 0% (0/1)
+php 0% (0/2), js 0% (0/1), Python 0% (0/14), swift 0% (0/3), kt 0% (0/1)
 ```
 
-#### COD-006 · low · Foreign keys declared but PRAGMA foreign_keys is OFF by default
+#### COD-008 · low · Foreign keys declared but PRAGMA foreign_keys is OFF by default
 
 - **Location:** `app.db:1`  ·  **Type:** code_smell/database  ·  **Effort:** 10 min
 
@@ -2759,7 +3042,7 @@ php 0% (0/2), js 0% (0/1), Python 0% (0/13), swift 0% (0/3), kt 0% (0/1)
 PRAGMA foreign_keys = 0
 ```
 
-#### COD-007 · low · Public API under-documented in `backend/app.py` (0/12)
+#### COD-009 · low · Public API under-documented in `backend/app.py` (0/12)
 
 - **Location:** `backend/app.py:1`  ·  **Type:** code_smell/documentation  ·  **Effort:** 36 min
 
@@ -2768,7 +3051,7 @@ PRAGMA foreign_keys = 0
 0/12 documented (0%). Missing: (module):1, users:9, search:16, ping:23, fetch:29, go:34, file:38, load:42
 ```
 
-#### COD-008 · low · Empty catch/except (swallowed error)
+#### COD-010 · low · Empty catch/except (swallowed error)
 
 - **Location:** `backend/app.py:62`  ·  **Type:** code_smell/error-handling  ·  **CWE:** CWE-390  ·  **OWASP:** A09:2021  ·  **Effort:** 10 min
 
@@ -2777,7 +3060,16 @@ PRAGMA foreign_keys = 0
 except Exception:
 ```
 
-#### COD-009 · low · Floating pragma (^0.8.0): deployed bytecode may differ from what was audited
+#### COD-011 · low · Personal machine path hardcoded: /Users/ana/
+
+- **Location:** `backend/billing.py:1`  ·  **Type:** code_smell/hardcode  ·  **CWE:** CWE-200  ·  **Effort:** 10 min
+
+**Evidence:**
+```
+CONFIG = '/Users/ana/Desktop/data.csv'
+```
+
+#### COD-012 · low · Floating pragma (^0.8.0): deployed bytecode may differ from what was audited
 
 - **Location:** `contracts/Vault.sol:1`  ·  **Type:** code_smell/smart-contract  ·  **CWE:** CWE-1104  ·  **Effort:** 5 min
 
@@ -2786,13 +3078,22 @@ except Exception:
 pragma solidity ^0.8.0;
 ```
 
-#### COD-010 · low · Table `orders` uses MyISAM
+#### COD-013 · low · Table `orders` uses MyISAM
 
 - **Location:** `db/schema.sql:2`  ·  **Type:** code_smell/database  ·  **Effort:** 20 min
 
 **Evidence:**
 ```
 ENGINE=MyISAM
+```
+
+#### COD-014 · low · 1 FIXME/HACK marker(s) in api_client.js
+
+- **Location:** `web/api_client.js:4`  ·  **Type:** code_smell/todo  ·  **Effort:** 10 min
+
+**Evidence:**
+```
+L4 FIXME: race condition when two requests arrive
 ```
 
 #### DEP-001 · low · `package.json` has no lockfile
@@ -2903,7 +3204,7 @@ web/index.html(1)
 (see location)
 ```
 
-#### COD-011 · info · Cursor configuration committed: .cursor
+#### COD-015 · info · Cursor configuration committed: .cursor
 
 - **Location:** `.cursor/rules/style.mdc:1`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 5 min
 
@@ -2912,7 +3213,7 @@ web/index.html(1)
 1 tracked file(s): .cursor/rules/style.mdc
 ```
 
-#### COD-012 · info · Claude Code configuration committed: CLAUDE.md
+#### COD-016 · info · Claude Code configuration committed: CLAUDE.md
 
 - **Location:** `CLAUDE.md:1`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 5 min
 
@@ -2921,7 +3222,7 @@ web/index.html(1)
 1 tracked file(s): CLAUDE.md
 ```
 
-#### COD-013 · info · Comment reveals AI-assisted authoring
+#### COD-017 · info · Comment reveals AI-assisted authoring
 
 - **Location:** `backend/utils_ai.py:1`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 2 min
 
@@ -2940,7 +3241,7 @@ web/index.html(1)
 ```
 
 <a id="revision"></a>
-## Needs review / validation (25)
+## Needs review / validation (31)
 
 #### SEO-012 · high · Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell)
 
@@ -3038,7 +3339,29 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** rate limiting may exist at the edge (CDN/WAF/gateway/ingress) which is outside the repository - confirm with the infrastructure owner
 
-#### HOT-008 · high · Server-side script stored in an upload/cache/media folder
+#### HOT-008 · high · TODO says security work is still missing: auth
+
+- **Location:** `web/api_client.js:3`  ·  **Type:** security_hotspot/todo  ·  **CWE:** CWE-1059  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+// TODO: add auth check before deleting users
+```
+
+**Review reason:** Heuristic: confirm it is not an intentional default or a documented exception.
+
+#### HOT-009 · high · Authorization depends on a literal user id
+
+- **Location:** `web/api_client.js:7`  ·  **Type:** security_hotspot/hardcode  ·  **CWE:** CWE-798, CWE-285  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+const isAdmin = (user.id === 1);
+```
+
+**Review reason:** Heuristic: confirm it is not an intentional default or a documented exception.
+
+#### HOT-010 · high · Server-side script stored in an upload/cache/media folder
 
 - **Location:** `web/uploads/shell.php:1`  ·  **Type:** security_hotspot/malware  ·  **CWE:** CWE-434, CWE-506  ·  **OWASP:** A08:2021  ·  **Effort:** 30 min
 
@@ -3049,7 +3372,7 @@ web/uploads/shell.php
 
 **Review reason:** Specific malicious pattern; read the code and confirm it is not intentional (security tool, test, documentation).
 
-#### HOT-009 · medium · Environment file `.env` present - ensure it is git-ignored and not web-served
+#### HOT-011 · medium · Environment file `.env` present - ensure it is git-ignored and not web-served
 
 - **Location:** `.env:1`  ·  **Type:** security_hotspot/secrets  ·  **Effort:** 5 min
 
@@ -3060,7 +3383,7 @@ web/uploads/shell.php
 
 **Review reason:** not tracked by git, but verify deployment does not publish it
 
-#### HOT-010 · medium · Dockerfile weakness
+#### HOT-012 · medium · Dockerfile weakness
 
 - **Location:** `Dockerfile:1`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-250, CWE-829  ·  **OWASP:** A05:2021, A08:2021  ·  **Effort:** 10 min
 
@@ -3072,7 +3395,7 @@ RUN curl http://x.sh | sh
 
 **Review reason:** heuristic match - review context
 
-#### HOT-011 · medium · `Dockerfile` never switches to a non-root USER
+#### HOT-013 · medium · `Dockerfile` never switches to a non-root USER
 
 - **Location:** `Dockerfile:1`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-250  ·  **OWASP:** A05:2021  ·  **Effort:** 10 min
 
@@ -3083,7 +3406,7 @@ RUN curl http://x.sh | sh
 
 **Review reason:** container runs as root by default
 
-#### HOT-012 · medium · Dockerfile weakness
+#### HOT-014 · medium · Dockerfile weakness
 
 - **Location:** `Dockerfile:2`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-250, CWE-829  ·  **OWASP:** A05:2021, A08:2021  ·  **Effort:** 10 min
 
@@ -3108,7 +3431,7 @@ for it in items:
 
 **Review reason:** a data-access call appears within 6 lines of a loop header - confirm the loop iterates over many rows
 
-#### HOT-013 · medium · Debug mode enabled
+#### HOT-015 · medium · Debug mode enabled
 
 - **Location:** `backend/app.py:66`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-489, CWE-209  ·  **OWASP:** A05:2021  ·  **Effort:** 5 min
 
@@ -3120,7 +3443,7 @@ if __name__ == "__main__":
 
 **Review reason:** heuristic match - review context
 
-#### HOT-014 · medium · Permissive CORS (*)
+#### HOT-016 · medium · Permissive CORS (*)
 
 - **Location:** `backend/server.js:3`  ·  **Type:** security_hotspot/misconfiguration  ·  **CWE:** CWE-942  ·  **OWASP:** A05:2021, API8:2023  ·  **Effort:** 10 min
 
@@ -3133,7 +3456,7 @@ app.get('/hello', (req, res) => { res.send('<h1>Hello ' + req.query.name + '</h1
 
 **Review reason:** heuristic match - review context
 
-#### COD-014 · medium · Leftover AI placeholder comment (possible truncated code)
+#### COD-018 · medium · Leftover AI placeholder comment (possible truncated code)
 
 - **Location:** `backend/utils_ai.py:2`  ·  **Type:** code_smell/ai-trace  ·  **Effort:** 10 min
 
@@ -3144,7 +3467,7 @@ app.get('/hello', (req, res) => { res.send('<h1>Hello ' + req.query.name + '</h1
 
 **Review reason:** Heuristic match - confirm the value's origin and reachability.
 
-#### HOT-015 · medium · Token/password in insecure local storage
+#### HOT-017 · medium · Token/password in insecure local storage
 
 - **Location:** `frontend/src/App.jsx:3`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-312  ·  **OWASP:** M9:2024  ·  **Effort:** 30 min
 
@@ -3157,7 +3480,7 @@ useEffect(() => { document.getElementById('x').innerHTML = location.hash; }, [])
 
 **Review reason:** heuristic match - review context
 
-#### HOT-016 · medium · Android: backup / exported component
+#### HOT-018 · medium · Android: backup / exported component
 
 - **Location:** `mobile/android/app/src/main/AndroidManifest.xml:2`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-200, CWE-926  ·  **OWASP:** M8:2024  ·  **Effort:** 10 min
 
@@ -3170,7 +3493,7 @@ useEffect(() => { document.getElementById('x').innerHTML = location.hash; }, [])
 
 **Review reason:** heuristic match - review context
 
-#### HOT-017 · medium · Android: backup / exported component
+#### HOT-019 · medium · Android: backup / exported component
 
 - **Location:** `mobile/android/app/src/main/AndroidManifest.xml:3`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-200, CWE-926  ·  **OWASP:** M8:2024  ·  **Effort:** 10 min
 
@@ -3183,7 +3506,7 @@ useEffect(() => { document.getElementById('x').innerHTML = location.hash; }, [])
 
 **Review reason:** heuristic match - review context
 
-#### HOT-018 · medium · WebView risk (JS enabled / bridge / file access)
+#### HOT-020 · medium · WebView risk (JS enabled / bridge / file access)
 
 - **Location:** `mobile/android/app/src/main/Main.kt:1`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-749, CWE-79  ·  **OWASP:** M4:2024  ·  **Effort:** 20 min
 
@@ -3194,7 +3517,7 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** heuristic match - review context
 
-#### HOT-019 · medium · Token/password in insecure local storage
+#### HOT-021 · medium · Token/password in insecure local storage
 
 - **Location:** `mobile/android/app/src/main/Main.kt:1`  ·  **Type:** security_hotspot/mobile  ·  **CWE:** CWE-312  ·  **OWASP:** M9:2024  ·  **Effort:** 30 min
 
@@ -3205,7 +3528,7 @@ class Main { fun f(w: WebView, prefs: SharedPreferences) { w.settings.setJavaScr
 
 **Review reason:** heuristic match - review context
 
-#### HOT-020 · medium · No automated accessibility testing (axe / jsx-a11y / Lighthouse)
+#### HOT-022 · medium · No automated accessibility testing (axe / jsx-a11y / Lighthouse)
 
 - **Location:** `package.json:1`  ·  **Type:** security_hotspot/a11y  ·  **Effort:** 60 min
 
@@ -3215,6 +3538,28 @@ no axe-core, jest-axe, @axe-core/playwright, pa11y or eslint a11y plugin
 ```
 
 **Review reason:** a11y may be audited manually or by an external tool - confirm
+
+#### COD-019 · medium · localhost URL hardcoded at a call site
+
+- **Location:** `web/api_client.js:1`  ·  **Type:** code_smell/hardcode  ·  **Effort:** 15 min
+
+**Evidence:**
+```
+const r = await fetch('http://localhost:3000/api/users');
+```
+
+**Review reason:** Heuristic: confirm it is not an intentional default or a documented exception.
+
+#### COD-020 · medium · IP address hardcoded as a host: 10.0.3.17
+
+- **Location:** `web/api_client.js:6`  ·  **Type:** code_smell/hardcode  ·  **Effort:** 20 min
+
+**Evidence:**
+```
+const host = { server: '10.0.3.17' };
+```
+
+**Review reason:** Heuristic: confirm it is not an intentional default or a documented exception.
 
 #### A11-004 · medium · <input> without id/aria-label (cannot have an associated label)
 
@@ -3229,7 +3574,7 @@ no axe-core, jest-axe, @axe-core/playwright, pa11y or eslint a11y plugin
 
 **Review reason:** heuristic match - review context
 
-#### HOT-021 · low · Outbound HTTP call without timeout
+#### HOT-023 · low · Outbound HTTP call without timeout
 
 - **Location:** `backend/app.py:31`  ·  **Type:** security_hotspot/resource-exhaustion  ·  **CWE:** CWE-400  ·  **OWASP:** A04:2021  ·  **Effort:** 5 min
 
@@ -3241,6 +3586,28 @@ url = request.args.get("url")
 
 **Review reason:** heuristic match - review context
 
+#### COD-021 · low · Business rate hardcoded in a function: tax_rate
+
+- **Location:** `backend/billing.py:3`  ·  **Type:** code_smell/hardcode  ·  **Effort:** 20 min
+
+**Evidence:**
+```
+tax_rate = 0.21
+```
+
+**Review reason:** Heuristic: confirm it is not an intentional default or a documented exception.
+
+#### COD-022 · low · Environment-specific host hardcoded: api-staging.myapp.com
+
+- **Location:** `web/api_client.js:2`  ·  **Type:** code_smell/hardcode  ·  **Effort:** 15 min
+
+**Evidence:**
+```
+const st = await fetch('https://api-staging.myapp.com/v1/orders');
+```
+
+**Review reason:** Heuristic: confirm it is not an intentional default or a documented exception.
+
 ## OWASP coverage
 
 | Standard | ID | Category | Status | Findings |
@@ -3248,26 +3615,26 @@ url = request.args.get("url")
 | OWASP Top 10:2021 | A01 | Broken Access Control | fail | SEC-014, SEC-021, SEC-027, SEC-034, SEC-040, HOT-001 |
 | OWASP Top 10:2021 | A02 | Cryptographic Failures | fail | SEC-001, SEC-006, SEC-022, SEC-041, SEC-043 |
 | OWASP Top 10:2021 | A03 | Injection | fail | SEC-002, SEC-003, SEC-005, SEC-012, SEC-013, SEC-017 |
-| OWASP Top 10:2021 | A04 | Insecure Design | fail | SEM-001, HOT-002, HOT-007, HOT-021 |
-| OWASP Top 10:2021 | A05 | Security Misconfiguration | fail | SEC-039, HOT-005, HOT-010, HOT-011, HOT-012, HOT-013 |
+| OWASP Top 10:2021 | A04 | Insecure Design | fail | SEM-001, HOT-002, HOT-007, HOT-023 |
+| OWASP Top 10:2021 | A05 | Security Misconfiguration | fail | SEC-039, HOT-005, HOT-012, HOT-013, HOT-014, HOT-015 |
 | OWASP Top 10:2021 | A06 | Vulnerable & Outdated Components | fail | DEP-001, DEP-002 |
 | OWASP Top 10:2021 | A07 | Identification & Authentication Failures | fail | SEC-015, SEC-016, SEC-026, SEC-035, BUG-006 |
 | OWASP Top 10:2021 | A08 | Software & Data Integrity Failures | fail | SEC-004, SEC-008, SEC-009, SEC-010, SEC-011, SEC-028 |
-| OWASP Top 10:2021 | A09 | Logging & Monitoring Failures | fail | SEC-044, COD-008 |
+| OWASP Top 10:2021 | A09 | Logging & Monitoring Failures | fail | SEC-044, COD-010 |
 | OWASP Top 10:2021 | A10 | Server-Side Request Forgery | fail | SEC-020 |
 | OWASP API Top 10:2023 | API1 | Broken Object Level Authorization | fail | SEC-014, SEC-027 |
 | OWASP API Top 10:2023 | API3 | Broken Object Property Level Authorization | review | HOT-001 |
 | OWASP API Top 10:2023 | API4 | Unrestricted Resource Consumption | review | HOT-002, HOT-007 |
 | OWASP API Top 10:2023 | API7 | SSRF | fail | SEC-020 |
-| OWASP API Top 10:2023 | API8 | Security Misconfiguration | review | HOT-014 |
-| OWASP Mobile Top 10:2024 | M* | Mobile findings | fail | SEC-037, BUG-001, HOT-015, HOT-016, HOT-017, HOT-018 |
+| OWASP API Top 10:2023 | API8 | Security Misconfiguration | review | HOT-016 |
+| OWASP Mobile Top 10:2024 | M* | Mobile findings | fail | SEC-037, BUG-001, HOT-017, HOT-018, HOT-019, HOT-020 |
 
 <a id="cobertura"></a>
 ## Audit coverage
 
 | Unit | Pass | State | Note |
 |---|---|---|---|
-| source scan (regex + taint look-back) | audit-security,audit-bugs | covered | 30 files; truncated rules: none |
+| source scan (regex + taint look-back) | audit-security,audit-bugs | covered | 32 files; truncated rules: none |
 | documentation / standards / architecture | audit-code | covered | strictness=standard |
 | test-suite analysis (static) | audit-quality | covered | file-name matching; coverage % not measured unless --run-tests |
 | QA front-end + mobile (static) | audit-qa,audit-mobile-qa | covered | mobile=android, ios |
@@ -3275,6 +3642,7 @@ url = request.args.get("url")
 | Vercel project configuration | audit-vercel | out_of_scope | vercel.json, next.config, crons, API routes, public env vars, headers, Next.js CVEs |
 | repository hygiene (keys, history, CI/CD) | audit-security | covered | sensitive files in git/history, remote credentials, workflow security, SECURITY.md/CODEOWNERS/dependabot/secre |
 | malware & backdoor indicators | audit-security | covered | webshells, reverse shells, decode-and-execute, miners, stealers, install hooks, persistence, polyglots, Trojan |
+| hardcode & TODOs | audit-quality | covered | TODO/FIXME/HACK (age via git blame), security TODOs, remove-before-prod markers, stubs, environment URLs, IPs, |
 | AI traces (project finish) | audit-docs | covered | AI comments/docs, agent & spec files, git trailers, provenance metadata, invisible characters |
 | PWA: manifest / service worker / offline | audit-pwa | out_of_scope | manifest, installability, service worker, caching, push, update flow |
 | crypto / web3 heuristics | audit-security | covered | Solidity, Anchor/Solana, dApp patterns |
@@ -3294,26 +3662,26 @@ url = request.args.get("url")
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.27 |
+| tool_version | 1.0.28 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
 | duplication.top_pairs | 0 items |
 | duplication.method | 8-line window hash |
-| ncloc | 132 |
-| files | 30 |
+| ncloc | 140 |
+| files | 32 |
 | frameworks | express |
 | skipped_files.binary/lock/min | 1 |
 | complexity.method | AST (python) / brace-matching (others) |
 | complexity.max_file_branches | 7 |
-| docstrings.public_symbols | 20 |
+| docstrings.public_symbols | 21 |
 | docstrings.documented | 0 |
 | docstrings.percent | 0.0 |
 | docstrings.by_language.php.public | 2 |
 | docstrings.by_language.php.documented | 0 |
 | docstrings.by_language.js.public | 1 |
 | docstrings.by_language.js.documented | 0 |
-| docstrings.by_language.Python.public | 13 |
+| docstrings.by_language.Python.public | 14 |
 | docstrings.by_language.Python.documented | 0 |
 | docstrings.by_language.swift.public | 3 |
 | docstrings.by_language.swift.documented | 0 |
@@ -3321,7 +3689,7 @@ url = request.args.get("url")
 | docstrings.by_language.kt.documented | 0 |
 | docstrings.target | 60 |
 | py_type_hints.percent | 0.0 |
-| py_type_hints.functions | 12 |
+| py_type_hints.functions | 13 |
 | cycles | 0 |
 | oversized_function_files | 0 |
 | profile_limits.fn_len | 60 |
@@ -3331,8 +3699,8 @@ url = request.args.get("url")
 | tests.test_files | 3 |
 | tests.test_cases | 4 |
 | tests.test_ncloc | 19 |
-| tests.src_ncloc | 113 |
-| tests.test_ratio | 0.168 |
+| tests.src_ncloc | 121 |
+| tests.test_ratio | 0.157 |
 
 ## Architecture
 
@@ -3353,14 +3721,14 @@ flowchart TB
 
 ## Professional full-stack roadmap
 
-**Level 1/5 - Getting started** (score 28/100). Prototype: it runs on your machine. 2 points to **Foundations**.
+**Level 1/5 - Getting started** (score 26/100). Prototype: it runs on your machine. 4 points to **Foundations**.
 
 ```mermaid
 xychart-beta
     title "Score by dimension"
     x-axis ["Foundations", "Security", "Quality", "Delivery", "Data", "Operations", "Craft", "Experience"]
     y-axis "%" 0 --> 100
-    bar [29, 6, 82, 30, 17, 29, 50, 0]
+    bar [29, 6, 71, 30, 17, 29, 50, 0]
 ```
 
 | Dimension | Practice | Status | Why it matters | How |
@@ -3383,7 +3751,7 @@ xychart-beta
 | Quality | Automated tests exist | ✅ |  |  |
 | Quality | Tests cover the important modules (auth, payments, data) | ✅ |  |  |
 | Quality | End-to-end tests cover the critical user journeys | ✅ |  |  |
-| Quality | Linter + formatter are configured | ✅ |  |  |
+| Quality | Linter + formatter are configured | ❌ | They catch bugs and end style arguments automatically. | ESLint+Prettier / ruff / phpcs+pint / golangci-lint; run in CI. |
 | Quality | Static typing is on (TS strict / type hints / PHPStan) | ✅ |  |  |
 | Quality | Tests are reliable (no sleeps, no un-awaited asserts) | ❌ | Flaky tests teach you to ignore CI. | Replace sleeps with auto-waiting assertions; always await expect(). |
 | Quality | Errors are not silently swallowed | ❌ | Hidden errors turn into mystery bugs. | Log or re-throw; catch the narrowest exception. |
@@ -3436,7 +3804,7 @@ xychart-beta
 
 ### SOC 2 - gaps to close
 
-- **CC5.2** Technology general controls / secure SDLC: missing → CI runs lint, types and tests on every change
+- **CC5.2** Technology general controls / secure SDLC: missing → CI runs lint, types and tests on every change; Linter + formatter are configured
 - **CC6.1** Logical access: authentication & authorization: missing → Uses a proven auth library/framework (not hand-rolled); Object access is checked per user (no IDOR / mass assignment); Passwords use argon2/bcrypt (never MD5/SHA-1/plain); No secrets in the code or git history
 - **CC6.6** Boundary protection & hardening: missing → Security headers and CORS are configured; Rate limiting protects login and expensive endpoints
 - **CC6.7** Data transmission and encryption: missing → Passwords use argon2/bcrypt (never MD5/SHA-1/plain); No secrets in the code or git history
@@ -3458,7 +3826,7 @@ xychart-beta
 - **8.12/8.11** Data leakage prevention & masking: missing → No secrets in the code or git history; no secrets written to logs
 - **8.15/8.16** Logging and monitoring: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
 - **8.24** Use of cryptography: missing → Passwords use argon2/bcrypt (never MD5/SHA-1/plain); No secrets in the code or git history
-- **8.25/8.28** Secure development life cycle & secure coding: missing → No SQL/command injection or XSS patterns; CI runs lint, types and tests on every change
+- **8.25/8.28** Secure development life cycle & secure coding: missing → No SQL/command injection or XSS patterns; Linter + formatter are configured; CI runs lint, types and tests on every change
 - **8.29** Security testing in development and acceptance: missing → CI runs lint, types and tests on every change; No critical/high security findings
 - **8.31/8.32** Separation of environments & change management: missing → Project is under Git with a .gitignore; CI runs lint, types and tests on every change; Database changes use migrations
 
@@ -3482,7 +3850,7 @@ xychart-beta
 
 - **Req 1/2** Network controls & secure configurations (no defaults): missing → Security headers and CORS are configured
 - **Req 3** Protect stored account data (never store SAD, strong crypto): missing → No secrets in the code or git history; Passwords use argon2/bcrypt (never MD5/SHA-1/plain); no secrets written to logs
-- **Req 6.2/6.3** Secure software development; vulnerabilities identified and addressed: missing → No SQL/command injection or XSS patterns; No critical/high security findings; Dependencies are scanned for known vulnerabilities
+- **Req 6.2/6.3** Secure software development; vulnerabilities identified and addressed: missing → No SQL/command injection or XSS patterns; No critical/high security findings; Dependencies are scanned for known vulnerabilities; Linter + formatter are configured
 - **Req 6.4** Public web apps protected (WAF or application review): missing → Security headers and CORS are configured; Rate limiting protects login and expensive endpoints; No SQL/command injection or XSS patterns
 - **Req 7/8** Restrict access by need-to-know; identify and authenticate users (MFA): missing → Object access is checked per user (no IDOR / mass assignment); Uses a proven auth library/framework (not hand-rolled); Passwords use argon2/bcrypt (never MD5/SHA-1/plain); Rate limiting protects login and expensive endpoints
 - **Req 10** Log and monitor all access: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
@@ -3494,7 +3862,7 @@ xychart-beta
 - **ID.RA** Risk assessment and vulnerability identification: missing → No critical/high security findings; Dependencies are scanned for known vulnerabilities
 - **PR.AA** Identity management, authentication and access control: missing → Uses a proven auth library/framework (not hand-rolled); Object access is checked per user (no IDOR / mass assignment); Passwords use argon2/bcrypt (never MD5/SHA-1/plain)
 - **PR.DS** Data security (at rest, in transit): missing → No secrets in the code or git history; Passwords use argon2/bcrypt (never MD5/SHA-1/plain)
-- **PR.PS** Platform security: config, patching, secure SDLC, logging: missing → CI runs lint, types and tests on every change; Dependencies are scanned for known vulnerabilities; Structured logging library is used
+- **PR.PS** Platform security: config, patching, secure SDLC, logging: missing → CI runs lint, types and tests on every change; Linter + formatter are configured; Dependencies are scanned for known vulnerabilities; Structured logging library is used
 - **DE.CM** Continuous monitoring: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
 
 ### DORA (EU 2022/2554) - gaps to close
@@ -3536,7 +3904,7 @@ xychart-beta
 - **5-6** Account and access control management: missing → Uses a proven auth library/framework (not hand-rolled); Object access is checked per user (no IDOR / mass assignment); Passwords use argon2/bcrypt (never MD5/SHA-1/plain)
 - **7** Continuous vulnerability management: missing → Dependencies are scanned for known vulnerabilities; No critical/high security findings; CI runs lint, types and tests on every change
 - **8** Audit log management: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
-- **16** Application software security: missing → No SQL/command injection or XSS patterns; CI runs lint, types and tests on every change; Input is validated with a schema library
+- **16** Application software security: missing → No SQL/command injection or XSS patterns; Linter + formatter are configured; CI runs lint, types and tests on every change; Input is validated with a schema library
 
 ## SEO / SEM
 
@@ -3557,5 +3925,6 @@ xychart-beta
 This report covers only what is listed under “Coverage”. No findings does not prove absence of defects: automatic rules are heuristics (regex + nearby variable tracking), not full data-flow analysis. “To review” items depend on context or on facts outside the repository. Verify each fix with its test before deploying.
 
 - repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`.
-- fix-plan.md was generated: 124 findings in 110 groups and 6 phases (phase 0 comes first).
+- todo-backlog.md was generated: every TODO/FIXME/HACK with its age, ready for your tracker.
+- fix-plan.md was generated: 134 findings in 120 groups and 6 phases (phase 0 comes first).
 - cleanup-fixes.sh was generated (remove AI traces with backups and quarantine malware; the tool never runs it): `bash cleanup-fixes.sh list`.
