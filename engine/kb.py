@@ -281,6 +281,8 @@ from .kb_trace import KB_TRACE
 KB.update(KB_TRACE)
 from .kb_hardcode import KB_HC
 KB.update(KB_HC)
+from .kb_adv import KB_ADV
+KB.update(KB_ADV)
 from .kb_vercel import KB_VERCEL
 KB.update(KB_VERCEL)
 

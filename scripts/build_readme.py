@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.29"
+VER = "1.0.30"
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from llm_prompts import readme_section
 LLM_SECTION = readme_section()
@@ -25,9 +25,9 @@ R = f'''<div align="center">
 [![Read-only target](assets/badges/st-readonly.svg)](#safety--privacy)
 [![PRs welcome](assets/badges/st-prs.svg)](CONTRIBUTING.md)
 
-### One command. Seventeen lenses. Live in your terminal, delivered as a dashboard.
+### One command. Eighteen lenses. Live in your terminal, delivered as a dashboard.
 
-**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Hardcode & TODOs · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
+**Security · Bugs · Code quality · Docs & standards · Architecture · Tests & QA · SEO/SEM · PWA · Vercel · Repository & leaked keys · Malware & backdoors · AI traces · Hardcode & TODOs · Version advisories (CVEs) · Databases · Servers & VPS · Crypto/Web3 · SaaS & Fintech · Audit-readiness**
 
 [**Quick start**](#quick-start) · [**See it**](#see-it) · [**What it audits**](#what-it-audits) · [**Install in your AI assistant**](#use-it-from-your-ai-assistant) · [**Compliance readiness**](#audit-readiness-for-soc-2-iso-27001-hipaa-pci-and-more) · [**Wiki**](docs/wiki/Home.md) · [**CLI reference**](docs/CLI.md) · [**Changelog**](CHANGELOG.md)
 
@@ -132,12 +132,12 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <td width="50%" valign="top"><img src="docs/img/gal-aitrace.png" alt="AI traces" width="100%"><br><sub><b>AI traces</b> - project finish: comments, agent files, git trailers, metadata and how to remove them</sub></td>
 </tr>
 <tr>
-<td width="50%" valign="top"><img src="docs/img/gal-profile.png" alt="Project profile" width="100%"><br><sub><b>Project profile</b> - what it is (SaaS, full-stack, PWA, mobile...) and what it is for (fintech, health, e-commerce...), with evidence</sub></td>
-<td width="50%" valign="top"><img src="docs/img/gal-triage.png" alt="Triage protocol" width="100%"><br><sub><b>Triage protocol</b> - how to confirm a suspicion (real / false positive), the fix and the exact suppression line</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-advisories.png" alt="Version advisories" width="100%"><br><sub><b>Version advisories</b> - CVEs for your exact runtime, framework and dependency versions, end of life, actively exploited bugs, with the upgrade command</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-profile.png" alt="Project profile" width="100%"><br><sub><b>Project profile</b> - what it is and what it is for, with evidence</sub></td>
 </tr>
 <tr>
+<td width="50%" valign="top"><img src="docs/img/gal-triage.png" alt="Triage protocol" width="100%"><br><sub><b>Triage protocol</b> - how to confirm a suspicion (real / false positive), the fix and the exact suppression line</sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-hardcode.png" alt="Hardcode and TODOs" width="100%"><br><sub><b>Hardcode &amp; TODOs</b> - unfinished work, security TODOs, hardcoded URLs/IPs/paths/rates, with <code>todo-backlog.md</code></sub></td>
-<td width="50%" valign="top"><img src="docs/img/gal-fixplan.png" alt="Phased fix plan" width="100%"><br><sub><b>Phased fix plan</b> - contain &amp; rotate first, one group per root cause, with steps and verification</sub></td>
 </tr>
 <tr>
 <td width="50%" valign="top"><img src="docs/img/gal-plan.png" alt="Fix plan" width="100%"><br><sub><b>Fix plan</b> - ordered phases (contain &amp; rotate first), one group per root cause, with steps, verification and an AI prompt each</sub></td>
@@ -218,7 +218,8 @@ flowchart LR
     C --> D8[malware and backdoors]
     C --> D9[AI traces - project finish]
     C --> D10[hardcode and TODOs]
-    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
+    C --> D11[version advisories<br/>CVEs · malicious packages · end of life]
+    D1 & D2 & D3 & D4 & D5 & D6 & D7 & D8 & D9 & D10 & D11 --> E[Consolidate · dedupe · scrub secrets · baseline diff]
     E --> F[Roadmap + Audit readiness + SBOM]
     F --> G[Dashboard HTML · REPORT.md · SARIF · JSON · PDF · Evidence pack<br/>9 languages · brand colors and logo]
     F --> H[Fix scripts - generated, never executed<br/>repo-fixes.sh · server-fixes.sh · cleanup-fixes.sh]
@@ -234,6 +235,7 @@ flowchart TB
       repo[repo.py + gitsrc.py + ftpsrc.py<br/>keys · history · CI/CD] --- vercel[vercel.py<br/>config · live · API]
       malware[malware.py<br/>webshells · revshells · miners · stealers] --- aitrace[aitrace.py<br/>AI comments · agent files · trailers]
       hardcode[hardcode.py<br/>TODO · FIXME · hardcoded values] --- fixplan[fixplan.py<br/>phased fix plan]
+      advisories[advisories.py<br/>runtime · framework · dependency CVEs] --- vulndb[vulndb.py<br/>text DB: OSV · KEV · NVD · EOL]
       dbaudit[dbaudit.py] --- remote[remote.py / remote_extra.py / aws.py<br/>VPS · cloud · k8s · containers]
       roadmap[roadmap.py] --- compliance[compliance.py / sbom.py / policies.py]
       kb[kb*.py + i18n.py<br/>remediation guides · 9 languages] --- fixes[repofix.py / serverfix.py / cleanfix.py<br/>reviewable fix scripts]
@@ -244,6 +246,27 @@ flowchart TB
     render --> out[(audit-output/run-N)]
     fixes --> out
 ```
+
+## Vulnerability database (online sources, stored locally as text)
+
+Everything the audit knows about bugs, vulnerabilities and patches comes from public, registered sources, kept in a **plain-text database** (JSON Lines) you can grep:
+
+```bash
+python3 audit.py --update-db              # build / refresh it (OSV.dev + CISA KEV + endoflife.date; ~350 MB of text, a few minutes)
+python3 audit.py --update-db --db-source nvd         # + NVD CVEs of runtimes and servers (PHP, Node.js, Python, nginx, OpenSSL, WordPress ... 28 products)
+python3 audit.py --update-db --db-eco Debian,Ubuntu  # any other OSV ecosystem (OS packages, Linux distros...)
+python3 audit.py --db-status              # what it holds and how old it is
+python3 audit.py ./my-app --offline       # no network at all: uses the local database
+```
+
+| Source | What it contains |
+|---|---|
+| **OSV.dev** (GitHub Advisories, ecosystem databases, OpenSSF) | advisories per package and version range for **npm** (234k incl. malicious-package reports), **PyPI** (32k), **Go** (15k), **Packagist/PHP** (14k), **Maven/Java** (14k), **NuGet/.NET** (8.6k), **RubyGems** (6.4k), **crates.io/Rust** (4.1k), Hex, Pub, GitHub Actions |
+| **CISA KEV** | 1,773 vulnerabilities **exploited in the wild**, including the newest ones for PHP, Node.js, React, Laravel, WordPress... |
+| **NVD** | CVEs with affected version ranges for the runtime/server itself (opt-in source) |
+| **endoflife.date** | support lifecycle of ~490 products (languages, frameworks, databases, OSes) |
+
+The audit looks versions up **locally first** (complete, ~0.3 s, works offline, and **no package name leaves your machine**), then falls back to the live APIs when the database is missing, and finally to a small offline end-of-life table; the dashboard says which data was used and how old it is. Findings are version-matched against your **lockfiles** (`package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `composer.lock`, `poetry.lock`, `Pipfile.lock`, pinned `requirements.txt`, `Gemfile.lock`, `go.sum`, `Cargo.lock`, ...) and the runtime/framework versions declared in `Dockerfile`, `.nvmrc`, `.tool-versions`, `runtime.txt`, `composer.json`, `go.mod`, CI workflows and more. Refresh it weekly (cron or CI: `python3 audit.py --update-db`).
 
 ## It recognises what it is auditing
 
@@ -274,6 +297,7 @@ A label needs several independent signals (dependencies, folders, README, databa
 | **malware** | **webshells** (eval/system on request data, c99/WSO/China Chopper signatures, PHP hidden in images and upload folders), **reverse shells** (`/dev/tcp`, `nc -e`, Python/Node/PHP/Go/PowerShell), decode-and-execute payloads, **miners** (stratum, XMRig, CoinHive), **stealers/exfiltration** (browser + wallet + SSH + cloud stores, webhooks, CI leaking env), **malicious install hooks** and known typosquats, **persistence** (authorized_keys, cron, LD_PRELOAD, auto_prepend, hidden trigger parameters), **Trojan Source** bidi/invisible characters; static and offline, specific signatures only (not a generic `eval` alarm), with **incident-response steps** and a reversible quarantine script |
 | **aitrace** | project finish: comments/docs that reveal AI authoring, **agent & spec files** (CLAUDE.md, AGENTS.md, `.cursor/`, `openspec/`...), git `Co-Authored-By` trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers; tells you how to remove each and writes `cleanup-fixes.sh` (backups, safe by default). It never tries to defeat statistical watermarks |
 | **hardcode** | **unfinished work:** TODO/FIXME/HACK/XXX inside real comments (age from `git blame`), **security TODOs** (auth, validation, encryption, CSRF, rate limit postponed), "remove before prod" markers, unimplemented stubs, and a ready-to-paste `todo-backlog.md`; **hardcoded values:** environment URLs at call sites (localhost, staging), IPs as hosts, machine-specific home paths, personal emails, identity checks (`user.id == 1`), business rates inside functions - shown together with hardcoded credentials from the security scanner. Env-based defaults (`process.env.X || 'http://localhost'`) are not reported |
+| **advisories** | **version-aware vulnerabilities**: detects the language runtime (PHP, Node.js, Python, Ruby, Go, Java, .NET), the framework (Laravel, Symfony, Django, Rails, Spring Boot, React, Angular, Next.js, Nuxt, WordPress...) and every locked dependency with its exact version, and matches them against the vulnerability database: **known CVEs for that version**, **known malicious packages** (OpenSSF/OSV), **end-of-life** runtimes/frameworks, CVEs of the exact runtime version and **recent actively exploited bugs of your stack** (CISA KEV). Each finding carries the fixed version and the exact upgrade command |
 | **vercel** | `vercel.json`, Next.js, crons without `CRON_SECRET`, API routes without auth, secret-looking `NEXT_PUBLIC_*`, CVE-2025-29927, headers, source maps; live site; project settings via the read-only API (`--vercel-project`) |
 | **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
@@ -322,7 +346,7 @@ python3 audit.py --install-agent claude --agent-scope user                # inst
 
 | Assistant | What gets installed | Invoke |
 |---|---|---|
-| **Claude Code** | 21 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
+| **Claude Code** | 22 skills in `.claude/skills/` + `/pn-audit` command | `/pn-audit` or "audit this project" |
 | **Codex** | skills in `.agents/skills/` + `AGENTS.md` block | ask in chat |
 | **Cursor** | `.cursor/rules/pn-ultra-audit.mdc` + `.cursor/commands/pn-audit.md` | `/pn-audit` |
 | **Windsurf** | `.windsurf/rules/` + `.windsurf/workflows/pn-audit.md` | `/pn-audit` |
@@ -393,6 +417,7 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | Flag | Meaning |
 |---|---|
 | `--plan` · `--only a,b` · `--skip a,b` · `--list-auditors` | show the project profile and choose auditors (default: auto-detect; malware, AI traces and hardcode always on) |
+| `--update-db` · `--db-status` · `--db-eco LIST` · `--db-source LIST` · `--offline` | build/inspect the local vulnerability database; `--offline` = no network |
 | `--triage` · `--brief` · `--show ID` · `--run DIR` | anti false positives: suspicions grouped by rule with one confirm protocol; compact summary; fix card with the protocol |
 | `--level beginner\\|pro` · `--strictness basic\\|standard\\|strict` `--ask` · `--baseline auto` | learning mode · docs/complexity thresholds · ratchet |
 | `--git SPEC` `--branch` `--depth` `--history` `--git-host` `--git-token-env` | repositories |
@@ -501,6 +526,6 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 21 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
+<div align="center"><sub>{len(RULES)} rules · {len(KB)} remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v{VER}</sub></div>
 '''
 open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8").write(R); print("README.md", len(R.splitlines()), "lines")

@@ -13,6 +13,7 @@ The plan is chosen automatically from what is detected. Override with `--only a,
 | `repo` | sensitive files and keys in git and history, remote credentials, CI/CD workflow security, SECURITY.md / CODEOWNERS / dependabot / secret scanning |
 | `malware` | Malware & backdoors: webshells, reverse shells, decode-and-execute payloads, miners, stealers, malicious install hooks, persistence, polyglot files, Trojan Source |
 | `hardcode` | Hardcode & TODOs: TODO/FIXME/HACK markers (with age), security TODOs, remove-before-prod markers, stubs, hardcoded environment URLs/IPs/machine paths/personal emails/identity checks/business rates (+ hardcoded credentials from security) |
+| `advisories` | Version advisories (LIVE: OSV.dev, CISA KEV, NVD, endoflife.date): known vulnerabilities and end-of-life status of the language runtime, framework and every locked dependency; recent actively exploited bugs of your stack |
 | `aitrace` | AI traces (project finish): comments, docs, agent/spec files, git trailers and metadata that reveal AI-assisted development, with removal guidance |
 | `vercel` | vercel.json, Next.js, crons, API routes, public env vars, headers, CVE-2025-29927; live site; project settings via API |
 | `pwa` | manifest, installability, service worker, offline, push, update flow, SW security |

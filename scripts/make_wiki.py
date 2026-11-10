@@ -10,7 +10,7 @@ from engine.kb import KB  # noqa: E402
 from engine.rules import RULES  # noqa: E402
 
 OUT = os.path.join(ROOT, "docs", "wiki"); os.makedirs(OUT, exist_ok=True)
-VER = "1.0.29"
+VER = "1.0.30"
 REPO = "https://github.com/paulnewmandev/pn-ultra-audit"
 IMG = "https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/"   # absolute: works on the GitHub wiki and in the repo
 P = {}  # page name -> markdown
@@ -28,6 +28,7 @@ P["Home"] = f"""# PN-Ultra-Audit wiki
 | Choose how strict it is | [Strictness Levels](Strictness-Levels) |
 | Spend as few AI tokens as possible | [Save Tokens](Save-Tokens) |
 | Run it from the chat of your LLM (copy-paste prompts) | [Run from your LLM chat](Run-from-your-LLM-Chat) |
+| Know which versions are vulnerable (online + local text database) | [Vulnerability database](Vulnerability-Database) |
 | Audit a VPS (AWS, Azure, GCP, DigitalOcean, Hostinger...) | [Server and VPS Audit](Server-and-VPS-Audit) |
 | Audit a Vercel project | [Vercel Audit](Vercel-Audit) |
 | Audit a PWA | [PWA Audit](PWA-Audit) |
@@ -601,10 +602,42 @@ The pack is auto-discovered (also in the `--lang` choices); anything you skip fa
 """
 P["Home"] = P["Home"].replace("## Start here", f"![Dashboard]({IMG}dash-overview-dark.png)\n\n## Start here",1)
 P["_Sidebar"] = P["_Sidebar"].replace("- [Strictness Levels](Strictness-Levels)","- [Strictness Levels](Strictness-Levels)\n- [Save Tokens](Save-Tokens)",1)
+P["Vulnerability-Database"] = """# Vulnerability database
+
+PN-Ultra-Audit keeps every bug, vulnerability and patch it knows about in a **plain-text database** (JSON Lines) built from public, registered sources. The audit queries it locally: complete, fast (~0.3 s), works offline and **no package name leaves your machine**.
+
+## Build and inspect it
+
+```bash
+python3 audit.py --update-db                          # OSV.dev + CISA KEV + endoflife.date (~350 MB of text, a few minutes)
+python3 audit.py --update-db --db-source nvd          # + NVD CVEs of runtimes/servers (slow without NVD_API_KEY)
+python3 audit.py --update-db --db-eco Debian,Ubuntu   # any other OSV ecosystem
+python3 audit.py --db-status                          # contents and age
+```
+
+Location: `~/.cache/pn-ultra-audit/db` (override with `PNUA_DB`). Files: `osv/<ecosystem>.jsonl` (+ `.idx`), `kev.jsonl`, `eol.jsonl`, `nvd/<product>.jsonl`, `meta.json`. It is greppable: `grep -h '"p":"lodash"' ~/.cache/pn-ultra-audit/db/osv/npm.jsonl`.
+
+## What it contains
+
+| Source | Coverage |
+|---|---|
+| OSV.dev | npm (incl. OpenSSF malicious-package reports), PyPI, Go, Packagist, Maven, NuGet, RubyGems, crates.io, Hex, Pub, GitHub Actions (+ any other OSV ecosystem) |
+| CISA KEV | vulnerabilities exploited in the wild (newest ones for PHP, Node.js, React, Laravel, WordPress ...) |
+| NVD | CVEs of PHP, Node.js, Python, Ruby, Go, Java, nginx, Apache, OpenSSL, MySQL, PostgreSQL, Redis, MongoDB, WordPress, Drupal, Laravel, Symfony, Django, Rails, Spring, Docker, Kubernetes ... with version ranges |
+| endoflife.date | support lifecycle of ~490 products |
+
+## How the audit uses it
+
+1. **Local database** (if built) - then nothing is sent anywhere.
+2. **Live APIs** (OSV.dev, CISA KEV, NVD, endoflife.date; only package names and versions) when the database is missing; cached for 12 h.
+3. **Offline table** of end-of-life dates as a last resort. `--offline` (or `PNUA_OFFLINE=1`) forbids any network request.
+
+Findings: `DEP-VULN` (lockfile version matches an advisory; fixed version and exact upgrade command included, same-major fix preferred), `MAL-MALICIOUS-PACKAGE`, `RUNTIME-EOL`, `RUNTIME-VULN` (CVEs of the exact runtime version), `ADV-KEV-RECENT` (recent actively exploited bugs of a product you use). Keep it fresh with a weekly `--update-db` (cron or CI).
+"""
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__))))
 from llm_prompts import wiki_page
 P["Run-from-your-LLM-Chat"] = wiki_page()
-P["_Sidebar"] = P["_Sidebar"].replace("- [Save Tokens](Save-Tokens)", "- [Save Tokens](Save-Tokens)\n- [Run from your LLM chat](Run-from-your-LLM-Chat)", 1)
+P["_Sidebar"] = P["_Sidebar"].replace("- [Save Tokens](Save-Tokens)", "- [Save Tokens](Save-Tokens)\n- [Run from your LLM chat](Run-from-your-LLM-Chat)\n- [Vulnerability database](Vulnerability-Database)", 1)
 
 for name, body in P.items(): open(os.path.join(OUT, name + ".md"), "w", encoding="utf-8").write(body.rstrip() + "\n")
 open(os.path.join(OUT, "README.md"), "w", encoding="utf-8").write(f"""# Wiki source

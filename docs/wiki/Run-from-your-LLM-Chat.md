@@ -24,6 +24,7 @@ SAFETY RULES (non-negotiable)
 - Remote targets (--ssh, --url, --aws-rds, database URLs, --vercel-project) only if I explicitly authorize them in this chat.
 
 STEPS
+0. Optional but recommended (first run, then weekly): `python3 ~/.pn-ultra-audit/audit.py --update-db` builds the local vulnerability database from public sources (OSV.dev, CISA KEV, endoflife.date; ~350 MB of text, a few minutes) so versions are checked locally.
 1. Detect: `python3 ~/.pn-ultra-audit/audit.py <PROJECT_PATH> --plan`. Tell me the project type, languages and which auditors will run (it always includes malware and AI traces).
 2. Ask me ONE question: strictness `basic`, `standard` (default) or `strict`. If I already said it, skip.
 3. Run: `python3 ~/.pn-ultra-audit/audit.py <PROJECT_PATH> --brief --strictness <level> --history --out ~/.pn-ultra-audit/audit-output`
@@ -55,6 +56,7 @@ REGLAS DE SEGURIDAD (no negociables)
 - Objetivos remotos (--ssh, --url, --aws-rds, URLs de base de datos, --vercel-project) solo si yo los autorizo explícitamente en este chat.
 
 PASOS
+0. Opcional pero recomendado (la primera vez y luego cada semana): `python3 ~/.pn-ultra-audit/audit.py --update-db` construye la base de datos local de vulnerabilidades con fuentes públicas (OSV.dev, CISA KEV, endoflife.date; ~350 MB de texto, unos minutos) para comprobar versiones en local.
 1. Detecta: `python3 ~/.pn-ultra-audit/audit.py <RUTA_DEL_PROYECTO> --plan`. Dime el tipo de proyecto, los lenguajes y qué auditores correrán (siempre incluye malware y rastros de IA).
 2. Hazme UNA sola pregunta: rigor `basic`, `standard` (por defecto) o `strict`. Si ya lo dije, omítela.
 3. Ejecuta: `python3 ~/.pn-ultra-audit/audit.py <RUTA_DEL_PROYECTO> --brief --strictness <nivel> --history --out ~/.pn-ultra-audit/audit-output`

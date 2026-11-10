@@ -128,6 +128,8 @@ def brief(run, top=10, label=None):
     ai = [f for f in fs if str(f.get("rule", "")).startswith("AITRACE-")]
     L.append("malware/backdoors: " + (f"{len(mal)} indicator(s) ({len(mal_c)} confirmed) - " + ", ".join(sorted({f['rule'] for f in mal})[:6]) if mal else "clean (static, not an antivirus)")
              + f" | exposed secrets: {len(sec)} (names only, never values) | AI traces: {len(ai)}")
+    dv = [f for f in fs if f.get("rule") == "DEP-VULN"]; eol = [f for f in fs if f.get("rule") == "RUNTIME-EOL"]; kev_ = [f for f in fs if "actively exploited" in str(f.get("title")) or f.get("rule") in ("ADV-KEV-RECENT",)]
+    if dv or eol or kev_: L.append(f"version advisories: {len(dv)} vulnerable package(s) | {len(eol)} end-of-life runtime/framework | {len(kev_)} with actively exploited bugs (CISA KEV)")
     pj = os.path.join(run, "fix-plan.json")
     if os.path.exists(pj):
         try:

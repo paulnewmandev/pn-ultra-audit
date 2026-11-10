@@ -1,6 +1,7 @@
 name: CI
 on: { push: { branches: [main] }, pull_request: {} }
 permissions: { contents: read }
+env: { PNUA_OFFLINE: "1" }   # deterministic CI: no live advisory lookups
 jobs:
   test:
     runs-on: ubuntu-24.04   # pinned: ubuntu-latest (26.04) has no Python 3.9 build

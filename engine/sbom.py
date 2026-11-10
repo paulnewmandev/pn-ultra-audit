@@ -7,12 +7,33 @@ STRONG = re.compile(r"\b(AGPL|SSPL|GPL-?[23]|GPL(?!-?\w*LGPL)|BUSL|CPAL)", re.I)
 def _purl(eco, name, ver): return f"pkg:{eco}/{name.replace('@', '%40', 1) if name.startswith('@') else name}@{ver}"
 
 
+LOCKS = {"package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml", "composer.lock", "poetry.lock", "Pipfile.lock", "Gemfile.lock", "Cargo.lock", "pubspec.lock", "go.sum"}
+_SKIP = {"node_modules", "vendor", ".git", "dist", "build", "target", "__pycache__", ".venv", "venv", ".next", "Pods", "bower_components"}
+
+
+def _locks(root, files):
+    """Lockfiles are skipped by the code scanner (they are not source), but the SBOM and the advisory check need them."""
+    have = {r for r, *_ in files}; out = []
+    for dp, dn, fn in os.walk(root):
+        dn[:] = [d for d in dn if d not in _SKIP and not d.startswith(".")]
+        if dp[len(root):].count(os.sep) > 3: dn[:] = []
+        for f in fn:
+            if f in LOCKS:
+                ab = os.path.join(dp, f); rel = os.path.relpath(ab, root).replace(os.sep, "/")
+                if rel not in have:
+                    try: out.append((rel, ab, "lock", os.path.getsize(ab)))
+                    except OSError: pass
+    return out
+
+
 def build(root, files):
+    files = list(files) + _locks(root, files)
     comps, seen, lic = [], set(), {}
     def add(eco, name, ver, license=None, direct=None):
         k = (eco, name, ver)
         if not name or not ver or k in seen: return
         seen.add(k); c = {"type": "library", "name": name, "version": ver, "purl": _purl(eco, name, ver), "bom-ref": _purl(eco, name, ver)}
+        c["properties"] = [{"name": "pnua:file", "value": rel}]
         if license: c["licenses"] = [{"license": {"id": license}}] if re.fullmatch(r"[A-Za-z0-9.\-+]+", license) else [{"expression": license}]; lic[license] = lic.get(license, 0) + 1
         comps.append(c)
     for rel, ab, e, sz in files:
@@ -34,6 +55,10 @@ def build(root, files):
                 for l in t.splitlines():
                     m = re.match(r"^\s*([A-Za-z0-9_.\-]+)\s*==\s*([\w.\-+]+)", l)
                     if m: add("pypi", m.group(1).lower(), m.group(2))
+            elif b == "yarn.lock":
+                for m in re.finditer(r'(?m)^"?((?:@[^/@"\s]+/)?[^@"\s]+)@[^\n]*:\n\s+version "?([^"\n]+)"?', t): add("npm", m.group(1), m.group(2))
+            elif b == "pnpm-lock.yaml":
+                for m in re.finditer(r"(?m)^\s{2,4}/?'?((?:@[^/@'\s]+/)?[^@'\s/][^@'\s]*)@(\d[^(:'\s]*)", t): add("npm", m.group(1), m.group(2))
             elif b == "poetry.lock":
                 for m in re.finditer(r'\[\[package\]\]\s*name = "([^"]+)"\s*version = "([^"]+)"', t): add("pypi", m.group(1).lower(), m.group(2))
             elif b == "Pipfile.lock":

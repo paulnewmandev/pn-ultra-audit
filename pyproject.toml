@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pn-ultra-audit"
-version = "1.0.29"
+version = "1.0.30"
 description = "One read-only command to audit code, tests, docs, databases, servers, SEO, crypto, SaaS/fintech and audit-readiness - live in the terminal, delivered as a dashboard."
 readme = "README.md"
 requires-python = ">=3.9"

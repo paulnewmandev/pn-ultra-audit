@@ -3,6 +3,17 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.30] - 2026-11-10
+
+### Added
+- **Version advisories** auditor (`--only advisories`, always in the automatic plan; new sidebar item): detects the language runtime (PHP, Node.js, Python, Ruby, Go, Java, .NET: from Dockerfile, .nvmrc, .tool-versions, runtime.txt, composer.json, go.mod, pom.xml, CI workflows...), the framework (Laravel, Symfony, Django, Rails, Spring Boot, React, Angular, Next.js, Nuxt, Vue, WordPress) and every locked dependency with its exact version, and reports: `DEP-VULN` (known vulnerabilities for that exact version, fixed version and upgrade command, same-major fix preferred, dev-only lowered), `MAL-MALICIOUS-PACKAGE` (OpenSSF/OSV malicious-package reports), `RUNTIME-EOL`, `RUNTIME-VULN` (CVEs of the exact runtime version) and `ADV-KEV-RECENT` (recently exploited bugs of a product you use, e.g. PHP). Triage protocol, remediation guides (EN/ES), skill `audit-advisories` (22 skills).
+- **Local vulnerability database as plain text** (`engine/vulndb.py`): `--update-db` builds JSON Lines files with an index under `~/.cache/pn-ultra-audit/db` from OSV.dev bulk dumps (npm 234k advisories incl. malicious packages, PyPI, Go, Packagist, Maven, NuGet, RubyGems, crates.io, Hex, Pub, GitHub Actions and any other OSV ecosystem), CISA KEV, endoflife.date (~490 products) and optional NVD CVEs with version ranges for 28 runtimes/servers/frameworks. `--db-status`, `--db-eco`, `--db-source`. The audit queries it locally first (no package name leaves the machine, works offline, ~0.3 s), then the live APIs, then an offline end-of-life table; the dashboard shows which data was used and its age.
+- `--offline` / `PNUA_OFFLINE=1` forbids every network request.
+
+### Fixed
+- The SBOM never read lockfiles (the code scanner skips them): `package-lock.json`, `yarn.lock`, `pnpm-lock.yaml`, `composer.lock`, `Pipfile.lock`, `poetry.lock`, `Gemfile.lock`, `Cargo.lock`, `go.sum`... are now found on disk (also gives `sbom.cdx.json` a source file per component).
+- Tests and CI run offline against an empty database (deterministic).
+
 ## [1.0.29] - 2026-11-09
 
 ### Added

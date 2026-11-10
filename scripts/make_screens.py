@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Captures REAL terminal output of the CLI and renders pretty PNG/SVG screenshots + dashboard screenshots.
 Needs Chrome/Chromium for PNGs.  python3 scripts/make_screens.py"""
-import html, os, re, shutil, subprocess, sys, tempfile
+import html, json, os, re, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "docs", "img"); os.makedirs(OUT, exist_ok=True)
@@ -12,7 +12,7 @@ ANSI = re.compile(r"\x1b\[([0-9;]*)m")
 
 
 def run(args, cwd=ROOT, env=None):
-    e = dict(os.environ); e.update(env or {}); e["COLUMNS"] = "118"
+    e = dict(os.environ); e.update({"PNUA_OFFLINE": "1", "PNUA_DB": os.path.join(tempfile.gettempdir(), "pnua-shots-empty-db")}); e.update(env or {}); e["COLUMNS"] = "118"
     r = subprocess.run([PY] + args, cwd=cwd, capture_output=True, text=True, env=e, timeout=300)
     return r.stdout + r.stderr
 
@@ -99,6 +99,15 @@ def main():
     scf = go(["vulnerable-demo", "--scaffold", "--lang", "en"])
     shutil.copytree(os.path.join(ROOT, "examples", "fintech-saas-demo"), os.path.join(work, "fintech-saas-demo"))
     fin = go(["fintech-saas-demo", "--lang", "en", "--color", "always", "--out", "audit-output/fin", "--verbose"])
+    # advisories demo: old versions with real known vulnerabilities, checked against the real data (local DB if built, else live; offline table otherwise)
+    adv = os.path.join(work, "advisories-demo"); os.makedirs(adv, exist_ok=True)
+    for rel_, txt_ in {"Dockerfile": "FROM php:8.1-apache\n", ".nvmrc": "18.12.0\n", "requirements.txt": "django==3.2.0\nrequests==2.19.0\n",
+                       "package.json": json.dumps({"name": "adv-demo", "dependencies": {"lodash": "4.17.15", "express": "4.17.1"}, "devDependencies": {"minimist": "1.2.5"}}),
+                       "package-lock.json": json.dumps({"lockfileVersion": 3, "packages": {"": {"name": "adv-demo"}, "node_modules/lodash": {"version": "4.17.15"}, "node_modules/express": {"version": "4.17.1"}, "node_modules/minimist": {"version": "1.2.5"}}}),
+                       "composer.json": json.dumps({"require": {"php": "^8.1", "laravel/framework": "^8.0"}}), "composer.lock": json.dumps({"packages": [{"name": "laravel/framework", "version": "v8.0.0"}], "packages-dev": []})}.items():
+        open(os.path.join(adv, rel_), "w").write(txt_)
+    live_env = {"PNUA_OFFLINE": "0", "PNUA_DB": os.environ.get("PNUA_REAL_DB") or os.path.join(os.path.expanduser("~"), ".cache", "pn-ultra-audit", "db")}
+    run([AUD, "advisories-demo", "--lang", "en", "--color", "never", "--out", "audit-output/adv", "--only", "advisories"], cwd=work, env=live_env)
     shutil.copytree(os.path.join(ROOT, "examples", "pwa-demo"), os.path.join(work, "pwa-demo"))
     pwa_out = go(["pwa-demo", "--lang", "en", "--color", "always", "--out", "audit-output/pwa", "--strictness", "strict", "--verbose"])
     go(["pwa-demo", "--lang", "zh", "--color", "never", "--out", "audit-output/pwa-zh", "--strictness", "strict"])
@@ -159,7 +168,7 @@ def main():
     if CHROME:
         for name, frag, rpt in (("gal-issue.png", "v=issues&id=SEC-003&theme=dark", rep), ("gal-security.png", "v=security&theme=dark", rep), ("gal-roadmap.png", "v=roadmap&theme=dark", rep), ("gal-compliance.png", "v=compliance&theme=dark", rep),
                                 ("gal-domain.png", "v=domain&theme=dark", os.path.join(work, "audit-output", "fin", "run-1", "report.html")), ("gal-seo.png", "v=seo&theme=dark", rep), ("gal-arch.png", "v=arch&theme=dark", rep), ("gal-owasp.png", "v=owasp&theme=dark", rep),
-                                ("gal-plan.png", "v=plan&theme=light", rep), ("gal-coverage.png", "v=coverage&theme=dark", rep), ("gal-malware.png", "v=malware&theme=dark", rep), ("gal-aitrace.png", "v=aitrace&theme=dark", rep), ("gal-hardcode.png", "v=hardcode&theme=dark", rep), ("gal-profile.png", "v=overview&theme=dark", os.path.join(work, "audit-output", "fin", "run-1", "report.html")), ("gal-fixplan.png", "v=plan&theme=dark", rep)):
+                                ("gal-plan.png", "v=plan&theme=light", rep), ("gal-coverage.png", "v=coverage&theme=dark", rep), ("gal-malware.png", "v=malware&theme=dark", rep), ("gal-aitrace.png", "v=aitrace&theme=dark", rep), ("gal-hardcode.png", "v=hardcode&theme=dark", rep), ("gal-advisories.png", "v=advisories&theme=dark", os.path.join(work, "audit-output", "adv", "run-1", "report.html")), ("gal-profile.png", "v=overview&theme=dark", os.path.join(work, "audit-output", "fin", "run-1", "report.html")), ("gal-fixplan.png", "v=plan&theme=dark", rep)):
             subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1", "--window-size=1500,940", "--virtual-time-budget=3500", f"--screenshot={os.path.join(OUT, name)}", "file://" + rpt + "#" + frag], capture_output=True, timeout=120); print("  ->", name)
         subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=1", "--window-size=1500,1650", "--virtual-time-budget=3500", f"--screenshot={os.path.join(OUT, 'gal-triage.png')}", "file://" + rep + "#v=issues&id=HOT-001&theme=dark"], capture_output=True, timeout=120); print("  -> gal-triage.png")
     # publishable sample bundle (privacy-checked): docs/demo/

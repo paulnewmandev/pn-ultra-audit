@@ -3,6 +3,7 @@ and an exact suppression line that really works."""
 import json, os, subprocess, sys, tempfile, unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.environ.setdefault("PNUA_OFFLINE", "1"); os.environ.setdefault("PNUA_DB", os.path.join(__import__("tempfile").gettempdir(), "pnua-test-empty-db"))   # tests never use the network nor the real vulnerability database
 sys.path.insert(0, ROOT)
 from engine import fixplan, suppress, triage  # noqa: E402
 from engine.kb import KB  # noqa: E402

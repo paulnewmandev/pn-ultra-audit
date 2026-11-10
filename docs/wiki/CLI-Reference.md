@@ -9,7 +9,8 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--exclude EXCLUDE] [--tools] [--semgrep-config SEMGREP_CONFIG] [--run-tests]
                       [--test-timeout TEST_TIMEOUT] [--only ONLY] [--skip SKIP] [--plan] [--list-auditors]
                       [--no-docs] [--no-qa] [--domain DOMAIN] [--compliance LIST|all] [--evidence-pack DIR]
-                      [--level {beginner,pro}] [--scaffold] [--write] [--triage] [--show ID] [--kb QUERY]
+                      [--level {beginner,pro}] [--scaffold] [--write] [--update-db] [--db-eco LIST]
+                      [--db-source LIST] [--db-status] [--offline] [--triage] [--show ID] [--kb QUERY]
                       [--run DIR] [--mcp] [--verify-corpus] [--install-agent TOOL[,TOOL]]
                       [--agent-scope {project,user}] [--agent-dir AGENT_DIR] [--force] [--ftp URL]
                       [--ftp-pass-env FTP_PASS_ENV] [--ftp-allow-plain] [--sftp USER@HOST]
@@ -27,7 +28,7 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.29 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.30 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -54,7 +55,7 @@ options:
   --run-tests           EXECUTES the project's own test suite (runs target code)
   --test-timeout TEST_TIMEOUT
   --only ONLY           run only these auditors (comma list): security,quality,docs,tests,qa,seo,repo,malwar
-                        e,hardcode,aitrace,vercel,pwa,web3,db,domain
+                        e,hardcode,advisories,aitrace,vercel,pwa,web3,db,domain
   --skip SKIP           skip these auditors (comma list)
   --plan                detect the project type, print which auditors would run, and exit
   --list-auditors       list the auditors and exit
@@ -89,6 +90,19 @@ Learning / beginner friendly:
   --write               with --scaffold: actually write the files
 
 Fix retrieval (offline; token-saving for humans and AI assistants):
+  --update-db           build/refresh the LOCAL vulnerability database (plain-text JSONL under ~/.cache/pn-
+                        ultra-audit/db): OSV.dev advisories of every language ecosystem (+ malicious-package
+                        reports), CISA KEV, endoflife.date and NVD CVEs of runtimes/servers. The audit then
+                        looks versions up locally: complete, fast, offline and private. Re-run it
+                        daily/weekly (cron or CI)
+  --db-eco LIST         with --update-db: OSV ecosystems to sync (default:
+                        npm,PyPI,Packagist,Go,RubyGems,crates.io,Maven,NuGet,Pub,Hex,'GitHub Actions'; any
+                        OSV ecosystem works, e.g. Debian,Ubuntu,Alpine)
+  --db-source LIST      with --update-db: sources to sync: osv,kev,eol,nvd (default osv,kev,eol; add nvd for
+                        runtime/server CVEs - slow without NVD_API_KEY)
+  --db-status           show what the local vulnerability database contains and how old it is
+  --offline             no network: skip the live advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date);
+                        cached data and an offline end-of-life table are still used. Also: PNUA_OFFLINE=1
   --triage              print the triage worklist of the latest run: every finding that needs a human/AI
                         decision, grouped by rule with ONE protocol (what to check, when it is real, when it
                         is a false positive, how to suppress it) - read this before fixing or reporting

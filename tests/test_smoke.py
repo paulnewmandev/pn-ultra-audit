@@ -2,6 +2,7 @@
 import json, os, re, shutil, subprocess, sys, tempfile, unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+os.environ.setdefault("PNUA_OFFLINE", "1"); os.environ.setdefault("PNUA_DB", os.path.join(__import__("tempfile").gettempdir(), "pnua-test-empty-db"))   # tests never use the network nor the real vulnerability database
 DEMO = os.path.join(ROOT, "examples", "vulnerable-demo")
 CLI = [sys.executable, os.path.join(ROOT, "audit.py")]
 
@@ -64,7 +65,7 @@ class Smoke(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             open(os.path.join(d, "schema.sql"), "w").write("CREATE TABLE t (a int);\n")
             out = run(d, "--plan", "--lang", "en").stdout
-            self.assertIn("Auditors: aitrace, db, hardcode, malware, security", out)
+            self.assertIn("Auditors: advisories, aitrace, db, hardcode, malware, security", out)
 
     def test_only_flag_and_bad_name(self):
         with tempfile.TemporaryDirectory() as d:
@@ -77,7 +78,7 @@ class Smoke(unittest.TestCase):
         self.assertEqual(r.returncode, 2); self.assertIn("--authorized", r.stderr)
 
     def test_version(self):
-        self.assertIn("1.0.29", run("--version").stdout)
+        self.assertIn("1.0.30", run("--version").stdout)
 
     def test_fintech_saas_domain(self):
         d = os.path.join(ROOT, "examples", "fintech-saas-demo")

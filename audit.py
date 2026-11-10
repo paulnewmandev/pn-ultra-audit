@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, advisories as advmod, vulndb, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.29"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.30"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -214,6 +214,11 @@ def main(argv=None):
     g.add_argument("--scaffold", action="store_true", help="create the professional files that are MISSING (.gitignore, .env.example, README, CI, pre-commit, SECURITY.md, docs/architecture.md). Dry-run unless --write; never overwrites")
     g.add_argument("--write", action="store_true", help="with --scaffold: actually write the files")
     g = ap.add_argument_group("Fix retrieval (offline; token-saving for humans and AI assistants)")
+    g.add_argument("--update-db", action="store_true", help="build/refresh the LOCAL vulnerability database (plain-text JSONL under ~/.cache/pn-ultra-audit/db): OSV.dev advisories of every language ecosystem (+ malicious-package reports), CISA KEV, endoflife.date and NVD CVEs of runtimes/servers. The audit then looks versions up locally: complete, fast, offline and private. Re-run it daily/weekly (cron or CI)")
+    g.add_argument("--db-eco", metavar="LIST", help="with --update-db: OSV ecosystems to sync (default: npm,PyPI,Packagist,Go,RubyGems,crates.io,Maven,NuGet,Pub,Hex,'GitHub Actions'; any OSV ecosystem works, e.g. Debian,Ubuntu,Alpine)")
+    g.add_argument("--db-source", metavar="LIST", help="with --update-db: sources to sync: osv,kev,eol,nvd (default osv,kev,eol; add nvd for runtime/server CVEs - slow without NVD_API_KEY)")
+    g.add_argument("--db-status", action="store_true", help="show what the local vulnerability database contains and how old it is")
+    g.add_argument("--offline", action="store_true", help="no network: skip the live advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date); cached data and an offline end-of-life table are still used. Also: PNUA_OFFLINE=1")
     g.add_argument("--triage", action="store_true", help="print the triage worklist of the latest run: every finding that needs a human/AI decision, grouped by rule with ONE protocol (what to check, when it is real, when it is a false positive, how to suppress it) - read this before fixing or reporting suspicions")
     g.add_argument("--show", metavar="ID", help="print a compact fix card for one finding (e.g. SEC-001) from the latest run (see --run)")
     g.add_argument("--kb", metavar="QUERY", help="search the offline remediation knowledge base (e.g. --kb \"sql injection php\")")
@@ -269,6 +274,18 @@ def main(argv=None):
         print(f"\n{len(r) - len(bad)}/{len(r)} pairs verified"); return 1 if bad else 0
     if a.mcp:
         mcpserver.serve(a.run or a.path or os.getcwd()); return 0
+    if a.db_status:
+        st = vulndb.DB().status()
+        if not st["exists"]: print(f"No local vulnerability database at {st['dir']}.\nBuild it with: python3 audit.py --update-db   (OSV.dev + CISA KEV + endoflife.date; ~350 MB of text, a few minutes)"); return 1
+        print(f"Local vulnerability database: {st['dir']}\n  updated: {st['updated']} ({st['age_days']} day(s) ago) · {st['total_mb']} MB on disk")
+        for e, v in sorted(st["osv"].items()): print(f"  OSV {e:<15} {v['advisories']:>8,} advisories · {v['packages']:>7,} packages")
+        print(f"  CISA KEV: {st['kev']} · endoflife.date: {st['eol']} products · NVD products: {', '.join((st['nvd'] or {}).keys()) or '-'}")
+        return 0
+    if a.update_db:
+        eco = [x.strip() for x in a.db_eco.split(",") if x.strip()] if a.db_eco else None
+        src = [x.strip() for x in a.db_source.split(",") if x.strip()] if a.db_source else None
+        print(f"Updating the local vulnerability database in {vulndb.db_dir()} (public sources, read-only)...")
+        meta = vulndb.sync(eco, src, None, print); print("Done. Check it with: python3 audit.py --db-status"); return 0 if meta else 1
     if a.triage:
         run = kbsearch.latest_run(a.run or a.path or os.getcwd())
         if not run: print("ERROR: no audit run found. Run `python3 audit.py <project>` first, or pass --run DIR.", file=sys.stderr); return 2
@@ -296,6 +313,7 @@ def main(argv=None):
     if a.via_ssh and not a.ssh: print("ERROR: --via-ssh needs --ssh", file=sys.stderr); return 2
     if a.remote_path and not (a.ssh or a.sftp): print("ERROR: --remote-path needs --ssh or --sftp", file=sys.stderr); return 2
     if a.sftp and not a.remote_path: print("ERROR: --sftp needs --remote-path", file=sys.stderr); return 2
+    if getattr(a, "offline", False): os.environ["PNUA_OFFLINE"] = "1"
     local_root = os.path.abspath(a.path) if a.path else (os.getcwd() if not (a.ssh or a.url or a.keywords or a.gsc_csv or a.git or a.ftp or a.sftp) else None)
     if local_root and not os.path.isdir(local_root): print(f"ERROR: not a directory: {local_root}", file=sys.stderr); return 2
     given = any(x.startswith("--strictness") for x in (argv if argv is not None else sys.argv))
@@ -367,6 +385,7 @@ def main(argv=None):
             if "domain" in plan: stages.append(("domain", N("Dominio: SaaS / Fintech / Banca (aislamiento, dinero, idempotencia, webhooks)", "Domain deep-dive: SaaS / Fintech / Banking (isolation, money, idempotency, webhooks)")))
             if "vercel" in plan: stages.append(("vercel", N("Vercel: vercel.json, Next.js, crons, variables y rutas API", "Vercel: vercel.json, Next.js, crons, env vars & API routes")))
             if "malware" in plan: stages.append(("malware", N("Malware y backdoors: webshells, reverse shells, mineros, stealers, hooks de instalación", "Malware & backdoors: webshells, reverse shells, miners, stealers, install hooks")))
+            if "advisories" in plan: stages.append(("advisories", N("Avisos por versión (en vivo): runtime, framework y dependencias · OSV · CISA KEV · NVD", "Version advisories (live): runtime, framework & dependencies · OSV · CISA KEV · NVD")))
             if "hardcode" in plan: stages.append(("hardcode", N("Hardcode y TODOs: pendientes, valores atados al entorno y credenciales", "Hardcode & TODOs: unfinished work, environment-bound values & credentials")))
             if "aitrace" in plan: stages.append(("aitrace", N("Rastros de IA: comentarios, archivos de agentes, trailers de git y metadatos", "AI traces: comments, agent files, git trailers & metadata")))
             if "repo" in plan: stages.append(("repo", N("Higiene del repositorio: claves, historial y CI/CD", "Repository hygiene: keys, history & CI/CD")))
@@ -526,6 +545,12 @@ def main(argv=None):
         raw += mf_; stream(mf_); metrics["malware"] = minfo
         ui.done((f"{len(mf_)} " + N("indicadores", "indicators") + f" · {minfo.get('scanned', 0)} " + N("archivos revisados", "files inspected")) if not minfo.get("error") else minfo["error"], warn=bool(mf_ or minfo.get("error")))
         L("malware & backdoor indicators", "audit-security", "covered" if not minfo.get("error") else "blocked", "webshells, reverse shells, decode-and-execute, miners, stealers, install hooks, persistence, polyglots, Trojan Source (static, offline; not an antivirus)")
+        begin("advisories")
+        try: advf_, advinfo = advmod.analyze(scan_root, files, a.strictness)
+        except Exception as ex_: advf_, advinfo = [], {"error": str(ex_)[:80], "states": [], "errors": [], "runtimes": [], "frameworks": []}
+        raw += advf_; stream(advf_); metrics["advisories"] = advinfo
+        ui.done((f"{advinfo.get('components', 0)} " + N("dependencias", "dependencies") + f" · {advinfo.get('vulnerable', 0)} " + N("vulnerables", "vulnerable") + f" · {advinfo.get('kev', 0)} " + N("explotadas (KEV)", "exploited (KEV)") + " · " + (N("en vivo", "live") if advinfo.get("live") else N("sin red (datos no actualizados)", "offline (data not refreshed)"))) if not advinfo.get("error") else advinfo["error"], warn=bool(advinfo.get("error") or advinfo.get("errors")))
+        L("version advisories (OSV · CISA KEV · NVD · endoflife.date)", "audit-security", "covered" if not advinfo.get("error") else "blocked", "dependency CVEs by locked version, runtime/framework end-of-life, CVEs of the exact runtime, recent actively exploited bugs of the stack")
         begin("hardcode")
         try: hf_, hinfo = hardcodemod.analyze(scan_root, files, a.strictness)
         except Exception as ex_: hf_, hinfo = [], {"error": str(ex_)[:80]}
@@ -652,6 +677,7 @@ def main(argv=None):
         if f.get("seo_cat") or f["category"] in ("seo", "sem", "privacy") or r.startswith(("SEO-", "SEM-")): return "seo"
         if r.startswith(("FIN-", "SAAS-")) or fam in ("domain-fin", "domain-saas"): return "domain"
         if r.startswith("VERCEL-") or fam.startswith("vercel-"): return "vercel"
+        if r.startswith(("DEP-VULN", "RUNTIME-", "ADV-")) or fam in ("dep-vuln", "runtime-eol", "runtime-vuln", "adv-kev"): return "advisories"
         if r.startswith(("HC-", "TODO-")) or fam.startswith(("hc-", "todo-")): return "hardcode"
         if r.startswith("MAL-") or fam.startswith("mal-"): return "malware"
         if r.startswith("AITRACE-") or fam.startswith("ai-trace") or fam in ("ai-placeholder", "hidden-unicode"): return "aitrace"
@@ -667,7 +693,7 @@ def main(argv=None):
     raw = [f for f in raw if auditor_of(f) in plan or auditor_of(f) == "explicit"]
     if (detected or {}).get("profile"): metrics["profile"] = detected["profile"]
     STAGE_AUD = {"server": ("servers",), "scan": ("security",), "project": ("quality",), "docs": ("docs",), "tests": ("tests",), "qa": ("qa",), "seo_static": ("seo",), "crawl": ("seo",), "psi": ("seo",), "seo_data": ("seo",), "domain": ("domain",),
-                 "vercel": ("vercel",), "vercel_api": ("vercel",), "repo": ("repo",), "history": ("repo",), "pwa": ("pwa",), "pwa_live": ("pwa",), "web3": ("web3",), "malware": ("malware",), "aitrace": ("aitrace",), "hardcode": ("hardcode",), "db": ("db",), "aws": ("db",), "tools": ("security",)}
+                 "vercel": ("vercel",), "vercel_api": ("vercel",), "repo": ("repo",), "history": ("repo",), "pwa": ("pwa",), "pwa_live": ("pwa",), "web3": ("web3",), "malware": ("malware",), "aitrace": ("aitrace",), "hardcode": ("hardcode",), "advisories": ("advisories",), "db": ("db",), "aws": ("db",), "tools": ("security",)}
     ran_ = sorted({x for k in S_ for x in STAGE_AUD.get(k, ())}); code_ = any(k in S_ for k in ("scan", "project", "docs"))
     metrics["scope"] = dict(kind=("server" if (a.ssh and not code_) else "repository" if a.git else "project" if local_root else "website" if a.url else "database" if (a.db or a.aws_rds) else "remote"), ran=ran_, code=code_)
     metrics["plan"] = dict(kinds=(detected or {}).get("kinds", []), evidence=(detected or {}).get("evidence", {}), auditors=sorted(plan), skipped=sorted(ALL_AUD - plan), auto=not bool(only))

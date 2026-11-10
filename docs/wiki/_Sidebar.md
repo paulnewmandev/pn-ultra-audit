@@ -7,6 +7,7 @@
 - [Strictness Levels](Strictness-Levels)
 - [Save Tokens](Save-Tokens)
 - [Run from your LLM chat](Run-from-your-LLM-Chat)
+- [Vulnerability database](Vulnerability-Database)
 
 **Audit targets**
 - [Server and VPS](Server-and-VPS-Audit)

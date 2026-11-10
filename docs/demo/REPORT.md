@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.29
+- **Tool:** PN-Ultra-Audit 1.0.30
 
 ## Contents
 
@@ -21,7 +21,7 @@
 | Security ≥ B | ❌ | E |
 | Maintainability ≤ 10% debt | ❌ | 27.2% |
 | 0 secrets in source | ❌ | 4 |
-| Executed coverage units all covered | ✅ | 11/11 |
+| Executed coverage units all covered | ✅ | 12/12 |
 
 ### Ratings
 
@@ -3641,6 +3641,7 @@ const st = await fetch('https://api-staging.myapp.com/v1/orders');
 | static SEO / SEM | audit-seo | covered | templates, robots, sitemap, metadata, tracking/consent |
 | repository hygiene (keys, history, CI/CD) | audit-security | covered | sensitive files in git/history, remote credentials, workflow security, SECURITY.md/CODEOWNERS/dependabot/secre |
 | malware & backdoor indicators | audit-security | covered | webshells, reverse shells, decode-and-execute, miners, stealers, install hooks, persistence, polyglots, Trojan |
+| version advisories (OSV · CISA KEV · NVD · endoflife.date) | audit-security | covered | dependency CVEs by locked version, runtime/framework end-of-life, CVEs of the exact runtime, recent actively e |
 | hardcode & TODOs | audit-quality | covered | TODO/FIXME/HACK (age via git blame), security TODOs, remove-before-prod markers, stubs, environment URLs, IPs, |
 | AI traces (project finish) | audit-docs | covered | AI comments/docs, agent & spec files, git trailers, provenance metadata, invisible characters |
 | crypto / web3 heuristics | audit-security | covered | Solidity, Anchor/Solana, dApp patterns |
@@ -3655,7 +3656,7 @@ const st = await fetch('https://api-staging.myapp.com/v1/orders');
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.29 |
+| tool_version | 1.0.30 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
