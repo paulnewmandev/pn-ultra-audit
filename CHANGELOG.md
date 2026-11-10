@@ -3,6 +3,15 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.29] - 2026-11-09
+
+### Added
+- **Project profile** (`engine/profile.py`): what the project is (SaaS, backend/API, frontend/SPA, website, PWA, mobile, desktop, extension, CLI, library, monorepo, microservices, serverless, smart contracts, data/ML, bot, automation, and the combination such as "Full-stack (Backend/API + Frontend + Mobile + DB)") and what it is for (health, fintech, insurance, e-commerce, marketplace, business/ERP/CRM, education, logistics, real estate, travel, food, HR, legal/government, media/social, gaming, IoT, AI/LLM, chatbot, automation, analytics, crypto/Web3, CMS), with evidence and confidence (low-confidence guesses are not shown). Printed by `--plan`, shown in the terminal banner, the dashboard (profile card, header chips, executive summary) and `metrics.json`.
+
+### Changed
+- **Only what was audited is shown**: the dashboard hides lenses that did not run for the target (server audit: no SEO/PWA/Docs/Malware tabs; code-only views need a code scan), hides Reliability/Maintainability/health cards without a code scan and the "not applicable" coverage rows; `REPORT.md` skips them too. `metrics.json` has `scope` (kind, ran auditors, code scanned).
+- **Compliance frameworks follow the profile**: HIPAA only for health, PCI DSS for payments/e-commerce/marketplace, DORA for fintech/insurance, SOX/NYDFS/PSD2 for fintech, EU AI Act for AI, WCAG for web; an explicit `--compliance <id>` still forces a framework.
+
 ## [1.0.28] - 2026-11-09
 
 ### Added

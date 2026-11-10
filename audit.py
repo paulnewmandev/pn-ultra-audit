@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, cleanfix, fixplan, triage, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.28"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.29"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -319,7 +319,10 @@ def main(argv=None):
     try:
         if local_root:
             pre = scanner.discover(local_root, a.exclude)
-            detected = detect.detect(pre[0], deps_of(pre[0])); plan = detect.resolve_plan(detected, only, skip); plan = add_repo_auditor(plan, only, skip, local_root)
+            detected = detect.detect(pre[0], deps_of(pre[0]))
+            try: detected["profile"] = profilemod.analyze(local_root, pre[0], deps_of(pre[0]), detected, a.lang)
+            except Exception: detected["profile"] = None
+            plan = detect.resolve_plan(detected, only, skip); plan = add_repo_auditor(plan, only, skip, local_root)
         else:
             plan = set(only) if only else set(ALL_AUD); plan -= set(skip)
     except ValueError as e:
@@ -337,6 +340,11 @@ def main(argv=None):
         if detected:
             print(N("  Detectado:", "  Detected:"), ", ".join(detected["kinds"]))
             for k, v in detected["evidence"].items(): print(f"    {k:<9} {', '.join(v)}")
+            pr_ = detected.get("profile")
+            if pr_:
+                print(N("  Perfil    :", "  Profile  :"), pr_["summary"])
+                for it in pr_["architecture"]: print(f"    {it['id']:<13} {it['confidence']:<7} " + "; ".join(it["evidence"][:3]))
+                for it in pr_["industry"]: print(f"    {'focus:' + it['id']:<13} {it['confidence']:<7} " + ", ".join(it["evidence"][:5]))
         if ddet["domains"]: print(N("  Dominio   :", "  Domain   :"), ", ".join(ddet["domains"]), " (" + "; ".join(f"{k}: {', '.join(v[:2])}" for k, v in ddet["evidence"].items()) + ")")
         print(N("  Auditores:", "  Auditors:"), ", ".join(sorted(plan)) or "-"); print(N("  Omitidos :", "  Skipped  :"), ", ".join(sorted(ALL_AUD - plan)) or "-")
         print(N("  (ajusta con --only a,b / --skip a,b)", "  (adjust with --only a,b / --skip a,b)")); return 0
@@ -446,12 +454,15 @@ def main(argv=None):
         files, tracked, skipped = (pre if (pre and scan_root == local_root) else scanner.discover(scan_root, a.exclude)); ok_files = files
         if detected is None:
             detected = detect.detect(files, deps_of(files))
+            try: detected["profile"] = profilemod.analyze(scan_root, files, deps_of(files), detected, a.lang)
+            except Exception: detected["profile"] = None
             try: plan = detect.resolve_plan(detected, only, skip); plan = add_repo_auditor(plan, only, skip, local_root)
             except ValueError as e: print("ERROR: " + str(e), file=sys.stderr); return 2
             if a.db: plan.add("db")
             if a.url or a.keywords or a.gsc_csv or a.competitor: plan.add("seo")
             stages = build_stages(plan); S_ = {k: i for i, (k, _) in enumerate(stages)}; ui.total = len(stages)
             ui.p(ui.c("gray", "   " + N("Detectado: ", "Detected: ") + ", ".join(detected["kinds"]) + " → " + N("auditores: ", "auditors: ") + ", ".join(sorted(plan))))
+            if detected.get("profile"): ui.p(ui.c("gray", "   " + N("Perfil: ", "Profile: ") + detected["profile"]["summary"]))
         if a.profile == "quick": files = files[:2500]
         langs = Counter(scanner.LANG.get(e) for _, _, e, _ in files if scanner.LANG.get(e) in scanner.CODE_LANGS)
         deps_text = ""
@@ -654,6 +665,11 @@ def main(argv=None):
         if r.startswith("SQL-") or fam == "sql-schema": return "db"
         return "security"
     raw = [f for f in raw if auditor_of(f) in plan or auditor_of(f) == "explicit"]
+    if (detected or {}).get("profile"): metrics["profile"] = detected["profile"]
+    STAGE_AUD = {"server": ("servers",), "scan": ("security",), "project": ("quality",), "docs": ("docs",), "tests": ("tests",), "qa": ("qa",), "seo_static": ("seo",), "crawl": ("seo",), "psi": ("seo",), "seo_data": ("seo",), "domain": ("domain",),
+                 "vercel": ("vercel",), "vercel_api": ("vercel",), "repo": ("repo",), "history": ("repo",), "pwa": ("pwa",), "pwa_live": ("pwa",), "web3": ("web3",), "malware": ("malware",), "aitrace": ("aitrace",), "hardcode": ("hardcode",), "db": ("db",), "aws": ("db",), "tools": ("security",)}
+    ran_ = sorted({x for k in S_ for x in STAGE_AUD.get(k, ())}); code_ = any(k in S_ for k in ("scan", "project", "docs"))
+    metrics["scope"] = dict(kind=("server" if (a.ssh and not code_) else "repository" if a.git else "project" if local_root else "website" if a.url else "database" if (a.db or a.aws_rds) else "remote"), ran=ran_, code=code_)
     metrics["plan"] = dict(kinds=(detected or {}).get("kinds", []), evidence=(detected or {}).get("evidence", {}), auditors=sorted(plan), skipped=sorted(ALL_AUD - plan), auto=not bool(only))
     for k in sorted(ALL_AUD - plan): L(f"auditor: {k}", "pn-ultra-audit", "out_of_scope", N("no aplica a este tipo de proyecto o fue omitido (--skip/--only)", "not applicable to this project type or skipped (--skip/--only)"))
     findings = to_schema(raw, a.lang); findings, n_supp = suppress.apply(findings, scan_root)

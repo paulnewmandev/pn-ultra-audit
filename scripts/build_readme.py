@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.28"
+VER = "1.0.29"
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from llm_prompts import readme_section
 LLM_SECTION = readme_section()
@@ -132,6 +132,10 @@ Open the `report.html` it prints. Everything is written to `audit-output/<projec
 <td width="50%" valign="top"><img src="docs/img/gal-aitrace.png" alt="AI traces" width="100%"><br><sub><b>AI traces</b> - project finish: comments, agent files, git trailers, metadata and how to remove them</sub></td>
 </tr>
 <tr>
+<td width="50%" valign="top"><img src="docs/img/gal-profile.png" alt="Project profile" width="100%"><br><sub><b>Project profile</b> - what it is (SaaS, full-stack, PWA, mobile...) and what it is for (fintech, health, e-commerce...), with evidence</sub></td>
+<td width="50%" valign="top"><img src="docs/img/gal-triage.png" alt="Triage protocol" width="100%"><br><sub><b>Triage protocol</b> - how to confirm a suspicion (real / false positive), the fix and the exact suppression line</sub></td>
+</tr>
+<tr>
 <td width="50%" valign="top"><img src="docs/img/gal-hardcode.png" alt="Hardcode and TODOs" width="100%"><br><sub><b>Hardcode &amp; TODOs</b> - unfinished work, security TODOs, hardcoded URLs/IPs/paths/rates, with <code>todo-backlog.md</code></sub></td>
 <td width="50%" valign="top"><img src="docs/img/gal-fixplan.png" alt="Phased fix plan" width="100%"><br><sub><b>Phased fix plan</b> - contain &amp; rotate first, one group per root cause, with steps and verification</sub></td>
 </tr>
@@ -202,8 +206,8 @@ A full sample report is published in [`docs/demo/`](docs/demo/) (open `docs/demo
 
 ```mermaid
 flowchart LR
-    A[Target<br/>folder · git · ssh / VPS · ftp · db · url · Vercel API] --> B[Detect project type<br/>backend · frontend · mobile · db · web · pwa · vercel · web3 · saas/fintech]
-    B --> C{{Plan: only the auditors that apply<br/>malware + AI traces always run}}
+    A[Target<br/>folder · git · ssh / VPS · ftp · db · url · Vercel API] --> B[Profile: what it is + what it is for<br/>SaaS · backend · frontend · web · PWA · mobile · full-stack<br/>health · fintech · e-commerce · bot · automation · AI ...]
+    B --> C{{Plan: only the lenses that apply<br/>report shows only what was audited}}
     C --> D1[security + repo keys / history / CI]
     C --> D2[quality + docs + architecture]
     C --> D3[tests + QA web/mobile + PWA]
@@ -218,6 +222,7 @@ flowchart LR
     E --> F[Roadmap + Audit readiness + SBOM]
     F --> G[Dashboard HTML · REPORT.md · SARIF · JSON · PDF · Evidence pack<br/>9 languages · brand colors and logo]
     F --> H[Fix scripts - generated, never executed<br/>repo-fixes.sh · server-fixes.sh · cleanup-fixes.sh]
+    F --> I[Fix plan + triage protocol<br/>confirm: REAL / FALSE POSITIVE / UNSURE, then fix]
 ```
 
 ```mermaid
@@ -232,12 +237,24 @@ flowchart TB
       dbaudit[dbaudit.py] --- remote[remote.py / remote_extra.py / aws.py<br/>VPS · cloud · k8s · containers]
       roadmap[roadmap.py] --- compliance[compliance.py / sbom.py / policies.py]
       kb[kb*.py + i18n.py<br/>remediation guides · 9 languages] --- fixes[repofix.py / serverfix.py / cleanfix.py<br/>reviewable fix scripts]
+      profile[profile.py + detect.py<br/>project shape · industry · scope] --- triage[triage.py<br/>confirm vs false-positive protocol]
     end
     engine --> render[render_report.py + dashboard.py<br/>fwart.py · techlogos.py · sources.py]
     engine --> ai[kbsearch.py + mcpserver.py + agents.py<br/>token-saving brief for AI assistants]
     render --> out[(audit-output/run-N)]
     fixes --> out
 ```
+
+## It recognises what it is auditing
+
+Before auditing, PN-Ultra-Audit works out **what the project is** and **what it is for**, shows the evidence and a confidence level (hover a label in the dashboard, or run `--plan`), and only turns on the lenses that apply.
+
+| | Detected |
+|---|---|
+| **Technical shape** | SaaS (multi-tenant / subscriptions) · backend/API · frontend/SPA · website · PWA · mobile (Android, iOS, Flutter, React Native) · desktop · browser extension · CLI · library/SDK · monorepo · microservices · serverless · smart contracts · data/ML · bot · automation · infrastructure as code - and the combination, e.g. *Full-stack (Backend/API + Frontend + Mobile + DB)* |
+| **Focus / industry** | health · fintech/banking/payments · insurance · e-commerce · marketplace · business/ERP/CRM · education · logistics · real estate · travel/hospitality · food · HR · legal/government · media/social · gaming · IoT/hardware · AI/LLM · chatbots · automation/scraping · analytics/BI · crypto/Web3 · CMS |
+
+A label needs several independent signals (dependencies, folders, README, database schema, code identifiers), never one keyword. The profile also drives what is audited and shown: **only lenses that ran appear in the report** (a server audit has no SEO or PWA tabs, a library has no mobile checks, "not applicable" coverage rows are hidden) and **compliance frameworks follow the profile** (HIPAA only for health, PCI DSS for payments/e-commerce, DORA/PSD2/SOX for fintech, EU AI Act for AI products, WCAG for web/mobile UIs; ask for any framework explicitly with `--compliance hipaa`).
 
 ## What it audits
 
@@ -375,7 +392,8 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 
 | Flag | Meaning |
 |---|---|
-| `--plan` · `--only a,b` · `--skip a,b` · `--list-auditors` | choose auditors (default: auto-detect) |
+| `--plan` · `--only a,b` · `--skip a,b` · `--list-auditors` | show the project profile and choose auditors (default: auto-detect; malware, AI traces and hardcode always on) |
+| `--triage` · `--brief` · `--show ID` · `--run DIR` | anti false positives: suspicions grouped by rule with one confirm protocol; compact summary; fix card with the protocol |
 | `--level beginner\\|pro` · `--strictness basic\\|standard\\|strict` `--ask` · `--baseline auto` | learning mode · docs/complexity thresholds · ratchet |
 | `--git SPEC` `--branch` `--depth` `--history` `--git-host` `--git-token-env` | repositories |
 | `--ssh` `--sftp` `--ftp` `--remote-path` `--sudo` `--ssh-key` `--authorized` | servers (read-only) |

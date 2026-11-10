@@ -310,6 +310,7 @@ def build_md(ctx, t):
         for o in ctx["owasp"]: L.append(f"| {o.get('standard', '')} | {o.get('id', '')} | {o.get('name', '')} | {o.get('status', '')} | {', '.join((o.get('findings') or [])[:6])} |")
         L.append("")
     L += ['<a id="cobertura"></a>', f"## {t['coverage']}", ""]
+    ctx["ledger"] = [u for u in ctx["ledger"] if u.get("state") != "out_of_scope"]
     if ctx["ledger"]:
         L += ["| Unit | Pass | State | Note |", "|---|---|---|---|"] + [f"| {u.get('unit', '')} | {u.get('pass', '')} | {u.get('state', '')} | {str(u.get('note', ''))[:110]} |" for u in ctx["ledger"]] + [""]
     if m:

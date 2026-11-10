@@ -2,7 +2,7 @@
 
 - **Scope:** standard · vulnerable-demo
 - **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-09
-- **Tool:** PN-Ultra-Audit 1.0.28
+- **Tool:** PN-Ultra-Audit 1.0.29
 
 ## Contents
 
@@ -3639,30 +3639,23 @@ const st = await fetch('https://api-staging.myapp.com/v1/orders');
 | test-suite analysis (static) | audit-quality | covered | file-name matching; coverage % not measured unless --run-tests |
 | QA front-end + mobile (static) | audit-qa,audit-mobile-qa | covered | mobile=android, ios |
 | static SEO / SEM | audit-seo | covered | templates, robots, sitemap, metadata, tracking/consent |
-| Vercel project configuration | audit-vercel | out_of_scope | vercel.json, next.config, crons, API routes, public env vars, headers, Next.js CVEs |
 | repository hygiene (keys, history, CI/CD) | audit-security | covered | sensitive files in git/history, remote credentials, workflow security, SECURITY.md/CODEOWNERS/dependabot/secre |
 | malware & backdoor indicators | audit-security | covered | webshells, reverse shells, decode-and-execute, miners, stealers, install hooks, persistence, polyglots, Trojan |
 | hardcode & TODOs | audit-quality | covered | TODO/FIXME/HACK (age via git blame), security TODOs, remove-before-prod markers, stubs, environment URLs, IPs, |
 | AI traces (project finish) | audit-docs | covered | AI comments/docs, agent & spec files, git trailers, provenance metadata, invisible characters |
-| PWA: manifest / service worker / offline | audit-pwa | out_of_scope | manifest, installability, service worker, caching, push, update flow |
 | crypto / web3 heuristics | audit-security | covered | Solidity, Anchor/Solana, dApp patterns |
 | live database app.db | audit-security | covered | 2 tables |
 | external scanners | audit-security | deferred | not requested (--tools) |
 | test execution | audit-bugs | deferred | not requested (--run-tests) |
-| server hardening (ssh) | audit-security | out_of_scope | no --ssh |
 | live SEO crawl | audit-seo | deferred | no --url |
 | manual-style review (auth flows, business logic, IDOR beyond lookups) | audit-security | deferred | use the Claude skills (/audit) on top of this CLI baseline |
-| auditor: domain | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
-| auditor: pwa | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
-| auditor: repo | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
-| auditor: vercel | pn-ultra-audit | out_of_scope | not applicable to this project type or skipped (--skip/--only) |
 
 ### Metrics
 
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.28 |
+| tool_version | 1.0.29 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
@@ -3785,11 +3778,8 @@ xychart-beta
 |---|---|---|---|---|
 | SOC 2 | 0% | 0 | 11 | 3 |
 | ISO/IEC 27001:2022 | 15% | 2 | 11 | 2 |
-| HIPAA Security Rule | 17% | 1 | 5 | 5 |
 | GDPR / ePrivacy | 0% | 0 | 5 | 5 |
-| PCI DSS v4.0 | 12% | 1 | 7 | 2 |
 | NIST CSF 2.0 | 14% | 1 | 6 | 3 |
-| DORA (EU 2022/2554) | 0% | 0 | 6 | 1 |
 | WCAG 2.2 AA (VPAT / EN 301 549) | 43% | 3 | 4 | 1 |
 | OWASP ASVS 4.0 (Level 2) | 8% | 1 | 12 | 0 |
 | CIS Controls v8 (IG1/IG2) | 12% | 1 | 7 | 1 |
@@ -3797,9 +3787,9 @@ xychart-beta
 ```mermaid
 xychart-beta
     title "Readiness by framework (%)"
-    x-axis ["SOC 2", "ISO/IEC 27001 ", "HIPAA Security", "GDPR / ePrivac", "PCI DSS v4.0", "NIST CSF 2.0", "DORA EU 2022/2", "WCAG 2.2 AA VP", "OWASP ASVS 4.0", "CIS Controls v"]
+    x-axis ["SOC 2", "ISO/IEC 27001 ", "GDPR / ePrivac", "NIST CSF 2.0", "WCAG 2.2 AA VP", "OWASP ASVS 4.0", "CIS Controls v"]
     y-axis "%" 0 --> 100
-    bar [0, 15, 17, 0, 12, 14, 0, 43, 8, 12]
+    bar [0, 15, 0, 14, 43, 8, 12]
 ```
 
 ### SOC 2 - gaps to close
@@ -3830,14 +3820,6 @@ xychart-beta
 - **8.29** Security testing in development and acceptance: missing → CI runs lint, types and tests on every change; No critical/high security findings
 - **8.31/8.32** Separation of environments & change management: missing → Project is under Git with a .gitignore; CI runs lint, types and tests on every change; Database changes use migrations
 
-### HIPAA Security Rule - gaps to close
-
-- **§164.312(a)(1)** Access control (unique IDs, emergency access, auto logoff, encryption): missing → Uses a proven auth library/framework (not hand-rolled); Object access is checked per user (no IDOR / mass assignment); Passwords use argon2/bcrypt (never MD5/SHA-1/plain)
-- **§164.312(b)** Audit controls: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
-- **§164.312(c)** Integrity of ePHI: missing → Input is validated with a schema library; No SQL/command injection or XSS patterns
-- **§164.312(d)** Person or entity authentication: missing → Uses a proven auth library/framework (not hand-rolled); Passwords use argon2/bcrypt (never MD5/SHA-1/plain); Rate limiting protects login and expensive endpoints
-- **§164.312(e)** Transmission security (encryption in transit): missing → No secrets in the code or git history
-
 ### GDPR / ePrivacy - gaps to close
 
 - **Art. 7 / ePrivacy 5(3)** Consent for cookies/tracking before non-essential tags: missing → Tracking has user consent (GDPR/ePrivacy)
@@ -3845,16 +3827,6 @@ xychart-beta
 - **Art. 28** Processor agreements: missing → SBOM generated from lockfiles
 - **Art. 32** Security of processing: encryption, access control, resilience, testing: missing → Passwords use argon2/bcrypt (never MD5/SHA-1/plain); Object access is checked per user (no IDOR / mass assignment); Structured logging library is used; No critical/high security findings
 - **Art. 33/34** Personal-data breach notification (72 h): missing → Error tracking / APM is installed (Sentry, OpenTelemetry…); Structured logging library is used
-
-### PCI DSS v4.0 - gaps to close
-
-- **Req 1/2** Network controls & secure configurations (no defaults): missing → Security headers and CORS are configured
-- **Req 3** Protect stored account data (never store SAD, strong crypto): missing → No secrets in the code or git history; Passwords use argon2/bcrypt (never MD5/SHA-1/plain); no secrets written to logs
-- **Req 6.2/6.3** Secure software development; vulnerabilities identified and addressed: missing → No SQL/command injection or XSS patterns; No critical/high security findings; Dependencies are scanned for known vulnerabilities; Linter + formatter are configured
-- **Req 6.4** Public web apps protected (WAF or application review): missing → Security headers and CORS are configured; Rate limiting protects login and expensive endpoints; No SQL/command injection or XSS patterns
-- **Req 7/8** Restrict access by need-to-know; identify and authenticate users (MFA): missing → Object access is checked per user (no IDOR / mass assignment); Uses a proven auth library/framework (not hand-rolled); Passwords use argon2/bcrypt (never MD5/SHA-1/plain); Rate limiting protects login and expensive endpoints
-- **Req 10** Log and monitor all access: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
-- **Req 11** Test security regularly (scans, pen-tests, change detection): missing → CI runs lint, types and tests on every change; Dependencies are scanned for known vulnerabilities
 
 ### NIST CSF 2.0 - gaps to close
 
@@ -3864,15 +3836,6 @@ xychart-beta
 - **PR.DS** Data security (at rest, in transit): missing → No secrets in the code or git history; Passwords use argon2/bcrypt (never MD5/SHA-1/plain)
 - **PR.PS** Platform security: config, patching, secure SDLC, logging: missing → CI runs lint, types and tests on every change; Linter + formatter are configured; Dependencies are scanned for known vulnerabilities; Structured logging library is used
 - **DE.CM** Continuous monitoring: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
-
-### DORA (EU 2022/2554) - gaps to close
-
-- **Art. 5-16** ICT risk management framework: missing → CI runs lint, types and tests on every change
-- **Art. 8** Identification of ICT assets and dependencies: missing → SBOM generated from lockfiles
-- **Art. 10** Detection of anomalous activity: missing → Structured logging library is used; Error tracking / APM is installed (Sentry, OpenTelemetry…)
-- **Art. 17-19** ICT-related incident management, classification and reporting: missing → Error tracking / APM is installed (Sentry, OpenTelemetry…)
-- **Art. 24-25** Digital operational resilience testing (incl. vulnerability scans, source-code reviews, TLPT): missing → No critical/high security findings; CI runs lint, types and tests on every change
-- **Art. 28-30** ICT third-party risk and contractual provisions: missing → Dependencies are scanned for known vulnerabilities; SBOM generated from lockfiles
 
 ### WCAG 2.2 AA (VPAT / EN 301 549) - gaps to close
 

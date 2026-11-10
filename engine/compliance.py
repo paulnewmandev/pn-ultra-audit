@@ -55,7 +55,7 @@ fw("hipaa", "HIPAA Security Rule", "45 CFR §164.308 / .310 / .312 (US health da
  ("§164.312(e)", "Transmission security (encryption in transit)", ["https", "nosecrets"], "TLS configuration scan, VPN/private-link design."),
  ("§164.314/.308(b)", "Business associate agreements (BAAs)", [], "BAA inventory with every vendor touching ePHI (cloud, email, analytics, AI)."),
  ("§164.310", "Physical safeguards (facility, workstation, devices)", [], "Facility access, device encryption/MDM evidence, media disposal."),
-])
+], applies="health")
 fw("gdpr", "GDPR / ePrivacy", "Regulation (EU) 2016/679 + Directive 2002/58/EC", [
  ("Art. 5/6", "Lawfulness, purpose limitation, data minimisation", [], "Records of Processing Activities (RoPA), legal-basis register, data-minimisation review."),
  ("Art. 7 / ePrivacy 5(3)", "Consent for cookies/tracking before non-essential tags", ["consent"], "Consent banner configuration, consent log, tag-manager consent-mode setup."),
@@ -79,7 +79,7 @@ fw("pci", "PCI DSS v4.0", "Payment Card Industry Data Security Standard (cardhol
  ("Req 10", "Log and monitor all access", ["logging", "errortrack"], "Log configuration, retention ≥ 12 months (3 online), daily review evidence."),
  ("Req 11", "Test security regularly (scans, pen-tests, change detection)", ["ci", "depsaudit"], "Quarterly ASV external scans, annual pen-test reports, internal scans."),
  ("Req 12", "Policies, risk assessment, awareness, incident response", [], "Information security policy, annual risk assessment, training, IR plan tested."),
-])
+], applies="pay")
 fw("nist", "NIST CSF 2.0", "Cybersecurity Framework: Govern, Identify, Protect, Detect, Respond, Recover", [
  ("GV", "Govern: strategy, roles, policy, supply-chain risk", [], "Cybersecurity strategy, risk appetite, policies, roles & responsibilities."),
  ("ID.AM", "Asset management (hardware, software, data)", ["sbom"], "Asset & software inventory, SBOM, data inventory."),
@@ -100,7 +100,7 @@ fw("dora", "DORA (EU 2022/2554)", "Digital Operational Resilience Act - financia
  ("Art. 17-19", "ICT-related incident management, classification and reporting", ["errortrack"], "Incident classification criteria, major-incident reporting procedure to the competent authority."),
  ("Art. 24-25", "Digital operational resilience testing (incl. vulnerability scans, source-code reviews, TLPT)", ["tests", "e2e", "nocritical", "ci"], "Annual testing programme, scan/code-review reports (this audit), pen-test / TLPT results."),
  ("Art. 28-30", "ICT third-party risk and contractual provisions", ["depsaudit", "sbom"], "Register of information on ICT third-party providers, contracts with required clauses, exit strategies."),
-])
+], applies="fin")
 fw("euai", "EU AI Act", "Regulation (EU) 2024/1689 - applies when the product uses AI/LLM features", [
  ("Art. 9", "Risk management system for AI", [], "AI risk assessment, intended-purpose and risk classification (minimal/limited/high)."),
  ("Art. 10", "Data and data governance", [], "Dataset provenance, bias checks, data quality procedures."),
@@ -194,6 +194,12 @@ def evaluate(rm, findings, metrics, kinds, deps_text, sbom, which=None):
     fin = bool(set(dm.get("domains") or []) & {"fintech", "banking"})
     conf = [f for f in findings if f["status"] == "confirmed"]
     ai = bool(re.search(AI_SDK, deps_text, re.I)); web = bool(set(kinds) & {"frontend", "web"})
+    ind = {i["id"] for i in ((metrics.get("profile") or {}).get("industry") or [])}
+    fin = fin or bool(ind & {"fintech", "insurance"})
+    health = bool(ind & {"health"}) or "health" in (dm.get("domains") or [])
+    pay = bool(ind & {"fintech", "ecommerce", "marketplace"}) or bool(re.search(r"\b(stripe|adyen|braintree|paypal|mercadopago|square|authorize\.net|checkout\.com)\b", deps_text, re.I)) or fin
+    ai = ai or "ai" in ind
+    web = web or bool(set(kinds) & {"pwa"})
     def ev(tok):
         if tok.startswith("!"): return (tok[1:] not in rules, f"no {tok[1:]} findings")
         if tok.startswith("f:"): return (tok[2:] not in fams, f"no {tok[2:]} findings")
@@ -205,10 +211,12 @@ def evaluate(rm, findings, metrics, kinds, deps_text, sbom, which=None):
     out = []
     for k, f in F.items():
         if which and k not in which: continue
-        applies = f["applies"]
+        applies = None if (which and k in which) else f["applies"]
         if applies == "ai" and not ai: continue
         if applies == "web" and not web: continue
         if applies == "fin" and not fin: continue
+        if applies == "health" and not health: continue
+        if applies == "pay" and not pay: continue
         ctrls, p, g, m, na = [], 0, 0, 0, 0
         for cid, title, tokens, evid in f["controls"]:
             res = [(t, *ev(t)) for t in tokens]; known = [r for r in res if r[1] is not None]
