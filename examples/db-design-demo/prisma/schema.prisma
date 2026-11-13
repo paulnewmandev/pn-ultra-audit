@@ -1,0 +1,24 @@
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String
+  name      String?
+  phone1    String?
+  phone2    String?
+  phone3    String?
+  tags      String?
+  posts     Post[]
+}
+model Post {
+  id        Int    @id
+  authorId  Int
+  author    User   @relation(fields: [authorId], references: [id])
+  price     Float
+  createdAt DateTime @default(now())
+  @@index([authorId])
+}
+model Comment {
+  id      Int @id
+  post_id Int
+  body    String
+  created_at DateTime
+}

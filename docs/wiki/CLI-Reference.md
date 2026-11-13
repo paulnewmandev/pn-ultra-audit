@@ -23,13 +23,13 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--crawl-max CRAWL_MAX] [--psi] [--psi-key PSI_KEY] [--keywords KEYWORDS]
                       [--kw-lang KW_LANG] [--kw-country KW_COUNTRY] [--gsc-csv GSC_CSV]
                       [--competitor COMPETITOR] [--vercel-project NAME] [--vercel-team TEAM_ID]
-                      [--vercel-token-env VERCEL_TOKEN_ENV] [--no-snippets]
+                      [--vercel-token-env VERCEL_TOKEN_ENV] [--changed [REF]] [--no-snippets]
                       [--embed-source {auto,findings,none}] [--embed-budget MB] [--authorized]
                       [--fail-on {critical,high,medium,low,info}] [--brief] [--top N]
                       [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.33 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.34 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -198,6 +198,9 @@ Vercel (serverless platform: audited through project config, the live site and t
                         env var holding the Vercel token (never pass tokens on the command line)
 
 Report:
+  --changed [REF]       diff-scoped audit for pull requests: analyse only the files changed since REF
+                        (default: the merge-base with main) plus uncommitted/untracked files. Repository-
+                        wide metrics then describe that subset only
   --no-snippets         do not put ANY source code in the reports (no snippets, no embedded source):
                         findings keep file:line only. Reports otherwise contain code excerpts (secrets
                         masked) and must be treated as confidential

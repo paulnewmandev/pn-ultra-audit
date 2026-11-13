@@ -1,0 +1,31 @@
+name: "PN-Ultra-Audit"
+description: "Read-only audit of code, tests, docs, databases and API contracts. Fails the job on findings at or above a severity; scans only the pull request's changed files."
+author: "Paul Newman"
+branding: { icon: shield, color: blue }
+inputs:
+  path: { description: "Directory to audit", default: "." }
+  fail-on: { description: "Fail when a finding of this severity or higher exists (critical|high|medium|low|none)", default: "high" }
+  changed-only: { description: "Audit only files changed in the pull request (true|false)", default: "true" }
+  base-ref: { description: "Base branch for the diff (default: the pull request base, else main)", default: "" }
+  args: { description: "Extra CLI arguments", default: "" }
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with: { python-version: "3.12" }
+    - shell: bash
+      env:
+        PNUA_OFFLINE: "1"
+        IN_PATH: ${{ inputs.path }}
+        IN_FAIL: ${{ inputs.fail-on }}
+        IN_CHANGED: ${{ inputs.changed-only }}
+        IN_ARGS: ${{ inputs.args }}
+        BASE: ${{ inputs.base-ref || (github.base_ref && format('origin/{0}', github.base_ref)) || 'origin/main' }}
+        ACTION_PATH: ${{ github.action_path }}
+      run: |
+        set -euo pipefail
+        ARGS=(--color never --lang en --export pnua-report --out pnua-out)
+        if [ "$IN_CHANGED" = "true" ]; then ARGS+=(--changed "$BASE"); fi
+        if [ "$IN_FAIL" != "none" ]; then ARGS+=(--fail-on "$IN_FAIL"); fi
+        # shellcheck disable=SC2086
+        python3 "$ACTION_PATH/audit.py" "$IN_PATH" "${ARGS[@]}" $IN_ARGS

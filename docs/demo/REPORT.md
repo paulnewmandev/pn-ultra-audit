@@ -1,8 +1,8 @@
 # Audit report — vulnerable-demo
 
 - **Scope:** standard · vulnerable-demo
-- **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-10
-- **Tool:** PN-Ultra-Audit 1.0.30
+- **Mode:** local · **Ref:** `no-git` · **Date:** 2026-11-13
+- **Tool:** PN-Ultra-Audit 1.0.34
 
 ## Contents
 
@@ -36,7 +36,7 @@
 
 | critical | high | medium | low | info | Total | Needs review / validation |
 |---|---|---|---|---|---|---|
-| 7 | 29 | 32 | 20 | 1 | 89 | 23 |
+| 7 | 29 | 32 | 20 | 1 | 89 | 28 |
 
 ### Audited environment
 
@@ -101,9 +101,9 @@ xychart-beta
 ```mermaid
 pie showData
     title To review, by priority
-    "medium" : 14
+    "medium" : 16
     "high" : 8
-    "low" : 1
+    "low" : 4
 ```
 
 ### Project map: modules, size and findings
@@ -136,7 +136,7 @@ gantt
     dateFormat YYYY-MM-DD
     axisFormat %d/%m
     section Now critical/high
-    Smart contract / crypto security x5 :crit, t1, 2026-11-10, 1d
+    Smart contract / crypto security x5 :crit, t1, 2026-11-13, 1d
     Hard-coded secret / credential x4 :crit, t2, after t1, 1d
     OS Command Injection x3 :crit, t3, after t2, 1d
     Weak password hashing x2 :crit, t4, after t3, 1d
@@ -462,7 +462,7 @@ obj = json.loads(request.data)   # + schema validation; yaml.safe_load(...)
 
 - [ ] `SEC-004`  — tick when fixed, then re-run the audit
 
-### 6. Database schema issue  · **high**  · 13 confirmed · 0 to review
+### 6. Database schema issue  · **high**  · 13 confirmed · 5 to review
 
 **What it is.** Schema design problems that harm integrity, performance or security.
 
@@ -485,6 +485,9 @@ obj = json.loads(request.data)   # + schema validation; yaml.safe_load(...)
 | low | `app.db:1` | Foreign key `orders.user_id` without index | 10 min |
 | low | `db/schema.sql:2` | Foreign key `orders.user_id` without index | 10 min |
 | low | `db/schema.sql:2` | Table `orders` uses MyISAM | 20 min |
+| review/medium | `app.db:1` | `users.email` is an identifier but has no UNIQUE constraint | 30 min |
+| review/low | `app.db:1` | Foreign key `orders.user_id` has no explicit ON DELETE policy | 15 min |
+| … | … and 3 more in the detail | | |
 
 **Steps:**
 
@@ -2515,7 +2518,7 @@ web/index.html(1)
 ```
 
 <a id="revision"></a>
-## Needs review / validation (23)
+## Needs review / validation (28)
 
 #### SEO-012 · high · Client-side-rendered SPA without SSR/prerender (crawlers see an empty shell)
 
@@ -2660,6 +2663,17 @@ COPY . /app
 
 **Review reason:** heuristic match - review context
 
+#### BUG-012 · medium · `users.email` is an identifier but has no UNIQUE constraint
+
+- **Location:** `app.db:1`  ·  **Type:** bug/database  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+users.email (no unique index)
+```
+
+**Review reason:** Heuristic by column name: ignore if duplicates are valid here (e.g. per-tenant uniqueness).
+
 #### PER-003 · medium · Query inside a loop (possible N+1)
 
 - **Location:** `backend/app.py:59`  ·  **Type:** performance/n+1  ·  **CWE:** CWE-1073  ·  **Effort:** 30 min
@@ -2696,6 +2710,17 @@ app.get('/hello', (req, res) => { res.send('<h1>Hello ' + req.query.name + '</h1
 ```
 
 **Review reason:** heuristic match - review context
+
+#### BUG-013 · medium · `users.email` is an identifier but has no UNIQUE constraint
+
+- **Location:** `db/schema.sql:1`  ·  **Type:** bug/database  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+users.email (no unique index)
+```
+
+**Review reason:** Heuristic by column name: ignore if duplicates are valid here (e.g. per-tenant uniqueness).
 
 #### HOT-014 · medium · Token/password in insecure local storage
 
@@ -2782,6 +2807,17 @@ no axe-core, jest-axe, @axe-core/playwright, pa11y or eslint a11y plugin
 
 **Review reason:** heuristic match - review context
 
+#### COD-010 · low · Foreign key `orders.user_id` has no explicit ON DELETE policy
+
+- **Location:** `app.db:1`  ·  **Type:** code_smell/database  ·  **Effort:** 15 min
+
+**Evidence:**
+```
+orders.user_id -> users
+```
+
+**Review reason:** Heuristic: the default may be intentional.
+
 #### HOT-020 · low · Outbound HTTP call without timeout
 
 - **Location:** `backend/app.py:31`  ·  **Type:** security_hotspot/resource-exhaustion  ·  **CWE:** CWE-400  ·  **OWASP:** A04:2021  ·  **Effort:** 5 min
@@ -2793,6 +2829,28 @@ url = request.args.get("url")
 ```
 
 **Review reason:** heuristic match - review context
+
+#### COD-011 · low · `users` has no created/updated timestamps
+
+- **Location:** `db/schema.sql:1`  ·  **Type:** code_smell/database  ·  **Effort:** 30 min
+
+**Evidence:**
+```
+users(id, email, password, price…)
+```
+
+**Review reason:** Skip for static lookup tables.
+
+#### COD-012 · low · Foreign key `orders.user_id` has no explicit ON DELETE policy
+
+- **Location:** `db/schema.sql:2`  ·  **Type:** code_smell/database  ·  **Effort:** 15 min
+
+**Evidence:**
+```
+orders.user_id -> users
+```
+
+**Review reason:** Heuristic: the default may be intentional.
 
 ## OWASP coverage
 
@@ -2842,7 +2900,7 @@ url = request.args.get("url")
 | Metric | Value |
 |---|---|
 | tool | PN-Ultra-Audit |
-| tool_version | 1.0.30 |
+| tool_version | 1.0.34 |
 | strictness | standard |
 | duplication.percent | 0.0 |
 | duplication.duplicated_lines | 0 |
@@ -3074,5 +3132,6 @@ xychart-beta
 
 This report covers only what is listed under “Coverage”. No findings does not prove absence of defects: automatic rules are heuristics (regex + nearby variable tracking), not full data-flow analysis. “To review” items depend on context or on facts outside the repository. Verify each fix with its test before deploying.
 
+- db-fixes.sql (suggested indexes/constraints to REVIEW; never executed by the tool) and db-schema.mmd (Mermaid ER diagram) were generated.
 - repo-fixes.sh was generated (guided repository clean-up; the tool never runs it): `bash repo-fixes.sh list`.
-- fix-plan.md was generated: 112 findings in 99 groups and 5 phases (phase 0 comes first).
+- fix-plan.md was generated: 117 findings in 102 groups and 5 phases (phase 0 comes first).

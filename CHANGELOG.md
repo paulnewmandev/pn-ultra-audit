@@ -3,6 +3,19 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.34] - 2026-11-13
+
+Ideas taken from reviewing two open-source projects (only what fits a read-only static audit; nothing was copied).
+
+### Added
+- **API contract audit** (`engine/openapi.py`): reads OpenAPI/Swagger (JSON and YAML, with a built-in YAML subset reader) and Postman collections from the repository and reports the attack surface that the contract itself reveals: state-changing operations without authentication, privileged fields accepted from clients (mass assignment, `$ref` resolved), API keys/tokens in the query string, plain-HTTP servers, Basic auth, unbounded list endpoints, no rate-limit contract and hard-coded tokens in Postman collections (masked). Public login/health/webhook paths are not flagged. New demo `examples/api-contract-demo`, `tests/test_apicontract.py`.
+- **`--changed [REF]`**: diff-scoped audits for pull requests (files changed since REF, default the merge-base with main, plus uncommitted and untracked files). The report states that repository-wide metrics describe that subset.
+- **Reusable GitHub Action** (`action.yml`): read-only, offline, scans only the PR's changed files and fails at the chosen severity.
+- Demos `examples/db-design-demo` and `examples/api-contract-demo`; new README screenshots for the database design audit and the API contract audit.
+
+### Not adopted (on purpose)
+- Dynamic exploitation / autonomous attack agents (not read-only) and people-profiling OSINT (conflicts with the privacy rule). A CVSS vector was not added: the findings are heuristic and a precise-looking score would be misleading.
+
 ## [1.0.33] - 2026-11-13
 
 ### Added

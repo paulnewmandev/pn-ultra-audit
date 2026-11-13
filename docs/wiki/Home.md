@@ -1,6 +1,6 @@
 # PN-Ultra-Audit wiki
 
-**One read-only command that audits code, tests, docs, databases, servers/VPS, Vercel, PWA, SEO, crypto, SaaS/fintech and audit-readiness - live in your terminal, delivered as a dashboard.** Version 1.0.33.
+**One read-only command that audits code, tests, docs, databases, servers/VPS, Vercel, PWA, SEO, crypto, SaaS/fintech and audit-readiness - live in your terminal, delivered as a dashboard.** Version 1.0.34.
 
 ![Dashboard](https://raw.githubusercontent.com/paulnewmandev/pn-ultra-audit/main/docs/img/dash-overview-dark.png)
 

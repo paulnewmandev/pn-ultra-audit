@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import dbdesign, sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, advisories as advmod, vulndb, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import dbdesign, openapi, sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, advisories as advmod, vulndb, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.33"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.34"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -192,6 +192,16 @@ def add_repo_auditor(plan, only, skip, root):
     return plan
 
 
+def _scope_changed(res, root, a, notes, N):
+    """--changed: keep only the changed files of a scanner.discover() result."""
+    if getattr(a, "changed", None) is None or not res or not root: return res
+    ch, used = scanner.changed_files(root, a.changed or None)
+    if ch is None: raise SystemExit("ERROR: --changed needs a git work tree: " + used)
+    files = [f for f in res[0] if f[0] in ch]
+    notes.append(N(f"Auditoría limitada a los cambios desde {used[:12]}: {len(files)} de {len(res[0])} archivos. Las métricas globales (docs, tests, arquitectura) describen solo ese subconjunto.", f"Diff-scoped audit: {len(files)} of {len(res[0])} files changed since {used[:12]}. Repository-wide metrics (docs, tests, architecture) describe that subset only."))
+    return (files,) + tuple(res[1:])
+
+
 def _rmtree(p):
     """rmtree that also removes read-only files (Windows .git objects)."""
     import stat
@@ -277,6 +287,7 @@ def main(argv=None):
     g.add_argument("--vercel-project", metavar="NAME", help="audit project settings and env-var metadata via the Vercel API (read-only; token from env VERCEL_TOKEN; needs --authorized)")
     g.add_argument("--vercel-team", metavar="TEAM_ID", help="team id/slug that owns the project"); g.add_argument("--vercel-token-env", default="VERCEL_TOKEN", help="env var holding the Vercel token (never pass tokens on the command line)")
     g = ap.add_argument_group("Report")
+    g.add_argument("--changed", nargs="?", const="", default=None, metavar="REF", help="diff-scoped audit for pull requests: analyse only the files changed since REF (default: the merge-base with main) plus uncommitted/untracked files. Repository-wide metrics then describe that subset only")
     g.add_argument("--no-snippets", action="store_true", help="do not put ANY source code in the reports (no snippets, no embedded source): findings keep file:line only. Reports otherwise contain code excerpts (secrets masked) and must be treated as confidential")
     g.add_argument("--embed-source", default="auto", choices=["auto", "findings", "none"], help="source code embedded in report.html for the read-only code viewer: auto (all text files within the budget, files with findings first) | findings (only files with findings) | none. Secrets are masked; .env/keys/state files are never embedded")
     g.add_argument("--embed-budget", type=float, default=5.0, metavar="MB", help="size budget for source embedded in report.html (default 5 MB). Files over it are NOT dropped: they go to sources/chunk-*.js next to the report and load on demand in the viewer")
@@ -363,7 +374,7 @@ def main(argv=None):
     if a.level == "beginner" and not given: a.strictness = "standard"
     prof = docs.PROFILES[a.strictness]; strict = a.strictness == "strict"
     ALL_AUD = set(detect.AUDITORS)
-    pre = None; detected = None
+    pre = None; detected = None; scope_notes = []
     def deps_of(fl):
         t = ""
         for rel, ab, e, sz in detect.product_files(fl):
@@ -373,7 +384,7 @@ def main(argv=None):
         return t
     try:
         if local_root:
-            pre = scanner.discover(local_root, a.exclude)
+            pre = _scope_changed(scanner.discover(local_root, a.exclude), local_root, a, scope_notes, N)
             detected = detect.detect(pre[0], deps_of(pre[0]))
             try: detected["profile"] = profilemod.analyze(local_root, pre[0], deps_of(pre[0]), detected, a.lang)
             except Exception: detected["profile"] = None
@@ -507,7 +518,7 @@ def main(argv=None):
         if gs: metrics["git"] = gs
     if scan_local and scan_root:
         begin("discover")
-        files, tracked, skipped = (pre if (pre and scan_root == local_root) else scanner.discover(scan_root, a.exclude)); ok_files = files
+        files, tracked, skipped = (pre if (pre and scan_root == local_root) else _scope_changed(scanner.discover(scan_root, a.exclude), scan_root, a, scope_notes, N)); ok_files = files; notes.extend(scope_notes)
         if detected is None:
             detected = detect.detect(files, deps_of(files))
             try: detected["profile"] = profilemod.analyze(scan_root, files, deps_of(files), detected, a.lang)
@@ -643,6 +654,12 @@ def main(argv=None):
         fs, dbd_sum, db_schema = dbdesign.audit_project(ok_files, lambda p: open(p, errors="ignore", encoding="utf-8").read())
         fs = _dedupe(fs); raw += fs; stream(fs)
     except Exception as e: notes.append(f"database design audit skipped: {type(e).__name__}: {str(e)[:80]}")
+    api_sum = dict(specs=[], operations=0, public=0, mutating=0, notes=[])
+    try:
+        fs, api_sum = openapi.audit_project(ok_files, lambda p: open(p, errors="ignore", encoding="utf-8").read())
+        raw += fs; stream(fs)
+        for n_ in api_sum["notes"]: notes.append("API contract: " + n_)
+    except Exception as e: notes.append(f"API contract audit skipped: {type(e).__name__}: {str(e)[:80]}")
     for spec in a.db:
         ui.note(re.sub(r"//([^:@/]+):[^@]*@", "//", spec)[:44] + "…")
         try:
@@ -661,7 +678,7 @@ def main(argv=None):
         except Exception as e: notes.append(f"design audit of {shown} skipped: {type(e).__name__}")
         raw += fs; stream(fs); dbnotes.append(f"{shown}: {msg}"); L(f"live database {shown}", "audit-security", "covered" if (fs or msg.endswith(("OK", "tables")) or "table" in msg) else "blocked", msg)
     metrics["databases"] = dict(sql_files=len(sql_files), live=dbnotes)
-    metrics["dbdesign"] = dbd_sum
+    metrics["dbdesign"] = dbd_sum; metrics["api"] = api_sum
     if not a.db: L("live database checks", "audit-security", "deferred", "no --db given")
     ui.done(f"{len(sql_files)} .sql · {len(a.db)} " + N("conexiones", "connections") + (" · " + "; ".join(dbnotes)[:100] if dbnotes else ""))
     if a.aws_rds:

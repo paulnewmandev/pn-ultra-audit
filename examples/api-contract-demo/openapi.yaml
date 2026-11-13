@@ -1,0 +1,49 @@
+openapi: 3.0.3
+info: {title: Shop, version: "1"}
+servers:
+  - url: http://api.shop.example.com
+components:
+  securitySchemes:
+    key:
+      type: apiKey
+      in: query
+      name: api_key
+    basic:
+      type: http
+      scheme: basic
+paths:
+  /users:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {type: object}
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: {type: string}
+                role: {type: string}
+                is_admin: {type: boolean}
+      responses:
+        "201": {description: ok}
+  /login:
+    post:
+      security: []
+      responses:
+        "200": {description: ok}
+  /orders/{id}:
+    delete:
+      parameters:
+        - name: token
+          in: query
+          schema: {type: string}
+      security: []
+      responses:
+        "204": {description: ok}

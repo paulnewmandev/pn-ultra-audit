@@ -639,6 +639,13 @@
               }
             },
             {
+              "id": "DBD-NOT-UNIQUE",
+              "name": "database",
+              "shortDescription": {
+                "text": "`users.email` is an identifier but has no UNIQUE constraint"
+              }
+            },
+            {
               "id": "PERF-NPLUS1",
               "name": "n+1",
               "shortDescription": {
@@ -695,10 +702,24 @@
               }
             },
             {
+              "id": "DBD-FK-NO-ONDELETE",
+              "name": "database",
+              "shortDescription": {
+                "text": "Foreign key `orders.user_id` has no explicit ON DELETE policy"
+              }
+            },
+            {
               "id": "DOS-NO-TIMEOUT",
               "name": "resource-exhaustion",
               "shortDescription": {
                 "text": "Outbound HTTP call without timeout"
+              }
+            },
+            {
+              "id": "DBD-NO-TIMESTAMPS",
+              "name": "database",
+              "shortDescription": {
+                "text": "`users` has no created/updated timestamps"
               }
             }
           ]
@@ -3976,8 +3997,38 @@
           }
         },
         {
-          "ruleId": "PERF-NPLUS1",
+          "ruleId": "DBD-NOT-UNIQUE",
           "ruleIndex": 90,
+          "level": "note",
+          "message": {
+            "text": "`users.email` is an identifier but has no UNIQUE constraint \u2014 CREATE UNIQUE INDEX uq_users_email ON users(email);  -- resolve duplicates first"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DBD-NOT-UNIQUE:app.db:16f4f55149"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-012",
+            "type": "bug",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "PERF-NPLUS1",
+          "ruleIndex": 91,
           "level": "note",
           "message": {
             "text": "Query inside a loop (possible N+1) \u2014 Eager-load/batch: `with('rel')`, `select_related/prefetch_related`, `include`, `JOIN`, or `WHERE id IN (...)`.; Verify with query logging; add an assertion on query count in a test."
@@ -4009,7 +4060,7 @@
         },
         {
           "ruleId": "CFG-DEBUG",
-          "ruleIndex": 91,
+          "ruleIndex": 92,
           "level": "note",
           "message": {
             "text": "Debug mode enabled \u2014 Drive from environment: `DEBUG=False`/`APP_DEBUG=false`/`NODE_ENV=production` in production.; Ensure the dev value is not the default in committed prod config."
@@ -4044,7 +4095,7 @@
         },
         {
           "ruleId": "CFG-CORS",
-          "ruleIndex": 92,
+          "ruleIndex": 93,
           "level": "note",
           "message": {
             "text": "Permissive CORS (*) \u2014 Replace `*` with an explicit allowlist of origins.; Never combine reflected-Origin with `Allow-Credentials: true`."
@@ -4078,8 +4129,38 @@
           }
         },
         {
+          "ruleId": "DBD-NOT-UNIQUE",
+          "ruleIndex": 90,
+          "level": "note",
+          "message": {
+            "text": "`users.email` is an identifier but has no UNIQUE constraint \u2014 CREATE UNIQUE INDEX uq_users_email ON users(email);  -- resolve duplicates first"
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DBD-NOT-UNIQUE:db/schema.sql:16f4f55149"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "BUG-013",
+            "type": "bug",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "MOB-STORAGE",
-          "ruleIndex": 93,
+          "ruleIndex": 94,
           "level": "note",
           "message": {
             "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4113,7 +4194,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-MANIFEST",
-          "ruleIndex": 94,
+          "ruleIndex": 95,
           "level": "note",
           "message": {
             "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4148,7 +4229,7 @@
         },
         {
           "ruleId": "MOB-ANDROID-MANIFEST",
-          "ruleIndex": 94,
+          "ruleIndex": 95,
           "level": "note",
           "message": {
             "text": "Android: backup / exported component \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4183,7 +4264,7 @@
         },
         {
           "ruleId": "MOB-WEBVIEW",
-          "ruleIndex": 95,
+          "ruleIndex": 96,
           "level": "note",
           "message": {
             "text": "WebView risk (JS enabled / bridge / file access) \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4218,7 +4299,7 @@
         },
         {
           "ruleId": "MOB-STORAGE",
-          "ruleIndex": 93,
+          "ruleIndex": 94,
           "level": "note",
           "message": {
             "text": "Token/password in insecure local storage \u2014 Release builds: `android:debuggable=false`, `allowBackup=false` (or backup rules), `usesCleartextTraffic=false`.; Set `android:exported=\"false\"` unless needed; protect exported components with permissions."
@@ -4252,7 +4333,7 @@
         },
         {
           "ruleId": "QA-FE-NO-A11Y",
-          "ruleIndex": 96,
+          "ruleIndex": 97,
           "level": "note",
           "message": {
             "text": "No automated accessibility testing (axe / jsx-a11y / Lighthouse) \u2014 Add eslint-plugin-jsx-a11y (or vuejs-accessibility) and an axe scan per key page in E2E"
@@ -4282,7 +4363,7 @@
         },
         {
           "ruleId": "A11Y-INPUT-LABEL",
-          "ruleIndex": 97,
+          "ruleIndex": 98,
           "level": "note",
           "message": {
             "text": "<input> without id/aria-label (cannot have an associated label) \u2014 Images: meaningful `alt`, or `alt=\"\"` if decorative.; Use real controls: <button>, <a href>, <input>; if a div must be clickable add role, tabindex=\"0\" and Enter/Space handlers."
@@ -4311,8 +4392,38 @@
           }
         },
         {
+          "ruleId": "DBD-FK-NO-ONDELETE",
+          "ruleIndex": 99,
+          "level": "note",
+          "message": {
+            "text": "Foreign key `orders.user_id` has no explicit ON DELETE policy \u2014 Decide per relation: ON DELETE CASCADE (owned child), SET NULL (optional link) or RESTRICT (protected), and state it explicitly."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DBD-FK-NO-ONDELETE:app.db:e80b9c4ae3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "app.db"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-010",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
           "ruleId": "DOS-NO-TIMEOUT",
-          "ruleIndex": 98,
+          "ruleIndex": 100,
           "level": "note",
           "message": {
             "text": "Outbound HTTP call without timeout \u2014 Put rate limiting at the edge (nginx `limit_req`, CDN/WAF, API gateway) AND in the app for login, signup, reset, search and expensive endpoints.; Clamp every client-supplied size: `limit = min(int(limit), 100)`, max body size, max upload size, max array length, max GraphQL depth."
@@ -4342,6 +4453,66 @@
             "owasp": [
               "A04:2021"
             ]
+          }
+        },
+        {
+          "ruleId": "DBD-NO-TIMESTAMPS",
+          "ruleIndex": 101,
+          "level": "note",
+          "message": {
+            "text": "`users` has no created/updated timestamps \u2014 Add `created_at` / `updated_at` (default now(), updated by trigger or ORM)."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DBD-NO-TIMESTAMPS:db/schema.sql:a77aef68fd"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-011",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
+          }
+        },
+        {
+          "ruleId": "DBD-FK-NO-ONDELETE",
+          "ruleIndex": 99,
+          "level": "note",
+          "message": {
+            "text": "Foreign key `orders.user_id` has no explicit ON DELETE policy \u2014 Decide per relation: ON DELETE CASCADE (owned child), SET NULL (optional link) or RESTRICT (protected), and state it explicitly."
+          },
+          "partialFingerprints": {
+            "auditFingerprint/v1": "DBD-FK-NO-ONDELETE:db/schema.sql:e80b9c4ae3"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "db/schema.sql"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "properties": {
+            "id": "COD-012",
+            "type": "code_smell",
+            "status": "needs_validation",
+            "cwe": [],
+            "owasp": []
           }
         }
       ]

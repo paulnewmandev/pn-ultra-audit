@@ -59,6 +59,29 @@ def git_files(root):
         return None, None
 
 
+def changed_files(root, ref=None):
+    """Files changed since `ref` (default: merge-base with origin/main|main|master, else HEAD~1) plus uncommitted and untracked ones.
+    Returns (set_of_relative_paths, ref_used) or (None, reason) when root is not a git work tree."""
+    def git(*a):
+        try:
+            r = subprocess.run(["git", "-C", root, "-c", "core.quotepath=off"] + list(a), capture_output=True, text=True, timeout=60)
+            return r.returncode, r.stdout
+        except (OSError, subprocess.TimeoutExpired): return 1, ""
+    rc, _ = git("rev-parse", "--is-inside-work-tree")
+    if rc: return None, "not a git work tree"
+    used = ref
+    if not used:
+        for base in ("origin/main", "origin/master", "main", "master"):
+            rc, out = git("merge-base", "HEAD", base)
+            if rc == 0 and out.strip() and out.strip() != git("rev-parse", "HEAD")[1].strip(): used = out.strip(); break
+        used = used or ("HEAD~1" if git("rev-parse", "--verify", "-q", "HEAD~1")[0] == 0 else "HEAD")
+    rc, out = git("diff", "--name-only", "--diff-filter=ACMR", used)
+    if rc: return None, f"unknown ref `{used}`"
+    ch = set(x for x in out.split("\n") if x)
+    ch |= set(x for x in git("ls-files", "-o", "--exclude-standard")[1].split("\n") if x)
+    return ch, used
+
+
 def discover(root, excludes=(), max_bytes=1_500_000):
     files, skipped = [], Counter()
     listed, tracked = git_files(root)

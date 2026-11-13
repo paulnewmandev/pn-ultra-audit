@@ -340,6 +340,10 @@ AUTORIZO una auditoría de solo lectura de mi servidor. Instala https://github.c
 <td width="50%" valign="top"><img src="docs/img/terminal-brief.png" alt="Brief mode" width="100%"><br><sub><b>--brief</b> - a ~40-line summary for AI assistants (saves tokens)</sub></td>
 <td width="50%" valign="top"><img src="docs/img/terminal-server-fixes.png" alt="Server fix script" width="100%"><br><sub><b>VPS</b> - <code>server-fixes.sh</code> generated from an <code>--ssh</code> audit (sample)</sub></td>
 </tr>
+<tr>
+<td width="50%" valign="top"><img src="docs/img/terminal-dbdesign.png" alt="Database design audit" width="100%"><br><sub><b>Database design</b> - relations, normalization, indexes, types, migrations (<code>db-schema.mmd</code> + review-first <code>db-fixes.sql</code>)</sub></td>
+<td width="50%" valign="top"><img src="docs/img/terminal-api.png" alt="API contract audit" width="100%"><br><sub><b>API contract</b> - OpenAPI/Swagger/Postman: no auth, mass assignment, secrets in URLs, hard-coded tokens</sub></td>
+</tr>
 </table>
 </details>
 
@@ -442,6 +446,7 @@ A label needs several independent signals (dependencies, folders, README, databa
 | **aitrace** | project finish: comments/docs that reveal AI authoring, **agent & spec files** (CLAUDE.md, AGENTS.md, `.cursor/`, `openspec/`...), git `Co-Authored-By` trailers, provenance metadata (C2PA, IPTC, Midjourney/SD, PDF producer), leftover truncation markers; tells you how to remove each and writes `cleanup-fixes.sh` (backups, safe by default). It never tries to defeat statistical watermarks |
 | **hardcode** | **unfinished work:** TODO/FIXME/HACK/XXX inside real comments (age from `git blame`), **security TODOs** (auth, validation, encryption, CSRF, rate limit postponed), "remove before prod" markers, unimplemented stubs, and a ready-to-paste `todo-backlog.md`; **hardcoded values:** environment URLs at call sites (localhost, staging), IPs as hosts, machine-specific home paths, personal emails, identity checks (`user.id == 1`), business rates inside functions - shown together with hardcoded credentials from the security scanner. Env-based defaults (`process.env.X || 'http://localhost'`) are not reported |
 | **advisories** | **version-aware vulnerabilities**: detects the language runtime (PHP, Node.js, Python, Ruby, Go, Java, .NET), the framework (Laravel, Symfony, Django, Rails, Spring Boot, React, Angular, Next.js, Nuxt, WordPress...) and every locked dependency with its exact version, and matches them against the vulnerability database: **known CVEs for that version**, **known malicious packages** (OpenSSF/OSV), **end-of-life** runtimes/frameworks, CVEs of the exact runtime version and **recent actively exploited bugs of your stack** (CISA KEV). Each finding carries the fixed version and the exact upgrade command |
+| **api contract** | OpenAPI / Swagger (JSON or YAML, `$ref` resolved) and Postman files, read from the repository instead of crawling a live API: operations without authentication (public login/health/webhooks excluded), privileged fields a client can set (mass assignment), API keys / tokens in the query string, plain-HTTP servers, Basic auth, unbounded lists, no rate-limit contract, hard-coded tokens in Postman collections (masked). Always on when a spec exists; `API-*` rules |
 | **vercel** | `vercel.json`, Next.js, crons without `CRON_SECRET`, API routes without auth, secret-looking `NEXT_PUBLIC_*`, CVE-2025-29927, headers, source maps; live site; project settings via the read-only API (`--vercel-project`) |
 | **servers** | `--ssh` on any VPS: **provider detection** (AWS, Azure, Google Cloud, DigitalOcean, Hostinger, Hetzner, Vultr, Linode, OVH, Oracle…) + OS/EOL/patches, `sshd`, users, firewall, kernel/sysctl, nginx, **Apache**, PHP, **Docker & containers**, **Kubernetes**, **Redis**, **Kafka/ZooKeeper**, MySQL/PostgreSQL/MongoDB/Elasticsearch/memcached/RabbitMQ, mail, cron, backups, certificates, disk - and a reviewable **`server-fixes.sh`** |
 
@@ -549,6 +554,22 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 
 **Ratings** (SonarQube-style): Reliability (bugs), Security (vulnerabilities), Maintainability (technical-debt ratio) A-E; **Quality Gate**; **ratchet** with `--baseline auto` so legacy debt doesn't block you - only *new* findings fail CI (`--fail-on high`).
 
+### Pull requests: audit only what changed
+
+```bash
+python3 audit.py . --changed                  # files changed vs. the merge-base with main (+ uncommitted/untracked)
+python3 audit.py . --changed origin/develop   # ... or vs. any ref
+```
+
+Or use the reusable GitHub Action in this repository (read-only, no network, fails the job at the severity you choose, scans only the pull request's files):
+
+```yaml
+- uses: actions/checkout@v4
+  with: { fetch-depth: 0 }
+- uses: paulnewmandev/pn-ultra-audit@main
+  with: { fail-on: high, changed-only: "true" }
+```
+
 ### CI example
 ```yaml
 - run: python3 pn-ultra-audit/audit.py . --baseline auto --fail-on high --export docs --out audit-output --color never
@@ -576,6 +597,7 @@ Details: [docs/COMPLIANCE.md](docs/COMPLIANCE.md).
 | `--lang auto\|es\|en\|zh` | report/UI language (auto = system language) |
 | `--show ID` `--kb QUERY` `--mcp` `--run DIR` `--verify-corpus` | fix cards, KB search, MCP server, fix corpus |
 | `--install-agent TOOL` `--agent-scope` `--agent-dir` `--force` | AI assistants |
+| `--changed [REF]` | diff-scoped audit (pull requests): only the files changed since REF |
 | `--fail-on SEV` `--verbose` `--quiet` `--color` | CI & output |
 
 Full reference: [docs/CLI.md](docs/CLI.md) · rule catalog: [docs/RULES.md](docs/RULES.md).
@@ -653,7 +675,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.33
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.34
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Runs on Linux, macOS, Windows, FreeBSD and other Unix systems (Python 3.9+, stdlib only; CI covers Ubuntu, macOS and Windows). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -674,4 +696,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 108 remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v1.0.33</sub></div>
+<div align="center"><sub>110 rules · 108 remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v1.0.34</sub></div>
