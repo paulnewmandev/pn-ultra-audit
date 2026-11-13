@@ -23,12 +23,13 @@ usage: pn-ultra-audit [-h] [--out OUT] [--lang {auto,ar,en,es,fr,hi,it,ja,pt,zh}
                       [--crawl-max CRAWL_MAX] [--psi] [--psi-key PSI_KEY] [--keywords KEYWORDS]
                       [--kw-lang KW_LANG] [--kw-country KW_COUNTRY] [--gsc-csv GSC_CSV]
                       [--competitor COMPETITOR] [--vercel-project NAME] [--vercel-team TEAM_ID]
-                      [--vercel-token-env VERCEL_TOKEN_ENV] [--embed-source {auto,findings,none}]
-                      [--embed-budget MB] [--authorized] [--fail-on {critical,high,medium,low,info}]
-                      [--brief] [--top N] [--color {auto,always,never}] [--verbose] [--quiet] [--version]
+                      [--vercel-token-env VERCEL_TOKEN_ENV] [--no-snippets]
+                      [--embed-source {auto,findings,none}] [--embed-budget MB] [--authorized]
+                      [--fail-on {critical,high,medium,low,info}] [--brief] [--top N]
+                      [--color {auto,always,never}] [--verbose] [--quiet] [--version]
                       [path]
 
-PN-Ultra-Audit 1.0.31 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
+PN-Ultra-Audit 1.0.32 - read-only audit of code, tests, docs, architecture, databases, servers and SEO/SEM.
 
 positional arguments:
   path                  project directory (default .; omit when auditing only a remote server / URL)
@@ -104,8 +105,9 @@ Fix retrieval (offline; token-saving for humans and AI assistants):
   --online              allow read-only LIVE advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date) when
                         no local vulnerability database exists; only package names and versions are sent.
                         Default: no network at all (use --update-db once, then audit offline)
-  --offline             never use the network (this is already the default; it also overrides --online /
-                        PNUA_ONLINE=1). Also: PNUA_OFFLINE=1
+  --offline             never use the network (this is already the default; no request of any kind is made;
+                        options that need the network, such as --git/--url/--ssh/--online/--update-db, are
+                        refused). Also: PNUA_OFFLINE=1
   --triage              print the triage worklist of the latest run: every finding that needs a human/AI
                         decision, grouped by rule with ONE protocol (what to check, when it is real, when it
                         is a false positive, how to suppress it) - read this before fixing or reporting
@@ -196,6 +198,9 @@ Vercel (serverless platform: audited through project config, the live site and t
                         env var holding the Vercel token (never pass tokens on the command line)
 
 Report:
+  --no-snippets         do not put ANY source code in the reports (no snippets, no embedded source):
+                        findings keep file:line only. Reports otherwise contain code excerpts (secrets
+                        masked) and must be treated as confidential
   --embed-source {auto,findings,none}
                         source code embedded in report.html for the read-only code viewer: auto (all text
                         files within the budget, files with findings first) | findings (only files with

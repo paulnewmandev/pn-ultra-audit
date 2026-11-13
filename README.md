@@ -645,13 +645,15 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 - Remote actions need **`--authorized`**: you confirm you own the systems or may assess them. SSH/SFTP use keys or agent (never passwords on the command line); FTP uses an env var and refuses clear-text by default.
 - **Secrets are scrubbed** from evidence and snippets; DB password checks return aggregates only; reports never contain your absolute local paths (guarded by a test).
 - **No network by default.** An audit sends nothing anywhere. Network is used only when you ask for it: `--update-db` (downloads public vulnerability data, once), `--online` (live advisory lookups: only package names and versions), `--url`/`--psi`/`--crawl` (SEO), `--vercel-project`, `--git`, `--ssh`/`--ftp`. `--offline` forbids it all.
+- **Precise safety statement.** The audited project is never modified by the audit itself (external tools write their temporary output outside it). `--run-tests` is the one option that EXECUTES the audited project's own test command, so use it only on code you trust. Git tokens are sent only to the exact host they belong to (`github.com`, `gitlab.com`, ...) and never to a redirect target; a self-hosted server needs `--git-token-env`. `--offline` refuses every option that needs the network. External tools that reach the network (`semgrep` with remote rules, `npm audit`, `pip-audit`, `composer audit`) are skipped unless you pass `--online`.
+- **Reports are confidential.** They contain code excerpts (secrets are masked), file paths and the embedded read-only source viewer. Do not publish them. `--no-snippets` produces reports with file:line only, no source code at all.
 - No telemetry. The dashboard is a single offline file; PageSpeed (`--psi`), keyword ideas and live crawling are opt-in and send only the URL/seed you give.
 
 ## Install
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.31
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.32
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Runs on Linux, macOS, Windows, FreeBSD and other Unix systems (Python 3.9+, stdlib only; CI covers Ubuntu, macOS and Windows). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -672,4 +674,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 108 remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v1.0.31</sub></div>
+<div align="center"><sub>110 rules · 108 remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v1.0.32</sub></div>

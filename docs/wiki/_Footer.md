@@ -1,1 +1,1 @@
-PN-Ultra-Audit 1.0.31 - GPL-3.0 - [Repository](https://github.com/paulnewmandev/pn-ultra-audit) - [Changelog](https://github.com/paulnewmandev/pn-ultra-audit/blob/main/CHANGELOG.md) - [Report an issue](https://github.com/paulnewmandev/pn-ultra-audit/issues)
+PN-Ultra-Audit 1.0.32 - GPL-3.0 - [Repository](https://github.com/paulnewmandev/pn-ultra-audit) - [Changelog](https://github.com/paulnewmandev/pn-ultra-audit/blob/main/CHANGELOG.md) - [Report an issue](https://github.com/paulnewmandev/pn-ultra-audit/issues)

@@ -29,6 +29,13 @@ def available():
 def run_external(root, ui_note, timeout=240, semgrep_config="auto"):
     out, ran, notes = [], [], []
     have = available()
+    net = os.environ.get("PNUA_OFFLINE") != "1" and os.environ.get("PNUA_ONLINE") == "1"   # no network unless --online
+    if not net:
+        # these tools contact the network (rule download / advisory lookup): skipped by default
+        skipped = [t for t in ("npm", "pip-audit", "composer") if have[t]]
+        have = dict(have, npm=False, **{"pip-audit": False, "composer": False})
+        if have["semgrep"] and semgrep_config == "auto": have["semgrep"] = False; skipped.append("semgrep(auto rules)")
+        if skipped: notes.append("skipped (they use the network; add --online, or give semgrep a local --semgrep-config): " + ", ".join(skipped))
     if have["semgrep"]:
         ui_note("semgrep…")
         rc, so, se = _run(["semgrep", "--config", semgrep_config, "--json", "--quiet", "--metrics=off", "--timeout", "20", "."], root, timeout)
@@ -45,7 +52,8 @@ def run_external(root, ui_note, timeout=240, semgrep_config="auto"):
             notes.append(f"semgrep produced no JSON (rc={rc}): {se.strip()[:120]}")
     if have["gitleaks"]:
         ui_note("gitleaks…")
-        rep = os.path.join(root, ".audit-gitleaks.json")
+        import tempfile
+        _td = tempfile.mkdtemp(prefix="pnua-gl-"); rep = os.path.join(_td, "gitleaks.json")   # outside the audited project
         rc, so, se = _run(["gitleaks", "detect", "--no-banner", "--no-git", "-s", ".", "-f", "json", "-r", rep, "--redact"], root, timeout)
         try:
             for r in json.load(open(rep, encoding="utf-8")) or []:
@@ -55,8 +63,7 @@ def run_external(root, ui_note, timeout=240, semgrep_config="auto"):
         except (OSError, ValueError):
             pass
         finally:
-            try: os.remove(rep)
-            except OSError: pass
+            shutil.rmtree(_td, ignore_errors=True)
     if have["npm"] and os.path.exists(os.path.join(root, "package-lock.json")):
         ui_note("npm audit…")
         rc, so, se = _run(["npm", "audit", "--json", "--omit=dev"], root, timeout)

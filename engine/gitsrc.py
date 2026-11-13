@@ -42,7 +42,8 @@ def _token_for(url, token_env):
     host = re.sub(r"^.*?://([^/@]+@)?([^/:]+).*$", r"\2", url) if "://" in url else ""
     if token_env and os.environ.get(token_env): return os.environ[token_env], HOST_USER.get(host, "x-access-token")
     for k, (h, envs, user) in PROVIDERS.items():
-        if host == h or (k == "gitlab" and "gitlab" in host):
+        # EXACT host match only (a look-alike such as gitlab.evil.example never receives a token); self-hosted instances need --git-token-env
+        if host.lower() == h:
             for e in envs:
                 if os.environ.get(e): return os.environ[e], user
     return None, None
@@ -69,7 +70,8 @@ def clone(url, branch=None, depth=1, token_env=None, timeout=600, host=None):
     tok, user = _token_for(url, token_env)
     if tok and url.startswith("https://"):
         b64 = base64.b64encode(f"{user}:{tok}".encode()).decode()
-        args = ["-c", f"http.extraHeader=Authorization: Basic {b64}"] + args
+        # scoped to this exact URL and never re-sent to a redirect target
+        args = ["-c", "http.followRedirects=false", "-c", f"http.{url}.extraHeader=Authorization: Basic {b64}"] + args
     rc, so, se = _git(args, timeout=timeout)
     if rc != 0:
         _rm(dest)

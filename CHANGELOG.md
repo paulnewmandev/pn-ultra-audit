@@ -3,6 +3,15 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.32] - 2026-11-13
+
+### Security (hardening of the tool itself, from an external review)
+- **Git token leak to look-alike hosts**: a GitLab token was also sent to any host containing "gitlab" (`gitlab.evil.example`). Tokens now go only to the exact provider host, scoped to that URL, with redirects disabled; self-hosted servers must pass `--git-token-env`.
+- **`--offline` is now absolute**: it refuses (exit 2) every option that needs the network (`--git`, `--url`, `--psi`, `--ssh`, `--sftp`, `--ftp`, `--aws-rds`, `--vercel-project`, `--competitor`, `--online`, `--update-db`, remote `--db`). External tools that use the network (`semgrep` auto rules, `npm audit`, `pip-audit`, `composer audit`) are skipped unless `--online` is given.
+- **`--tools` no longer writes inside the audited project**: the gitleaks report goes to a private temp directory.
+- **Report confidentiality**: new `--no-snippets` (no source code in any report); README states plainly that reports contain code excerpts and that `--run-tests` executes the project's tests.
+- New `tests/test_hardening.py`.
+
 ## [1.0.31] - 2026-11-10
 
 ### Fixed

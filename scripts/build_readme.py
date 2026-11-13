@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.31"
+VER = "1.0.32"
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from llm_prompts import readme_section
 LLM_SECTION = readme_section()
@@ -501,6 +501,8 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 - Remote actions need **`--authorized`**: you confirm you own the systems or may assess them. SSH/SFTP use keys or agent (never passwords on the command line); FTP uses an env var and refuses clear-text by default.
 - **Secrets are scrubbed** from evidence and snippets; DB password checks return aggregates only; reports never contain your absolute local paths (guarded by a test).
 - **No network by default.** An audit sends nothing anywhere. Network is used only when you ask for it: `--update-db` (downloads public vulnerability data, once), `--online` (live advisory lookups: only package names and versions), `--url`/`--psi`/`--crawl` (SEO), `--vercel-project`, `--git`, `--ssh`/`--ftp`. `--offline` forbids it all.
+- **Precise safety statement.** The audited project is never modified by the audit itself (external tools write their temporary output outside it). `--run-tests` is the one option that EXECUTES the audited project's own test command, so use it only on code you trust. Git tokens are sent only to the exact host they belong to (`github.com`, `gitlab.com`, ...) and never to a redirect target; a self-hosted server needs `--git-token-env`. `--offline` refuses every option that needs the network. External tools that reach the network (`semgrep` with remote rules, `npm audit`, `pip-audit`, `composer audit`) are skipped unless you pass `--online`.
+- **Reports are confidential.** They contain code excerpts (secrets are masked), file paths and the embedded read-only source viewer. Do not publish them. `--no-snippets` produces reports with file:line only, no source code at all.
 - No telemetry. The dashboard is a single offline file; PageSpeed (`--psi`), keyword ideas and live crawling are opt-in and send only the URL/seed you give.
 
 ## Install

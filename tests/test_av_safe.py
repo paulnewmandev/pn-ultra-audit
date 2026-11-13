@@ -28,7 +28,7 @@ class AvSafe(unittest.TestCase):
     def test_the_detector_still_knows_the_signatures(self):
         from engine import malware
         self.assertTrue(any(r for r in malware.LINE_RULES if r[0] == "MAL-WEBSHELL-SIG"))
-        self.assertTrue(re.search(malware.EICAR.pattern, J(["X5O!P%@AP[4\\PZX54(P^)7CC)7}$EI", "CAR-STANDARD-ANTIVIRUS-TE", "ST-FILE!$H+H*"]).encode()))
+        self.assertTrue(re.search(malware.EICAR.pattern, J(["X5O!P%", "@AP[4\\PZX54(P^)7CC)7}$EI", "CAR-STANDARD-ANTIVIRUS-TE", "ST-FILE!$H+H*"]).encode()))
 
 
 if __name__ == "__main__":

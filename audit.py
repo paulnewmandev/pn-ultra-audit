@@ -19,7 +19,7 @@ from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.31"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.32"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -245,7 +245,7 @@ def main(argv=None):
     g.add_argument("--db-source", metavar="LIST", help="with --update-db: sources to sync: osv,kev,eol,nvd (default osv,kev,eol; add nvd for runtime/server CVEs - slow without NVD_API_KEY)")
     g.add_argument("--db-status", action="store_true", help="show what the local vulnerability database contains and how old it is")
     g.add_argument("--online", action="store_true", help="allow read-only LIVE advisory lookups (OSV.dev, CISA KEV, NVD, endoflife.date) when no local vulnerability database exists; only package names and versions are sent. Default: no network at all (use --update-db once, then audit offline)")
-    g.add_argument("--offline", action="store_true", help="never use the network (this is already the default; it also overrides --online / PNUA_ONLINE=1). Also: PNUA_OFFLINE=1")
+    g.add_argument("--offline", action="store_true", help="never use the network (this is already the default; no request of any kind is made; options that need the network, such as --git/--url/--ssh/--online/--update-db, are refused). Also: PNUA_OFFLINE=1")
     g.add_argument("--triage", action="store_true", help="print the triage worklist of the latest run: every finding that needs a human/AI decision, grouped by rule with ONE protocol (what to check, when it is real, when it is a false positive, how to suppress it) - read this before fixing or reporting suspicions")
     g.add_argument("--show", metavar="ID", help="print a compact fix card for one finding (e.g. SEC-001) from the latest run (see --run)")
     g.add_argument("--kb", metavar="QUERY", help="search the offline remediation knowledge base (e.g. --kb \"sql injection php\")")
@@ -277,6 +277,7 @@ def main(argv=None):
     g.add_argument("--vercel-project", metavar="NAME", help="audit project settings and env-var metadata via the Vercel API (read-only; token from env VERCEL_TOKEN; needs --authorized)")
     g.add_argument("--vercel-team", metavar="TEAM_ID", help="team id/slug that owns the project"); g.add_argument("--vercel-token-env", default="VERCEL_TOKEN", help="env var holding the Vercel token (never pass tokens on the command line)")
     g = ap.add_argument_group("Report")
+    g.add_argument("--no-snippets", action="store_true", help="do not put ANY source code in the reports (no snippets, no embedded source): findings keep file:line only. Reports otherwise contain code excerpts (secrets masked) and must be treated as confidential")
     g.add_argument("--embed-source", default="auto", choices=["auto", "findings", "none"], help="source code embedded in report.html for the read-only code viewer: auto (all text files within the budget, files with findings first) | findings (only files with findings) | none. Secrets are masked; .env/keys/state files are never embedded")
     g.add_argument("--embed-budget", type=float, default=5.0, metavar="MB", help="size budget for source embedded in report.html (default 5 MB). Files over it are NOT dropped: they go to sources/chunk-*.js next to the report and load on demand in the viewer")
     ap.add_argument("--authorized", action="store_true", help="REQUIRED for --ssh / --aws-rds / remote DBs / --url: you own or are allowed to assess them")
@@ -308,6 +309,7 @@ def main(argv=None):
         for e, v in sorted(st["osv"].items()): print(f"  OSV {e:<15} {v['advisories']:>8,} advisories · {v['packages']:>7,} packages")
         print(f"  CISA KEV: {st['kev']} · endoflife.date: {st['eol']} products · NVD products: {', '.join((st['nvd'] or {}).keys()) or '-'}")
         return 0
+    if a.update_db and (a.offline or os.environ.get("PNUA_OFFLINE") == "1"): print("ERROR: --update-db downloads data, but --offline forbids the network.", file=sys.stderr); return 2
     if a.update_db:
         eco = [x.strip() for x in a.db_eco.split(",") if x.strip()] if a.db_eco else None
         src = [x.strip() for x in a.db_source.split(",") if x.strip()] if a.db_source else None
@@ -340,6 +342,13 @@ def main(argv=None):
     if a.via_ssh and not a.ssh: print("ERROR: --via-ssh needs --ssh", file=sys.stderr); return 2
     if a.remote_path and not (a.ssh or a.sftp): print("ERROR: --remote-path needs --ssh or --sftp", file=sys.stderr); return 2
     if a.sftp and not a.remote_path: print("ERROR: --sftp needs --remote-path", file=sys.stderr); return 2
+    _off = getattr(a, "offline", False) or os.environ.get("PNUA_OFFLINE") == "1"
+    if _off:
+        _net = [f for f, v in (("--online", a.online), ("--update-db", a.update_db), ("--git", a.git), ("--url", a.url), ("--psi", a.psi), ("--crawl-max", False), ("--vercel-project", a.vercel_project),
+                               ("--ssh", a.ssh), ("--sftp", a.sftp), ("--ftp", a.ftp), ("--aws-rds", a.aws_rds), ("--via-ssh", a.via_ssh), ("--competitor", a.competitor)) if v]
+        for _d in ([a.db] if isinstance(a.db, str) else (a.db or [])):
+            if re.match(r"^[a-z][a-z0-9+.-]*://", str(_d)) and not str(_d).startswith("sqlite"): _net.append("--db " + str(_d).split("://")[0] + "://…")
+        if _net: print("ERROR: --offline forbids the network but these options need it: " + ", ".join(_net) + ". Remove --offline (or PNUA_OFFLINE=1) or those options.", file=sys.stderr); return 2
     if getattr(a, "online", False): os.environ["PNUA_ONLINE"] = "1"
     if getattr(a, "offline", False): os.environ["PNUA_OFFLINE"] = "1"
     local_root = os.path.abspath(a.path) if a.path else (os.getcwd() if not (a.ssh or a.url or a.keywords or a.gsc_csv or a.git or a.ftp or a.sftp) else None)
@@ -731,7 +740,10 @@ def main(argv=None):
     for f_ in findings:
         pb_ = secrets_playbook.for_rule(f_["rule"], a.lang)
         if pb_: f_["fix_steps"] = list(pb_[2]) + list(f_.get("fix_steps") or []); f_["rotate"] = dict(provider=pb_[0], url=pb_[1])
-    attach_snippets(findings, scan_root)
+    if not a.no_snippets: attach_snippets(findings, scan_root)
+    else:
+        for f_ in findings:
+            if f_.get("evidence"): f_["evidence"] = "(code omitted: --no-snippets)"
     try:
         if files:
             pf_ = detect.product_files(files); br = brandmod.detect(pf_, scan_root, label if 'label' in dir() else "")
@@ -808,7 +820,7 @@ def main(argv=None):
         except Exception as ex_: meta["notes"].append(f"server-fixes.sh not generated: {str(ex_)[:60]}")
     try:
         side_ = {}
-        src_ = sourcesmod.collect(scan_root, files, findings, a.embed_source, int(a.embed_budget * 1_000_000), lambda l: mask_secret_line(scrub(l)), side=side_) if (files and scan_root and a.embed_source != "none") else {}
+        src_ = sourcesmod.collect(scan_root, files, findings, ("none" if a.no_snippets else a.embed_source), int(a.embed_budget * 1_000_000), lambda l: mask_secret_line(scrub(l)), side=side_) if (files and scan_root and a.embed_source != "none") else {}
         if side_:   # over-budget files: lazy-loaded sidecar chunks (work from file://), not embedded in report.html
             os.makedirs(os.path.join(run_dir, "sources"), exist_ok=True); chunk, size, n_ = {}, 0, 0
             def _flush():
