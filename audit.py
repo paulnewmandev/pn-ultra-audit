@@ -12,14 +12,14 @@ from urllib.parse import urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from engine import sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, advisories as advmod, vulndb, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
+from engine import dbdesign, sources as sourcesmod, vercel as vercelmod, repo as repomod, repofix, malware as malwaremod, aitrace as aitracemod, hardcode as hardcodemod, advisories as advmod, vulndb, cleanfix, fixplan, triage, profile as profilemod, secrets_playbook, serverfix, i18n, brand as brandmod, pwa, suppress, kbsearch, corpus, mcpserver, scanner, dbaudit, tools, remote, aws, docs, qa, seo, seo_free, gitsrc, web3, detect, agents, roadmap, scaffold, sbom as sbommod, compliance, policies, domain as domainmod, ftpsrc  # noqa: E402
 from engine.kb_newbie import NEWBIE  # noqa: E402
 from engine.rules import RULES as _ALL_RULES  # noqa: E402
 from engine.kb import KB  # noqa: E402
 from engine.kb_es import KB_ES  # noqa: E402
 from engine.ui import UI  # noqa: E402
 
-NAME, VERSION = "PN-Ultra-Audit", "1.0.32"
+NAME, VERSION = "PN-Ultra-Audit", "1.0.33"
 SEV = ["critical", "high", "medium", "low", "info"]
 RANK = {s: i for i, s in enumerate(SEV)}
 PREFIX = {"vulnerability": "SEC", "bug": "BUG", "code_smell": "COD", "security_hotspot": "HOT", "architecture": "ARC", "performance": "PER", "test_gap": "TST", "dependency": "DEP"}
@@ -635,6 +635,14 @@ def main(argv=None):
     for rel, ab in sql_files:
         try: fs = dbaudit.static_sql(open(ab, errors="ignore", encoding="utf-8").read(), rel); raw += fs; stream(fs); dbs += 1
         except OSError: pass
+    db_schema, dbd_sum = {}, dict(tables=0, relations=0, indexes=0, sources={})
+    def _dedupe(fs_):
+        seen_ = {(x["rule"], x["file"], x["title"]) for x in raw}
+        return [x for x in fs_ if (x["rule"], x["file"], x["title"]) not in seen_]
+    try:
+        fs, dbd_sum, db_schema = dbdesign.audit_project(ok_files, lambda p: open(p, errors="ignore", encoding="utf-8").read())
+        fs = _dedupe(fs); raw += fs; stream(fs)
+    except Exception as e: notes.append(f"database design audit skipped: {type(e).__name__}: {str(e)[:80]}")
     for spec in a.db:
         ui.note(re.sub(r"//([^:@/]+):[^@]*@", "//", spec)[:44] + "…")
         try:
@@ -645,8 +653,15 @@ def main(argv=None):
         except RuntimeError as e: fs, msg = [], str(e)
         shown = re.sub(r"//([^:@/]+):[^@]*@", r"//\1:***@", spec) if "://" in spec else os.path.basename(spec)
         for f in fs: f["file"] = re.sub(r"//([^:@/]+):[^@]*@", "//", f["file"])
+        try:
+            dfs, dsum, dsch, dmsg = dbdesign.audit_live(spec)
+            for f in dfs: f["file"] = re.sub(r"//([^:@/]+):[^@]*@", "//", f["file"])
+            fs = fs + _dedupe(dfs); db_schema.update({k_: v_ for k_, v_ in dsch.items() if k_ not in db_schema})
+            if dsum: dbd_sum["live"] = dbd_sum.get("live", []) + [dict(dsum, db=shown)]
+        except Exception as e: notes.append(f"design audit of {shown} skipped: {type(e).__name__}")
         raw += fs; stream(fs); dbnotes.append(f"{shown}: {msg}"); L(f"live database {shown}", "audit-security", "covered" if (fs or msg.endswith(("OK", "tables")) or "table" in msg) else "blocked", msg)
     metrics["databases"] = dict(sql_files=len(sql_files), live=dbnotes)
+    metrics["dbdesign"] = dbd_sum
     if not a.db: L("live database checks", "audit-security", "deferred", "no --db given")
     ui.done(f"{len(sql_files)} .sql · {len(a.db)} " + N("conexiones", "connections") + (" · " + "; ".join(dbnotes)[:100] if dbnotes else ""))
     if a.aws_rds:
@@ -725,7 +740,7 @@ def main(argv=None):
         if fam in ("docs", "docstrings", "standards", "complexity", "architecture") or r.startswith(("DOC-", "STD-", "ARCH-")): return "docs"
         if r.startswith("TST-"): return "tests"
         if r.startswith(("QUA-", "DEP-NO-LOCK", "PERF-")): return "quality"
-        if r.startswith("SQL-") or fam == "sql-schema": return "db"
+        if r.startswith(("SQL-", "DBD-")) or fam == "sql-schema": return "db"
         return "security"
     raw = [f for f in raw if auditor_of(f) in plan or auditor_of(f) == "explicit"]
     if (detected or {}).get("profile"): metrics["profile"] = detected["profile"]
@@ -783,6 +798,14 @@ def main(argv=None):
     ref, dirty, branch = git_info(scan_root if tmp_git else local_root) if (tmp_git or (local_root and not tmp_remote)) else ("remote", False, "")
     meta = dict(repo=label, profile=a.profile, strictness=a.strictness, scope_paths=[disp(a.path) if a.path else (a.remote_path or a.url or ".")], source_ref=ref, branch=branch, dirty=dirty, date=str(datetime.date.today()), generated_at=t_start.isoformat(timespec="seconds"),
                 mode="ssh" if a.ssh else "local", tool=f"{NAME} {VERSION}", level=a.level, notes=notes, run_status="complete", run=int(os.path.basename(run_dir).split("-")[1]), lang=a.lang)
+    if db_schema:
+        try:
+            with open(os.path.join(run_dir, "db-schema.mmd"), "w", encoding="utf-8") as fh_: fh_.write(dbdesign.mermaid(db_schema))
+            dfx = dbdesign.fix_sql([x for x in raw if x["rule"].startswith(("DBD-", "SQL-FK"))])
+            if dfx:
+                with open(os.path.join(run_dir, "db-fixes.sql"), "w", encoding="utf-8") as fh_: fh_.write(dfx)
+                meta["notes"].append(N("Se generó db-fixes.sql (índices/restricciones sugeridos para REVISAR; la herramienta nunca lo ejecuta) y db-schema.mmd (diagrama ER Mermaid).", "db-fixes.sql (suggested indexes/constraints to REVIEW; never executed by the tool) and db-schema.mmd (Mermaid ER diagram) were generated."))
+        except Exception as ex_: meta["notes"].append(f"db artifacts not generated: {str(ex_)[:60]}")
     if metrics.get("repo") and not metrics["repo"].get("error"):
         try:
             rfx = repofix.build(findings, label, meta["date"])

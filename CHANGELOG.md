@@ -3,6 +3,13 @@
 All notable changes to **PN-Ultra-Audit** are documented here. Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · versioning: [SemVer](https://semver.org/).
 Every request for changes is released as a new patch version and listed below (newest first).
 
+## [1.0.33] - 2026-11-13
+
+### Added
+- **Database design audit** (`engine/dbdesign.py`, part of the `db` lens): one neutral schema model built from `.sql` DDL, Prisma, Django models, Rails schema/migrations, Laravel migrations, SQLAlchemy and TypeORM, and from live SQLite (PRAGMA), PostgreSQL (`psql`) and MySQL/MariaDB (`mysql`) catalogs, read-only. Checks: missing primary key / foreign-key index / dangling foreign key / `*_id` without FOREIGN KEY, no explicit ON DELETE policy, repeating columns and lists in a text column (1NF), EAV tables, polymorphic keys, wide tables, all-nullable tables, missing timestamps, money as float, dates stored as text, UUID as char, identifiers without UNIQUE, text primary keys, redundant indexes, mixed naming / reserved words, schemas with no relations at all, destructive or lock-prone migrations, and on PostgreSQL hot sequential scans, bloat and never-used indexes. Heuristic findings are `needs_validation`, structural ones are confirmed.
+- New outputs: `db-schema.mmd` (Mermaid ER diagram) and `db-fixes.sql` (review-first statements; risky ones commented out; never executed by the tool).
+- `tests/test_dbdesign.py` (10 tests, including a clean schema that must stay silent).
+
 ## [1.0.32] - 2026-11-13
 
 ### Security (hardening of the tool itself, from an external review)

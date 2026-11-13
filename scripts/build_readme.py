@@ -8,7 +8,7 @@ b = lambda kind: " ".join(f'<img src="assets/badges/{fn}" alt="{n}" height="26">
 FW = [("SOC 2", "soc2"), ("ISO 27001", "iso27001"), ("HIPAA", "hipaa"), ("GDPR", "gdpr"), ("PCI DSS", "pci"), ("NIST CSF", "nist"), ("DORA", "dora"), ("EU AI Act", "euai"), ("WCAG 2.2", "wcag")]
 fw = " ".join(f'<img src="assets/compliance/{s}.svg" alt="{n} readiness" height="110">' for n, s in FW)
 icon = lambda n, w=44: f'<img src="assets/features/{n}.svg" width="{w}" height="{w}" alt="">'
-VER = "1.0.32"
+VER = "1.0.33"
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 from llm_prompts import readme_section
 LLM_SECTION = readme_section()
@@ -291,7 +291,7 @@ A label needs several independent signals (dependencies, folders, README, databa
 | **qa** | **Front end:** unit/component/E2E/a11y/visual/perf layers, flaky patterns, un-awaited Playwright asserts, route coverage. **Mobile:** Android (Compose, Espresso, MockK, Turbine, Managed Devices), iOS (XCTest, XCUITest, Swift Testing, privacy strings), Flutter, React Native, Maestro, noqa |
 | **seo** | titles, meta, canonical, H1, robots, sitemap, noindex, redirects, JSON-LD, OG, hreflang, Core Web Vitals hints; **SEM**: trackers, consent mode, conversions; live crawl `--url`, PageSpeed `--psi`, Search Console CSV, keyword ideas, competitors |
 | **web3** | Solidity (reentrancy, access control, initializers, unchecked calls, randomness, signature replay, delegatecall, oracles, tx.origin, pragmas), Anchor/Solana, dApp patterns, wallet keys/mnemonics |
-| **db** | `.sql`/T-SQL/PL-SQL; live SQLite, PostgreSQL, MySQL/MariaDB, SQL Server, Redis, MongoDB (read-only); AWS RDS; `--db-sample` plaintext-password check (aggregates only) |
+| **db** | **Design audit** (modelling, relations, normalization, indexes, constraints, types, naming, migrations) of the schema found in `.sql`, Prisma, Django, Rails, Laravel, SQLAlchemy and TypeORM files and of live SQLite / PostgreSQL / MySQL catalogs (`DBD-*` rules: missing or dangling foreign keys, no ON DELETE policy, 1NF repeating groups / lists in a column, EAV, polymorphic keys, money as float, dates as text, uuid as char, non-unique emails, redundant/unused indexes, hot sequential scans and bloat on PostgreSQL, destructive migrations; writes a Mermaid ER diagram `db-schema.mmd` and a review-first `db-fixes.sql`, never executed); plus `.sql`/T-SQL/PL-SQL security checks; live SQLite, PostgreSQL, MySQL/MariaDB, SQL Server, Redis, MongoDB (read-only); AWS RDS; `--db-sample` plaintext-password check (aggregates only) |
 | **domain** | **SaaS:** tenant isolation (unscoped queries, RLS/global scope), RBAC/SSO/SCIM, audit log, API-key hashing, export/delete, backups/PITR, per-tenant limits. **Fintech/banking:** float-for-money, idempotency, balance races, unsigned webhooks, PAN/CVV, ledger/reconciliation, MFA/SCA, KMS |
 | **pwa** | manifest + installability, icons/maskable, service worker (registration, strategy, versioned caches, offline fallback, update flow), push, HTTPS, SW security (remote `importScripts`, cached private data, unvalidated messages, leaked VAPID keys); live check with `--url` |
 | **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |

@@ -434,7 +434,7 @@ A label needs several independent signals (dependencies, folders, README, databa
 | **qa** | **Front end:** unit/component/E2E/a11y/visual/perf layers, flaky patterns, un-awaited Playwright asserts, route coverage. **Mobile:** Android (Compose, Espresso, MockK, Turbine, Managed Devices), iOS (XCTest, XCUITest, Swift Testing, privacy strings), Flutter, React Native, Maestro, noqa |
 | **seo** | titles, meta, canonical, H1, robots, sitemap, noindex, redirects, JSON-LD, OG, hreflang, Core Web Vitals hints; **SEM**: trackers, consent mode, conversions; live crawl `--url`, PageSpeed `--psi`, Search Console CSV, keyword ideas, competitors |
 | **web3** | Solidity (reentrancy, access control, initializers, unchecked calls, randomness, signature replay, delegatecall, oracles, tx.origin, pragmas), Anchor/Solana, dApp patterns, wallet keys/mnemonics |
-| **db** | `.sql`/T-SQL/PL-SQL; live SQLite, PostgreSQL, MySQL/MariaDB, SQL Server, Redis, MongoDB (read-only); AWS RDS; `--db-sample` plaintext-password check (aggregates only) |
+| **db** | **Design audit** (modelling, relations, normalization, indexes, constraints, types, naming, migrations) of the schema found in `.sql`, Prisma, Django, Rails, Laravel, SQLAlchemy and TypeORM files and of live SQLite / PostgreSQL / MySQL catalogs (`DBD-*` rules: missing or dangling foreign keys, no ON DELETE policy, 1NF repeating groups / lists in a column, EAV, polymorphic keys, money as float, dates as text, uuid as char, non-unique emails, redundant/unused indexes, hot sequential scans and bloat on PostgreSQL, destructive migrations; writes a Mermaid ER diagram `db-schema.mmd` and a review-first `db-fixes.sql`, never executed); plus `.sql`/T-SQL/PL-SQL security checks; live SQLite, PostgreSQL, MySQL/MariaDB, SQL Server, Redis, MongoDB (read-only); AWS RDS; `--db-sample` plaintext-password check (aggregates only) |
 | **domain** | **SaaS:** tenant isolation (unscoped queries, RLS/global scope), RBAC/SSO/SCIM, audit log, API-key hashing, export/delete, backups/PITR, per-tenant limits. **Fintech/banking:** float-for-money, idempotency, balance races, unsigned webhooks, PAN/CVV, ledger/reconciliation, MFA/SCA, KMS |
 | **pwa** | manifest + installability, icons/maskable, service worker (registration, strategy, versioned caches, offline fallback, update flow), push, HTTPS, SW security (remote `importScripts`, cached private data, unvalidated messages, leaked VAPID keys); live check with `--url` |
 | **repo** | sensitive files and keys **in git and in history**, credentials in remotes, CI/CD workflow security (pwn-request, script injection, permissions, unpinned actions), SECURITY.md / CODEOWNERS / Dependabot / secret scanning; **key-rotation steps per provider** and a reviewable `repo-fixes.sh` |
@@ -653,7 +653,7 @@ The **Executive report** view (and the PDF) opens with a cover, overall risk lev
 
 ```bash
 git clone https://github.com/paulnewmandev/pn-ultra-audit
-cd pn-ultra-audit && python3 audit.py --version        # 1.0.32
+cd pn-ultra-audit && python3 audit.py --version        # 1.0.33
 ./install.sh --link                                      # optional: put `pn-ultra-audit` on your PATH
 ```
 `pip install .` installs the CLI only (the AI-assistant skills/installers need the git clone). Runs on Linux, macOS, Windows, FreeBSD and other Unix systems (Python 3.9+, stdlib only; CI covers Ubuntu, macOS and Windows). Python 3.9+ (developed on 3.11, test suite also run on 3.12; 3.9 is covered by the CI matrix), standard library only. Optional tools are used if present: `git`, `ssh`/`sftp`, `psql`, `mysql`, `redis-cli`, `mongosh`, `sqlcmd`, `aws`, `semgrep`, `gitleaks`, Chrome/Chromium (PNG/PDF).
@@ -674,4 +674,4 @@ Built after studying open-source projects whose ideas informed the design (no co
 
 [CONTRIBUTING.md](CONTRIBUTING.md) · [SECURITY.md](SECURITY.md) · [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) · [CHANGELOG.md](CHANGELOG.md) · [GPL-3.0 License](LICENSE)
 
-<div align="center"><sub>110 rules · 108 remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v1.0.32</sub></div>
+<div align="center"><sub>110 rules · 108 remediation guides · 22 skills · 14 compliance frameworks · 7 AI assistants · v1.0.33</sub></div>
